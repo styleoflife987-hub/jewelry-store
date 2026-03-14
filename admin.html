@@ -413,7 +413,7 @@
 
         .products-admin-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
             gap: 25px;
         }
 
@@ -438,7 +438,8 @@
         }
 
         .product-fields input,
-        .product-fields select {
+        .product-fields select,
+        .product-fields textarea {
             padding: 12px;
             background: #0f1722;
             border: 1px solid #2c3e50;
@@ -447,8 +448,14 @@
             width: 100%;
         }
 
+        .product-fields textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
         .product-fields input:focus,
-        .product-fields select:focus {
+        .product-fields select:focus,
+        .product-fields textarea:focus {
             outline: none;
             border-color: #f39c12;
         }
@@ -469,9 +476,12 @@
 
         .image-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 10px;
             margin-bottom: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px;
         }
 
         .image-preview {
@@ -504,11 +514,16 @@
             align-items: center;
             justify-content: center;
             font-size: 12px;
+            z-index: 10;
+        }
+
+        .image-preview .remove-image:hover {
+            background: #c0392b;
         }
 
         .upload-multiple-btn {
             width: 100%;
-            padding: 30px;
+            padding: 20px;
             border: 2px dashed #f39c12;
             border-radius: 10px;
             background: #0f1722;
@@ -551,9 +566,17 @@
             color: white;
         }
 
+        .btn-save-product:hover {
+            background: #229954;
+        }
+
         .btn-delete-product {
             background: #e74c3c;
             color: white;
+        }
+
+        .btn-delete-product:hover {
+            background: #c0392b;
         }
 
         .btn-add-product {
@@ -568,6 +591,11 @@
             align-items: center;
             gap: 10px;
             transition: 0.3s;
+        }
+
+        .btn-add-product:hover {
+            background: #e67e22;
+            transform: scale(1.02);
         }
 
         /* Orders Grid */
@@ -682,6 +710,20 @@
             display: flex;
             gap: 10px;
             margin-top: 15px;
+        }
+
+        .order-actions select {
+            flex: 2;
+            padding: 10px;
+            background: #1a2634;
+            color: white;
+            border: 1px solid #2c3e50;
+            border-radius: 8px;
+        }
+
+        .order-actions select:focus {
+            outline: none;
+            border-color: #f39c12;
         }
 
         /* Analytics Grid */
@@ -840,8 +882,8 @@
                     <!-- Slides will be populated here -->
                 </div>
 
-                <div class="upload-status" id="sliderStatus" style="margin-top: 20px;">
-                    <i class="fas fa-check-circle" style="color: #27ae60;"></i> Changes are live on customer portal
+                <div class="upload-status" id="sliderStatus" style="margin-top: 20px; color: #27ae60;">
+                    <i class="fas fa-check-circle"></i> Changes are live on customer portal
                 </div>
             </div>
         </div>
@@ -867,7 +909,7 @@
             <div class="admin-controls">
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="refreshOrders()">
-                        <i class="fas fa-sync-alt"></i> Refresh
+                        <i class="fas fa-sync-alt"></i> Refresh Orders
                     </button>
                 </div>
             </div>
@@ -974,6 +1016,29 @@
                     'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
                 ],
                 description: 'Set of 4 Polki bangles with uncut diamond look, gold-plated finish.'
+            },
+            { 
+                id: 'SOL004', 
+                name: 'Kundan Maang Tikka', 
+                category: 'Headpiece', 
+                price: 990, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Traditional Kundan maang tikka with pearl drops, perfect for bridal wear.'
+            },
+            { 
+                id: 'SOL005', 
+                name: 'Pearl Gold Bracelet', 
+                category: 'Bracelet', 
+                price: 750, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Elegant gold-plated bracelet with freshwater pearl accents.'
             }
         ];
 
@@ -1124,6 +1189,11 @@
             const categories = ['Necklace', 'Earrings', 'Bangles', 'Headpiece', 'Bracelet', 'Ring'];
             const stockOptions = ['In Stock', 'Limited', 'Out of Stock'];
 
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="loading">No products yet. Click "Add New Product" to get started!</div>';
+                return;
+            }
+
             let html = '';
             products.forEach((product, index) => {
                 // Generate image previews
@@ -1143,14 +1213,14 @@
                     <div class="product-admin-card">
                         <h3>${product.id}</h3>
                         <div class="product-fields">
-                            <input type="text" placeholder="Product ID" value="${product.id}" onchange="updateProductField(${index}, 'id', this.value)">
-                            <input type="text" placeholder="Product Name" value="${product.name}" onchange="updateProductField(${index}, 'name', this.value)">
-                            <input type="text" placeholder="Description" value="${product.description || ''}" onchange="updateProductField(${index}, 'description', this.value)">
-                            <select onchange="updateProductField(${index}, 'category', this.value)">
+                            <input type="text" placeholder="Product ID" value="${product.id}" onchange="updateProductField(${index}, 'id', this.value)" id="id_${index}">
+                            <input type="text" placeholder="Product Name" value="${product.name}" onchange="updateProductField(${index}, 'name', this.value)" id="name_${index}">
+                            <textarea placeholder="Description" onchange="updateProductField(${index}, 'description', this.value)" id="desc_${index}">${product.description || ''}</textarea>
+                            <select onchange="updateProductField(${index}, 'category', this.value)" id="cat_${index}">
                                 ${categories.map(c => `<option value="${c}" ${product.category === c ? 'selected' : ''}>${c}</option>`).join('')}
                             </select>
-                            <input type="number" placeholder="Price" value="${product.price}" onchange="updateProductField(${index}, 'price', this.value)">
-                            <select onchange="updateProductField(${index}, 'stock', this.value)">
+                            <input type="number" placeholder="Price" value="${product.price}" onchange="updateProductField(${index}, 'price', this.value)" id="price_${index}">
+                            <select onchange="updateProductField(${index}, 'stock', this.value)" id="stock_${index}">
                                 ${stockOptions.map(s => `<option value="${s}" ${product.stock === s ? 'selected' : ''}>${s}</option>`).join('')}
                             </select>
                         </div>
@@ -1285,14 +1355,14 @@
                             <span>₹${order.total}</span>
                         </div>
                         <div class="order-actions">
-                            <select onchange="updateOrderStatus('${order.id}', this.value)" style="flex: 2; padding: 10px; background: #1a2634; color: white; border: 1px solid #2c3e50; border-radius: 8px;">
+                            <select onchange="updateOrderStatus('${order.id}', this.value)">
                                 <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
                                 <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
                                 <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
                                 <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                                 <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                             </select>
-                            <button class="btn btn-danger" onclick="deleteOrder('${order.id}')" style="flex: 1;">
+                            <button class="btn btn-danger" onclick="deleteOrder('${order.id}')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
