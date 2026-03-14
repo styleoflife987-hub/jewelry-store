@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Style Of Life · Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -19,7 +18,6 @@
             min-height: 100vh;
         }
 
-        /* Header */
         .admin-header {
             background: #0f1722;
             padding: 20px 40px;
@@ -71,7 +69,6 @@
             gap: 10px;
         }
 
-        /* Customer Link */
         .customer-link {
             position: fixed;
             bottom: 30px;
@@ -95,14 +92,12 @@
             transform: translateY(-3px);
         }
 
-        /* Main Container */
         .container {
             max-width: 1400px;
             margin: 40px auto;
             padding: 0 40px;
         }
 
-        /* Stats Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -152,87 +147,6 @@
             font-weight: 700;
         }
 
-        /* Admin Controls */
-        .admin-controls {
-            background: #0f1722;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            border: 1px solid #2c3e50;
-        }
-
-        .save-indicator {
-            background: #27ae60;
-            color: white;
-            padding: 10px 25px;
-            border-radius: 40px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s;
-        }
-
-        .btn-primary {
-            background: #f39c12;
-            color: #0f1722;
-        }
-
-        .btn-primary:hover {
-            background: #e67e22;
-            transform: scale(1.02);
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #229954;
-        }
-
-        .btn-warning {
-            background: #f1c40f;
-            color: #0f1722;
-        }
-
-        .btn-info {
-            background: #3498db;
-            color: white;
-        }
-
-        /* Tab Navigation */
         .admin-tabs {
             display: flex;
             gap: 10px;
@@ -272,124 +186,10 @@
             display: block;
         }
 
-        /* Hero Slider Management */
-        .slider-management {
-            background: #0f1722;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 40px;
-            border: 2px solid #f39c12;
-        }
-
-        .slider-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            color: white;
-        }
-
-        .slider-header h2 {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .slider-header h2 i {
-            color: #f39c12;
-        }
-
-        .slides-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .slide-card {
-            background: #1a2634;
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid #2c3e50;
-            position: relative;
-        }
-
-        .slide-preview {
-            width: 100%;
-            height: 150px;
-            border-radius: 10px;
-            background-size: cover;
-            background-position: center;
-            margin-bottom: 15px;
-            border: 2px solid #2c3e50;
-        }
-
-        .slide-input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            background: #0f1722;
-            border: 1px solid #2c3e50;
-            border-radius: 8px;
-            color: white;
-        }
-
-        .slide-input:focus {
-            outline: none;
-            border-color: #f39c12;
-        }
-
-        .slide-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .slide-actions button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .btn-update {
-            background: #f39c12;
-            color: #0f1722;
-        }
-
-        .btn-delete {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-add-slide {
-            background: #27ae60;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s;
-        }
-
-        .btn-add-slide:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
-        }
-
-        /* Product Management with Multiple Images */
         .product-management {
             background: #0f1722;
             border-radius: 20px;
             padding: 30px;
-            margin-bottom: 40px;
             border: 2px solid #f39c12;
         }
 
@@ -411,9 +211,28 @@
             color: #f39c12;
         }
 
+        .btn-add-product {
+            background: #27ae60;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-add-product:hover {
+            background: #229954;
+            transform: scale(1.02);
+        }
+
         .products-admin-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
             gap: 25px;
         }
 
@@ -460,7 +279,6 @@
             border-color: #f39c12;
         }
 
-        /* Multiple Image Upload */
         .image-upload-section {
             margin: 20px 0;
             padding: 15px;
@@ -579,31 +397,36 @@
             background: #c0392b;
         }
 
-        .btn-add-product {
-            background: #f39c12;
-            color: #0f1722;
+        .save-status {
+            position: fixed;
+            top: 100px;
+            right: 40px;
+            background: #27ae60;
+            color: white;
             padding: 15px 30px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
+            border-radius: 50px;
+            display: none;
             align-items: center;
             gap: 10px;
-            transition: 0.3s;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
         }
 
-        .btn-add-product:hover {
-            background: #e67e22;
-            transform: scale(1.02);
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
-        /* Orders Grid */
         .orders-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
             gap: 25px;
-            margin-bottom: 40px;
         }
 
         .order-card {
@@ -611,12 +434,6 @@
             border-radius: 20px;
             padding: 25px;
             border: 1px solid #2c3e50;
-            transition: 0.3s;
-        }
-
-        .order-card:hover {
-            border-color: #f39c12;
-            transform: translateY(-5px);
         }
 
         .order-header {
@@ -642,26 +459,6 @@
 
         .status-confirmed {
             background: #27ae60;
-            color: white;
-        }
-
-        .status-processing {
-            background: #f39c12;
-            color: #0f1722;
-        }
-
-        .status-shipped {
-            background: #3498db;
-            color: white;
-        }
-
-        .status-delivered {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .status-cancelled {
-            background: #e74c3c;
             color: white;
         }
 
@@ -706,57 +503,6 @@
             border-top: 1px solid #2c3e50;
         }
 
-        .order-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .order-actions select {
-            flex: 2;
-            padding: 10px;
-            background: #1a2634;
-            color: white;
-            border: 1px solid #2c3e50;
-            border-radius: 8px;
-        }
-
-        .order-actions select:focus {
-            outline: none;
-            border-color: #f39c12;
-        }
-
-        /* Analytics Grid */
-        .analytics-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-        }
-
-        .chart-card {
-            background: #0f1722;
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid #2c3e50;
-        }
-
-        .chart-card h3 {
-            color: white;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chart-card h3 i {
-            color: #f39c12;
-        }
-
-        canvas {
-            max-height: 300px;
-        }
-
-        /* Footer */
         .footer {
             text-align: center;
             padding: 30px;
@@ -765,36 +511,22 @@
             margin-top: 60px;
         }
 
-        /* Loading */
         .loading {
             text-align: center;
             padding: 50px;
             color: #f39c12;
         }
-
-        @media (max-width: 768px) {
-            .analytics-grid {
-                grid-template-columns: 1fr;
-            }
-            .orders-grid {
-                grid-template-columns: 1fr;
-            }
-            .slides-grid {
-                grid-template-columns: 1fr;
-            }
-            .products-admin-grid {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Customer Link -->
     <a href="customer.html" class="customer-link" target="_blank">
         <i class="fas fa-store"></i> View Customer Store
     </a>
 
-    <!-- Header -->
+    <div class="save-status" id="saveStatus">
+        <i class="fas fa-check-circle"></i> Changes Saved!
+    </div>
+
     <header class="admin-header">
         <div class="logo">
             <div class="logo-icon">
@@ -810,11 +542,9 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <div class="container">
-        <!-- Stats Cards -->
         <div class="stats-grid">
-            <div class="stat-card" onclick="switchTab('products')">
+            <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-box"></i>
                 </div>
@@ -823,7 +553,7 @@
                     <span id="totalProducts">0</span>
                 </div>
             </div>
-            <div class="stat-card" onclick="switchTab('categories')">
+            <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-tags"></i>
                 </div>
@@ -832,7 +562,7 @@
                     <span id="totalCategories">0</span>
                 </div>
             </div>
-            <div class="stat-card" onclick="switchTab('orders')">
+            <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-shopping-cart"></i>
                 </div>
@@ -841,7 +571,7 @@
                     <span id="totalOrders">0</span>
                 </div>
             </div>
-            <div class="stat-card" onclick="switchTab('revenue')">
+            <div class="stat-card">
                 <div class="stat-icon">
                     <i class="fas fa-rupee-sign"></i>
                 </div>
@@ -852,44 +582,16 @@
             </div>
         </div>
 
-        <!-- Tabs -->
         <div class="admin-tabs">
-            <button class="tab-btn active" onclick="switchTab('hero')">
-                <i class="fas fa-images"></i> Hero Slider
-            </button>
-            <button class="tab-btn" onclick="switchTab('products')">
+            <button class="tab-btn active" onclick="switchTab('products')">
                 <i class="fas fa-box"></i> Products
             </button>
             <button class="tab-btn" onclick="switchTab('orders')">
                 <i class="fas fa-shopping-cart"></i> Orders
             </button>
-            <button class="tab-btn" onclick="switchTab('analytics')">
-                <i class="fas fa-chart-line"></i> Analytics
-            </button>
         </div>
 
-        <!-- Hero Slider Tab -->
-        <div class="tab-content active" id="heroTab">
-            <div class="slider-management">
-                <div class="slider-header">
-                    <h2><i class="fas fa-images"></i> Hero Slider Management</h2>
-                    <button class="btn-add-slide" onclick="addNewSlide()">
-                        <i class="fas fa-plus"></i> Add New Slide
-                    </button>
-                </div>
-
-                <div class="slides-grid" id="slidesGrid">
-                    <!-- Slides will be populated here -->
-                </div>
-
-                <div class="upload-status" id="sliderStatus" style="margin-top: 20px; color: #27ae60;">
-                    <i class="fas fa-check-circle"></i> Changes are live on customer portal
-                </div>
-            </div>
-        </div>
-
-        <!-- Products Tab -->
-        <div class="tab-content" id="productsTab">
+        <div class="tab-content active" id="productsTab">
             <div class="product-management">
                 <div class="product-header">
                     <h2><i class="fas fa-box"></i> Product Management</h2>
@@ -898,84 +600,24 @@
                     </button>
                 </div>
 
-                <div class="products-admin-grid" id="productsAdminGrid">
-                    <!-- Products will be populated here -->
-                </div>
+                <div class="products-admin-grid" id="productsAdminGrid"></div>
             </div>
         </div>
 
-        <!-- Orders Tab -->
         <div class="tab-content" id="ordersTab">
-            <div class="admin-controls">
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="refreshOrders()">
-                        <i class="fas fa-sync-alt"></i> Refresh Orders
-                    </button>
-                </div>
-            </div>
             <div class="orders-grid" id="ordersGrid">
-                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>
-            </div>
-        </div>
-
-        <!-- Analytics Tab -->
-        <div class="tab-content" id="analyticsTab">
-            <div class="analytics-grid">
-                <div class="chart-card">
-                    <h3><i class="fas fa-chart-pie"></i> Sales by Category</h3>
-                    <canvas id="categoryChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3><i class="fas fa-chart-line"></i> Daily Orders</h3>
-                    <canvas id="ordersChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3><i class="fas fa-chart-bar"></i> Stock Status</h3>
-                    <canvas id="stockChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3><i class="fas fa-chart-pie"></i> Payment Methods</h3>
-                    <canvas id="paymentChart"></canvas>
-                </div>
+                <div class="loading">Loading orders...</div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
-        <p>Style Of Life · Real-time updates active · Changes reflect immediately on customer portal</p>
+        <p>Style Of Life · Real-time updates active</p>
     </footer>
 
     <script>
-        // Data
         let products = [];
         let orders = JSON.parse(localStorage.getItem('sol_orders')) || [];
-        let heroSlides = [];
-        let charts = {};
-
-        const DEFAULT_SLIDES = [
-            {
-                id: 'slide1',
-                image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-                title: 'Timeless Beauty',
-                subtitle: 'Elegance In Every Detail',
-                description: 'Discover our exquisite collection of handcrafted luxury imitation jewelry'
-            },
-            {
-                id: 'slide2',
-                image: 'https://images.unsplash.com/photo-1512152272829-e3139592d56f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-                title: 'Modern Elegance',
-                subtitle: 'Contemporary Design',
-                description: 'Where traditional craftsmanship meets modern aesthetics'
-            },
-            {
-                id: 'slide3',
-                image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-                title: 'Luxury Redefined',
-                subtitle: 'Exclusive Collection',
-                description: 'Each piece tells a unique story of elegance and sophistication'
-            }
-        ];
 
         const DEFAULT_PRODUCTS = [
             { 
@@ -989,7 +631,7 @@
                     'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
                     'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
                 ],
-                description: 'Exquisite gold-plated choker with peacock design, featuring intricate detailing and traditional craftsmanship.'
+                description: 'Exquisite gold-plated choker with peacock design.'
             },
             { 
                 id: 'SOL002', 
@@ -999,196 +641,61 @@
                 stock: 'In Stock', 
                 images: [
                     'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
                 ],
-                description: 'Traditional oxidized silver jhumkas with bell-shaped design, perfect for festive occasions.'
-            },
-            { 
-                id: 'SOL003', 
-                name: 'Polki Bangle Set', 
-                category: 'Bangles', 
-                price: 2400, 
-                stock: 'Limited', 
-                images: [
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Set of 4 Polki bangles with uncut diamond look, gold-plated finish.'
-            },
-            { 
-                id: 'SOL004', 
-                name: 'Kundan Maang Tikka', 
-                category: 'Headpiece', 
-                price: 990, 
-                stock: 'In Stock', 
-                images: [
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Traditional Kundan maang tikka with pearl drops, perfect for bridal wear.'
-            },
-            { 
-                id: 'SOL005', 
-                name: 'Pearl Gold Bracelet', 
-                category: 'Bracelet', 
-                price: 750, 
-                stock: 'In Stock', 
-                images: [
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Elegant gold-plated bracelet with freshwater pearl accents.'
+                description: 'Traditional oxidized silver jhumkas.'
             }
         ];
 
-        // Tab Switching
-        window.switchTab = function(tabName) {
+        function switchTab(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.closest('.tab-btn').classList.add('active');
 
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             
-            if (tabName === 'hero') {
-                document.getElementById('heroTab').classList.add('active');
-                loadHeroSlides();
-            }
             if (tabName === 'products') {
                 document.getElementById('productsTab').classList.add('active');
                 renderProductsGrid();
-            }
-            if (tabName === 'orders') {
+            } else {
                 document.getElementById('ordersTab').classList.add('active');
                 renderOrders();
             }
-            if (tabName === 'analytics') {
-                document.getElementById('analyticsTab').classList.add('active');
-                renderCharts();
-            }
-        };
-
-        // ========== HERO SLIDER MANAGEMENT ==========
-        function loadHeroSlides() {
-            const saved = localStorage.getItem('sol_hero_slides');
-            heroSlides = saved ? JSON.parse(saved) : [...DEFAULT_SLIDES];
-            
-            if (!saved) {
-                localStorage.setItem('sol_hero_slides', JSON.stringify(heroSlides));
-            }
-            
-            renderSlides();
         }
 
-        function renderSlides() {
-            const grid = document.getElementById('slidesGrid');
-            
-            let html = '';
-            heroSlides.forEach((slide, index) => {
-                html += `
-                    <div class="slide-card">
-                        <div class="slide-preview" style="background-image: url('${slide.image}');"></div>
-                        <input type="text" class="slide-input" placeholder="Image URL" value="${slide.image}" id="img_${index}">
-                        <input type="text" class="slide-input" placeholder="Title" value="${slide.title}" id="title_${index}">
-                        <input type="text" class="slide-input" placeholder="Subtitle" value="${slide.subtitle}" id="subtitle_${index}">
-                        <input type="text" class="slide-input" placeholder="Description" value="${slide.description}" id="desc_${index}">
-                        <div class="slide-actions">
-                            <button class="btn-update" onclick="updateSlide(${index})">
-                                <i class="fas fa-save"></i> Update
-                            </button>
-                            <button class="btn-delete" onclick="deleteSlide(${index})">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            grid.innerHTML = html;
-        }
-
-        window.updateSlide = function(index) {
-            heroSlides[index] = {
-                id: heroSlides[index].id,
-                image: document.getElementById(`img_${index}`).value,
-                title: document.getElementById(`title_${index}`).value,
-                subtitle: document.getElementById(`subtitle_${index}`).value,
-                description: document.getElementById(`desc_${index}`).value
-            };
-            
-            saveHeroSlides();
-            document.getElementById('sliderStatus').innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Slide updated and live on customer portal!';
-        };
-
-        window.deleteSlide = function(index) {
-            if (confirm('Delete this slide?')) {
-                heroSlides.splice(index, 1);
-                saveHeroSlides();
-                renderSlides();
-            }
-        };
-
-        window.addNewSlide = function() {
-            const newId = 'slide' + (heroSlides.length + 1);
-            heroSlides.push({
-                id: newId,
-                image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-                title: 'New Slide Title',
-                subtitle: 'New Subtitle',
-                description: 'New slide description'
-            });
-            saveHeroSlides();
-            renderSlides();
-        };
-
-        function saveHeroSlides() {
-            localStorage.setItem('sol_hero_slides', JSON.stringify(heroSlides));
-            
-            // Notify customer portal
-            window.dispatchEvent(new StorageEvent('storage', {
-                key: 'sol_hero_slides',
-                newValue: JSON.stringify(heroSlides)
-            }));
-        }
-
-        // ========== PRODUCT MANAGEMENT ==========
         function loadProducts() {
             const saved = localStorage.getItem('sol_products');
-            products = saved ? JSON.parse(saved) : [...DEFAULT_PRODUCTS];
-            
-            if (!saved) {
-                localStorage.setItem('sol_products', JSON.stringify(products));
+            if (saved) {
+                products = JSON.parse(saved);
+            } else {
+                products = [...DEFAULT_PRODUCTS];
+                saveToLocalStorage();
             }
-            
             updateStats();
         }
 
-        function saveProducts() {
+        function saveToLocalStorage() {
             localStorage.setItem('sol_products', JSON.stringify(products));
-            updateStats();
             
-            // Show save indicator
-            const statusDiv = document.querySelector('.save-indicator');
-            if (statusDiv) {
-                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Saved!';
-                statusDiv.style.background = '#27ae60';
-                setTimeout(() => {
-                    statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> All Changes Saved';
-                }, 2000);
-            }
+            // Show save status
+            const status = document.getElementById('saveStatus');
+            status.style.display = 'flex';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 2000);
             
-            // Notify customer portal
+            // Trigger storage event for customer portal
             window.dispatchEvent(new StorageEvent('storage', {
                 key: 'sol_products',
                 newValue: JSON.stringify(products)
             }));
+            
+            updateStats();
         }
 
         function updateStats() {
             document.getElementById('totalProducts').textContent = products.length;
-            
             const categories = new Set(products.map(p => p.category)).size;
             document.getElementById('totalCategories').textContent = categories;
-            
             document.getElementById('totalOrders').textContent = orders.length;
             const revenue = orders.reduce((sum, o) => sum + o.total, 0);
             document.getElementById('totalRevenue').textContent = '₹' + revenue;
@@ -1206,13 +713,12 @@
 
             let html = '';
             products.forEach((product, index) => {
-                // Generate image previews
                 let imagePreviews = '';
                 if (product.images && product.images.length > 0) {
                     product.images.forEach((img, imgIndex) => {
                         imagePreviews += `
                             <div class="image-preview">
-                                <img src="${img}" alt="Product image ${imgIndex + 1}">
+                                <img src="${img}" alt="Product image">
                                 <button class="remove-image" onclick="removeProductImage(${index}, ${imgIndex})">×</button>
                             </div>
                         `;
@@ -1223,14 +729,14 @@
                     <div class="product-admin-card">
                         <h3>${product.id}</h3>
                         <div class="product-fields">
-                            <input type="text" placeholder="Product ID" value="${product.id}" onchange="updateProductField(${index}, 'id', this.value)" id="id_${index}">
-                            <input type="text" placeholder="Product Name" value="${product.name}" onchange="updateProductField(${index}, 'name', this.value)" id="name_${index}">
-                            <textarea placeholder="Description" onchange="updateProductField(${index}, 'description', this.value)" id="desc_${index}">${product.description || ''}</textarea>
-                            <select onchange="updateProductField(${index}, 'category', this.value)" id="cat_${index}">
+                            <input type="text" placeholder="Product ID" value="${product.id}" onchange="updateField(${index}, 'id', this.value)">
+                            <input type="text" placeholder="Product Name" value="${product.name}" onchange="updateField(${index}, 'name', this.value)">
+                            <textarea placeholder="Description" onchange="updateField(${index}, 'description', this.value)">${product.description || ''}</textarea>
+                            <select onchange="updateField(${index}, 'category', this.value)">
                                 ${categories.map(c => `<option value="${c}" ${product.category === c ? 'selected' : ''}>${c}</option>`).join('')}
                             </select>
-                            <input type="number" placeholder="Price" value="${product.price}" onchange="updateProductField(${index}, 'price', this.value)" id="price_${index}">
-                            <select onchange="updateProductField(${index}, 'stock', this.value)" id="stock_${index}">
+                            <input type="number" placeholder="Price" value="${product.price}" onchange="updateField(${index}, 'price', this.value)">
+                            <select onchange="updateField(${index}, 'stock', this.value)">
                                 ${stockOptions.map(s => `<option value="${s}" ${product.stock === s ? 'selected' : ''}>${s}</option>`).join('')}
                             </select>
                         </div>
@@ -1243,7 +749,7 @@
                             <div class="upload-multiple-btn" onclick="document.getElementById('fileInput_${index}').click()">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span>Click to upload multiple images</span>
-                                <input type="file" id="fileInput_${index}" multiple accept="image/*" style="display: none;" onchange="uploadProductImages(${index}, this.files)">
+                                <input type="file" id="fileInput_${index}" multiple accept="image/*" style="display: none;" onchange="uploadImages(${index}, this.files)">
                             </div>
                         </div>
 
@@ -1262,71 +768,61 @@
             grid.innerHTML = html;
         }
 
-        window.updateProductField = function(index, field, value) {
+        window.updateField = function(index, field, value) {
             if (field === 'price') value = parseFloat(value) || 0;
             products[index][field] = value;
-            // Auto-save on field change
-            saveProducts();
         };
 
-        window.uploadProductImages = function(index, files) {
-            const product = products[index];
-            if (!product.images) product.images = [];
+        window.uploadImages = function(index, files) {
+            if (!products[index].images) {
+                products[index].images = [];
+            }
 
-            let filesProcessed = 0;
-            
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    product.images.push(e.target.result);
-                    filesProcessed++;
+                    products[index].images.push(e.target.result);
                     
                     // Update image grid
                     const imageGrid = document.getElementById(`imageGrid_${index}`);
-                    const imgIndex = product.images.length - 1;
                     const imgHtml = `
                         <div class="image-preview">
                             <img src="${e.target.result}" alt="Product image">
-                            <button class="remove-image" onclick="removeProductImage(${index}, ${imgIndex})">×</button>
+                            <button class="remove-image" onclick="removeProductImage(${index}, ${products[index].images.length - 1})">×</button>
                         </div>
                     `;
                     imageGrid.insertAdjacentHTML('beforeend', imgHtml);
                     
-                    // Save after all files are processed
-                    if (filesProcessed === files.length) {
-                        saveProducts();
-                    }
+                    // Auto-save after each image
+                    saveToLocalStorage();
                 };
                 reader.readAsDataURL(file);
             });
         };
 
         window.removeProductImage = function(productIndex, imageIndex) {
-            if (confirm('Remove this image?')) {
-                products[productIndex].images.splice(imageIndex, 1);
-                saveProducts();
-                renderProductsGrid(); // Re-render to update image grid
-            }
+            products[productIndex].images.splice(imageIndex, 1);
+            saveToLocalStorage();
+            renderProductsGrid(); // Re-render to update image grid
         };
 
         window.saveProduct = function(index) {
             // Get latest values from inputs
             const product = products[index];
-            product.id = document.getElementById(`id_${index}`).value;
-            product.name = document.getElementById(`name_${index}`).value;
-            product.description = document.getElementById(`desc_${index}`).value;
-            product.category = document.getElementById(`cat_${index}`).value;
-            product.price = parseFloat(document.getElementById(`price_${index}`).value) || 0;
-            product.stock = document.getElementById(`stock_${index}`).value;
+            product.id = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) input[placeholder="Product ID"]`).value;
+            product.name = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) input[placeholder="Product Name"]`).value;
+            product.description = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) textarea`).value;
+            product.category = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) select`).value;
+            product.price = parseFloat(document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) input[type="number"]`).value) || 0;
+            product.stock = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) select:last-of-type`).value;
             
-            saveProducts();
-            showNotification('Product saved successfully!');
+            saveToLocalStorage();
         };
 
         window.deleteProduct = function(index) {
             if (confirm('Delete this product?')) {
                 products.splice(index, 1);
-                saveProducts();
+                saveToLocalStorage();
                 renderProductsGrid();
             }
         };
@@ -1342,11 +838,10 @@
                 images: [],
                 description: 'New product description'
             });
-            saveProducts();
+            saveToLocalStorage();
             renderProductsGrid();
         };
 
-        // Orders
         function renderOrders() {
             const grid = document.getElementById('ordersGrid');
             
@@ -1358,13 +853,12 @@
             let html = '';
             orders.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(order => {
                 const date = new Date(order.date).toLocaleString();
-                const statusClass = 'status-' + order.status;
 
                 html += `
                     <div class="order-card">
                         <div class="order-header">
                             <span class="order-id"><i class="fas fa-hashtag"></i> ${order.id}</span>
-                            <span class="order-status ${statusClass}">${order.status.toUpperCase()}</span>
+                            <span class="order-status status-confirmed">${order.status.toUpperCase()}</span>
                         </div>
                         <div class="order-details">
                             <div class="order-detail"><i class="fas fa-user"></i> ${order.customer.name}</div>
@@ -1385,18 +879,6 @@
                             <span>Total:</span>
                             <span>₹${order.total}</span>
                         </div>
-                        <div class="order-actions">
-                            <select onchange="updateOrderStatus('${order.id}', this.value)">
-                                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-                                <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                            </select>
-                            <button class="btn btn-danger" onclick="deleteOrder('${order.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
                     </div>
                 `;
             });
@@ -1404,137 +886,7 @@
             grid.innerHTML = html;
         }
 
-        window.updateOrderStatus = function(orderId, status) {
-            const order = orders.find(o => o.id === orderId);
-            if (order) {
-                order.status = status;
-                localStorage.setItem('sol_orders', JSON.stringify(orders));
-                renderOrders();
-                updateStats();
-            }
-        };
-
-        window.deleteOrder = function(orderId) {
-            if (confirm('Delete this order?')) {
-                orders = orders.filter(o => o.id !== orderId);
-                localStorage.setItem('sol_orders', JSON.stringify(orders));
-                renderOrders();
-                updateStats();
-            }
-        };
-
-        window.refreshOrders = function() {
-            orders = JSON.parse(localStorage.getItem('sol_orders')) || [];
-            renderOrders();
-            updateStats();
-        };
-
-        // Charts
-        function renderCharts() {
-            Object.values(charts).forEach(chart => chart?.destroy());
-
-            // Category Chart
-            const categoryData = {};
-            orders.forEach(order => {
-                order.items.forEach(item => {
-                    const product = products.find(p => p.name === item.name);
-                    const category = product ? product.category : 'Other';
-                    categoryData[category] = (categoryData[category] || 0) + (item.price * item.quantity);
-                });
-            });
-
-            if (Object.keys(categoryData).length > 0) {
-                charts.category = new Chart(document.getElementById('categoryChart'), {
-                    type: 'pie',
-                    data: {
-                        labels: Object.keys(categoryData),
-                        datasets: [{
-                            data: Object.values(categoryData),
-                            backgroundColor: ['#f39c12', '#27ae60', '#e74c3c', '#3498db', '#9b59b6']
-                        }]
-                    }
-                });
-            }
-
-            // Orders Chart
-            const last7Days = [];
-            const orderCounts = [];
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                last7Days.push(date.toLocaleDateString());
-                
-                const count = orders.filter(o => {
-                    const orderDate = new Date(o.date);
-                    return orderDate.toLocaleDateString() === date.toLocaleDateString();
-                }).length;
-                orderCounts.push(count);
-            }
-
-            charts.orders = new Chart(document.getElementById('ordersChart'), {
-                type: 'line',
-                data: {
-                    labels: last7Days,
-                    datasets: [{
-                        label: 'Orders',
-                        data: orderCounts,
-                        borderColor: '#f39c12',
-                        tension: 0.1
-                    }]
-                }
-            });
-
-            // Stock Chart
-            const stockCounts = {
-                'In Stock': products.filter(p => p.stock === 'In Stock').length,
-                'Limited': products.filter(p => p.stock === 'Limited').length,
-                'Out of Stock': products.filter(p => p.stock === 'Out of Stock').length
-            };
-
-            charts.stock = new Chart(document.getElementById('stockChart'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(stockCounts),
-                    datasets: [{
-                        label: 'Products',
-                        data: Object.values(stockCounts),
-                        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c']
-                    }]
-                }
-            });
-
-            // Payment Chart
-            const paymentData = {};
-            orders.forEach(order => {
-                paymentData[order.payment] = (paymentData[order.payment] || 0) + 1;
-            });
-
-            if (Object.keys(paymentData).length > 0) {
-                charts.payment = new Chart(document.getElementById('paymentChart'), {
-                    type: 'pie',
-                    data: {
-                        labels: Object.keys(paymentData),
-                        datasets: [{
-                            data: Object.values(paymentData),
-                            backgroundColor: ['#27ae60', '#f39c12', '#3498db']
-                        }]
-                    }
-                });
-            }
-        }
-
-        // Notification
-        function showNotification(message) {
-            const statusDiv = document.getElementById('sliderStatus');
-            if (statusDiv) {
-                statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #27ae60;"></i> ${message}`;
-                setTimeout(() => {
-                    statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> System Ready';
-                }, 3000);
-            }
-        }
-
-        // Listen for new orders
+        // Listen for storage events
         window.addEventListener('storage', function(e) {
             if (e.key === 'sol_orders') {
                 orders = JSON.parse(e.newValue) || [];
@@ -1542,27 +894,12 @@
                 if (document.getElementById('ordersTab').classList.contains('active')) {
                     renderOrders();
                 }
-                if (document.getElementById('analyticsTab').classList.contains('active')) {
-                    renderCharts();
-                }
             }
         });
 
-        // Auto-refresh
-        setInterval(() => {
-            const newOrders = JSON.parse(localStorage.getItem('sol_orders')) || [];
-            if (JSON.stringify(orders) !== JSON.stringify(newOrders)) {
-                orders = newOrders;
-                updateStats();
-                if (document.getElementById('ordersTab').classList.contains('active')) {
-                    renderOrders();
-                }
-            }
-        }, 2000);
-
         // Initialize
-        loadHeroSlides();
         loadProducts();
+        renderProductsGrid();
         updateStats();
     </script>
 </body>
