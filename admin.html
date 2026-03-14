@@ -349,6 +349,17 @@
             color: white;
         }
 
+        .action-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .action-btn:disabled:hover {
+            background: #1a2634;
+            color: white;
+            border-color: #2c3e50;
+        }
+
         .no-image {
             color: #7f8c8d;
             font-style: italic;
@@ -382,16 +393,32 @@
             }
         }
 
-        .orders-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 25px;
-        }
-
-        .order-card {
+        .orders-section {
             background: #0f1722;
             border-radius: 20px;
             padding: 25px;
+            border: 1px solid #2c3e50;
+            margin-top: 40px;
+        }
+
+        .orders-section h2 {
+            color: #f39c12;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .order-card {
+            background: #1a2634;
+            border-radius: 15px;
+            padding: 20px;
             border: 1px solid #2c3e50;
         }
 
@@ -407,6 +434,7 @@
         .order-id {
             color: #f39c12;
             font-weight: 700;
+            font-size: 1.1rem;
         }
 
         .order-status {
@@ -418,20 +446,14 @@
             color: white;
         }
 
-        .order-detail {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 8px;
+        .order-date {
             color: #95a5a6;
-        }
-
-        .order-detail i {
-            color: #f39c12;
-            width: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
         }
 
         .order-items {
-            background: #1a2634;
+            background: #0f1722;
             padding: 15px;
             border-radius: 12px;
             margin: 15px 0;
@@ -442,6 +464,7 @@
             justify-content: space-between;
             color: white;
             margin-bottom: 5px;
+            font-size: 0.95rem;
         }
 
         .order-total {
@@ -602,13 +625,13 @@
                     <i class="fas fa-plus"></i> Add Product
                 </button>
                 <button class="btn btn-warning" onclick="resetToDefault()">
-                    <i class="fas fa-redo"></i> Reset
+                    <i class="fas fa-redo"></i> Reset to Default
                 </button>
                 <button class="btn btn-info" onclick="exportProducts()">
-                    <i class="fas fa-download"></i> Export
+                    <i class="fas fa-download"></i> Export JSON
                 </button>
                 <button class="btn btn-primary" onclick="importProducts()">
-                    <i class="fas fa-upload"></i> Import
+                    <i class="fas fa-upload"></i> Import JSON
                 </button>
             </div>
         </div>
@@ -636,6 +659,14 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Orders Section -->
+        <div class="orders-section">
+            <h2><i class="fas fa-shopping-bag"></i> Recent Orders</h2>
+            <div id="ordersContainer" class="orders-grid">
+                <div class="loading">No orders yet</div>
+            </div>
+        </div>
     </div>
 
     <footer class="footer">
@@ -644,7 +675,7 @@
 
     <script>
         let products = [];
-        let orders = JSON.parse(localStorage.getItem('sol_orders')) || [];
+        let orders = [];
 
         const DEFAULT_PRODUCTS = [
             { 
@@ -693,6 +724,16 @@
             updateStats();
         }
 
+        function loadOrders() {
+            const saved = localStorage.getItem('sol_orders');
+            if (saved) {
+                orders = JSON.parse(saved);
+            } else {
+                orders = [];
+            }
+            renderOrders();
+        }
+
         function saveToLocalStorage(showNotification = true) {
             localStorage.setItem('sol_products', JSON.stringify(products));
             
@@ -715,10 +756,16 @@
 
         function updateStats() {
             document.getElementById('totalProducts').textContent = products.length;
-            const categories = new Set(products.map(p => p.category)).size;
+            const categories = [...new Set(products.map(p => p.category))].length;
             document.getElementById('totalCategories').textContent = categories;
+            
+            // Load orders for stats
+            const savedOrders = localStorage.getItem('sol_orders');
+            if (savedOrders) {
+                orders = JSON.parse(savedOrders);
+            }
             document.getElementById('totalOrders').textContent = orders.length;
-            const revenue = orders.reduce((sum, o) => sum + o.total, 0);
+            const revenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
             document.getElementById('totalRevenue').textContent = '₹' + revenue;
         }
 
@@ -726,6 +773,11 @@
             const tbody = document.getElementById('tableBody');
             const categories = ['Necklace', 'Earrings', 'Bangles', 'Headpiece', 'Bracelet', 'Ring', 'Anklet'];
             const stockOptions = ['In Stock', 'Limited', 'Out of Stock'];
+
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">No products found. Click "Add Product" to create one.</td></tr>';
+                return;
+            }
 
             let html = '';
             products.forEach((p, index) => {
@@ -812,23 +864,54 @@
             });
         }
 
+        function renderOrders() {
+            const container = document.getElementById('ordersContainer');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="loading">No orders yet</div>';
+                return;
+            }
+
+            let html = '';
+            orders.slice(-6).reverse().forEach(order => {
+                const date = new Date(order.date).toLocaleDateString();
+                html += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-id">${order.id}</span>
+                            <span class="order-status">${order.status || 'Pending'}</span>
+                        </div>
+                        <div class="order-date">${date}</div>
+                        <div class="order-items">
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <span>${item.name} x${item.quantity}</span>
+                                    <span>₹${item.price * item.quantity}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="order-total">
+                            <span>Total:</span>
+                            <span>₹${order.total || 0}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
         window.uploadImages = function(index, files) {
             if (!products[index].images) {
                 products[index].images = [];
             }
 
-            let filesProcessed = 0;
-            
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     products[index].images.push(e.target.result);
-                    filesProcessed++;
-                    
-                    if (filesProcessed === files.length) {
-                        saveToLocalStorage();
-                        renderTable(); // Re-render to show new images
-                    }
+                    saveToLocalStorage();
+                    renderTable();
                 };
                 reader.readAsDataURL(file);
             });
@@ -932,12 +1015,28 @@
         window.addEventListener('storage', function(e) {
             if (e.key === 'sol_orders') {
                 orders = JSON.parse(e.newValue) || [];
+                renderOrders();
                 updateStats();
             }
         });
 
         // Initialize
         loadProducts();
+        loadOrders();
+        updateStats();
+
+        // Refresh orders every 2 seconds
+        setInterval(() => {
+            const savedOrders = localStorage.getItem('sol_orders');
+            if (savedOrders) {
+                const newOrders = JSON.parse(savedOrders);
+                if (JSON.stringify(orders) !== JSON.stringify(newOrders)) {
+                    orders = newOrders;
+                    renderOrders();
+                    updateStats();
+                }
+            }
+        }, 2000);
     </script>
 </body>
 </html>
