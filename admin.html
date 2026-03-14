@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Style Of Life · Enterprise Admin Panel</title>
+    <title>Style Of Life · Google Drive Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Copy all the styles from the previous admin.html */
+        /* I'll include the complete styles here */
         * {
             margin: 0;
             padding: 0;
@@ -58,15 +60,44 @@
             font-size: 0.9rem;
         }
 
-        .admin-badge {
-            background: #f39c12;
-            color: #0f1722;
-            padding: 10px 25px;
-            border-radius: 40px;
-            font-weight: 600;
+        .connection-status {
             display: flex;
             align-items: center;
             gap: 10px;
+            background: #1a2634;
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 1px solid #2c3e50;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.disconnected {
+            background: #e74c3c;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .drive-badge {
+            background: #f39c12;
+            color: #0f1722;
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-left: 10px;
         }
 
         .customer-link {
@@ -100,7 +131,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 25px;
             margin-bottom: 40px;
         }
@@ -114,7 +145,6 @@
             gap: 20px;
             border: 1px solid #2c3e50;
             transition: 0.3s;
-            cursor: pointer;
         }
 
         .stat-card:hover {
@@ -136,14 +166,14 @@
 
         .stat-info h3 {
             color: #95a5a6;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 400;
             margin-bottom: 5px;
         }
 
         .stat-info span {
             color: white;
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 700;
         }
 
@@ -155,6 +185,7 @@
             padding: 15px;
             border-radius: 15px;
             border: 1px solid #2c3e50;
+            flex-wrap: wrap;
         }
 
         .tab-btn {
@@ -257,20 +288,11 @@
             color: #0f1722;
         }
 
-        .btn-warning:hover {
-            background: #d4ac0d;
-        }
-
         .btn-info {
             background: #3498db;
             color: white;
         }
 
-        .btn-info:hover {
-            background: #2980b9;
-        }
-
-        /* Excel-like Table */
         .table-wrapper {
             background: #0f1722;
             border-radius: 20px;
@@ -293,8 +315,6 @@
             text-align: left;
             font-weight: 600;
             border-bottom: 3px solid #f39c12;
-            position: sticky;
-            top: 0;
         }
 
         .excel-table td {
@@ -319,19 +339,9 @@
             border-color: #f39c12;
         }
 
-        .excel-table input[type="number"] {
-            -moz-appearance: textfield;
-        }
-
-        .excel-table input[type="number"]::-webkit-outer-spin-button,
-        .excel-table input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
         .image-cell {
             position: relative;
-            min-width: 150px;
+            min-width: 200px;
         }
 
         .image-preview-container {
@@ -339,11 +349,13 @@
             gap: 5px;
             flex-wrap: wrap;
             margin-bottom: 5px;
+            max-height: 150px;
+            overflow-y: auto;
         }
 
         .table-image-preview {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 8px;
             object-fit: cover;
             border: 2px solid #2c3e50;
@@ -403,125 +415,6 @@
             color: white;
         }
 
-        .action-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .action-btn:disabled:hover {
-            background: #1a2634;
-            color: white;
-            border-color: #2c3e50;
-        }
-
-        .no-image {
-            color: #7f8c8d;
-            font-style: italic;
-            font-size: 0.9rem;
-        }
-
-        .save-status {
-            position: fixed;
-            top: 100px;
-            right: 40px;
-            background: #27ae60;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 50px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Orders Table */
-        .orders-table-wrapper {
-            background: #0f1722;
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid #2c3e50;
-            margin-top: 20px;
-            overflow-x: auto;
-        }
-
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1400px;
-        }
-
-        .orders-table th {
-            background: #1a2634;
-            color: #f39c12;
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 3px solid #f39c12;
-        }
-
-        .orders-table td {
-            padding: 15px;
-            border-bottom: 1px solid #2c3e50;
-            color: white;
-        }
-
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .status-pending {
-            background: #f39c12;
-            color: #0f1722;
-        }
-
-        .status-processing {
-            background: #3498db;
-            color: white;
-        }
-
-        .status-shipped {
-            background: #9b59b6;
-            color: white;
-        }
-
-        .status-delivered {
-            background: #27ae60;
-            color: white;
-        }
-
-        .status-cancelled {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .order-items-list {
-            max-width: 300px;
-        }
-
-        .order-item-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            padding: 2px 0;
-        }
-
         .filter-section {
             background: #0f1722;
             border-radius: 15px;
@@ -576,29 +469,30 @@
             color: white;
         }
 
-        .pagination {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
         }
 
-        .pagination-btn {
-            padding: 8px 15px;
-            background: #1a2634;
-            border: 1px solid #2c3e50;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
+        .status-pending { background: #f39c12; color: #0f1722; }
+        .status-processing { background: #3498db; color: white; }
+        .status-shipped { background: #9b59b6; color: white; }
+        .status-delivered { background: #27ae60; color: white; }
+        .status-cancelled { background: #e74c3c; color: white; }
+
+        .drive-badge-small {
+            background: #0f1722;
+            color: #f39c12;
+            padding: 2px 8px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            border: 1px solid #f39c12;
         }
 
-        .pagination-btn.active {
-            background: #f39c12;
-            color: #0f1722;
-            border-color: #f39c12;
-        }
-
-        .order-detail-modal {
+        .modal {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -606,21 +500,28 @@
             background: #0f1722;
             border-radius: 20px;
             padding: 40px;
-            width: 90%;
-            max-width: 600px;
             z-index: 2000;
             transition: 0.3s;
             border: 2px solid #f39c12;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow: auto;
         }
 
-        .order-detail-modal.show {
+        .modal.show {
             transform: translate(-50%, -50%) scale(1);
         }
 
-        .close-modal {
+        .modal img {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 10px;
+        }
+
+        .modal-close {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 10px;
+            right: 10px;
             background: #e74c3c;
             color: white;
             border: none;
@@ -628,39 +529,6 @@
             height: 30px;
             border-radius: 50%;
             cursor: pointer;
-        }
-
-        .order-info {
-            color: white;
-            margin: 20px 0;
-        }
-
-        .info-row {
-            display: flex;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #1a2634;
-            border-radius: 10px;
-        }
-
-        .info-label {
-            width: 120px;
-            color: #f39c12;
-            font-weight: 600;
-        }
-
-        .info-value {
-            flex: 1;
-            color: white;
-        }
-
-        .status-select {
-            padding: 8px 15px;
-            background: #1a2634;
-            border: 2px solid #f39c12;
-            border-radius: 8px;
-            color: white;
-            width: 100%;
         }
 
         .modal-overlay {
@@ -678,52 +546,24 @@
             display: block;
         }
 
-        /* Analytics Section */
-        .analytics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-        .analytics-card {
-            background: #0f1722;
-            border-radius: 20px;
-            padding: 25px;
-            border: 1px solid #2c3e50;
-        }
-
-        .analytics-card h3 {
-            color: #f39c12;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-        }
-
-        .chart-container {
-            height: 200px;
-            display: flex;
-            align-items: flex-end;
-            gap: 10px;
-        }
-
-        .chart-bar {
-            flex: 1;
-            background: #f39c12;
-            border-radius: 8px 8px 0 0;
-            min-width: 30px;
-            position: relative;
-            transition: 0.3s;
-        }
-
-        .chart-bar:hover {
-            opacity: 0.8;
-        }
-
-        .chart-label {
-            text-align: center;
-            margin-top: 10px;
+        .save-status {
+            position: fixed;
+            top: 100px;
+            right: 40px;
+            background: #27ae60;
             color: white;
-            font-size: 0.9rem;
+            padding: 15px 30px;
+            border-radius: 50px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         .footer {
@@ -739,55 +579,6 @@
             padding: 50px;
             color: #f39c12;
         }
-
-        /* Modal for image preview */
-        .image-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: #0f1722;
-            border-radius: 20px;
-            padding: 30px;
-            z-index: 2000;
-            transition: 0.3s;
-            border: 2px solid #f39c12;
-            max-width: 90%;
-            max-height: 90vh;
-            overflow: auto;
-        }
-
-        .image-modal.show {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .image-modal img {
-            max-width: 100%;
-            max-height: 70vh;
-            border-radius: 10px;
-        }
-
-        .image-modal-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .filter-section {
-                flex-direction: column;
-            }
-            .search-box {
-                width: 100%;
-            }
-        }
     </style>
 </head>
 <body>
@@ -801,17 +592,9 @@
 
     <!-- Image Preview Modal -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeImageModal()"></div>
-    <div class="image-modal" id="imageModal">
-        <button class="image-modal-close" onclick="closeImageModal()"><i class="fas fa-times"></i></button>
+    <div class="modal" id="imageModal">
+        <button class="modal-close" onclick="closeImageModal()"><i class="fas fa-times"></i></button>
         <img id="modalImage" src="" alt="Preview">
-    </div>
-
-    <!-- Order Detail Modal -->
-    <div class="modal-overlay" id="orderModalOverlay" onclick="closeOrderModal()"></div>
-    <div class="order-detail-modal" id="orderModal">
-        <button class="close-modal" onclick="closeOrderModal()"><i class="fas fa-times"></i></button>
-        <h2 style="color: #f39c12; margin-bottom: 20px;">Order Details</h2>
-        <div id="orderDetailContent"></div>
     </div>
 
     <header class="admin-header">
@@ -821,59 +604,51 @@
             </div>
             <div class="logo-text">
                 <h1>Style Of Life</h1>
-                <p>Enterprise Administration Panel</p>
+                <p>Google Drive Integration</p>
             </div>
         </div>
-        <div class="admin-badge">
-            <i class="fas fa-lock"></i> Admin Access
+        <div class="connection-status">
+            <div class="status-dot" id="connectionDot"></div>
+            <span id="connectionText" style="color: white;">Connected to Drive</span>
+            <span class="drive-badge"><i class="fab fa-google-drive"></i> Google Drive</span>
         </div>
     </header>
 
     <div class="container">
-        <div class="stats-grid">
+        <div class="stats-grid" id="statsContainer">
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-box"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-box"></i></div>
                 <div class="stat-info">
                     <h3>Total Products</h3>
                     <span id="totalProducts">0</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-tags"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-tags"></i></div>
                 <div class="stat-info">
                     <h3>Categories</h3>
                     <span id="totalCategories">0</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-shopping-cart"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
                 <div class="stat-info">
                     <h3>Total Orders</h3>
                     <span id="totalOrders">0</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-rupee-sign"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
                 <div class="stat-info">
-                    <h3>Total Revenue</h3>
+                    <h3>Revenue</h3>
                     <span id="totalRevenue">₹0</span>
                 </div>
             </div>
             <div class="stat-card">
-                <div class="stat-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
+                <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
                 <div class="stat-info">
-                    <h3>Avg Order Value</h3>
-                    <span id="avgOrderValue">₹0</span>
+                    <h3>Avg Order</h3>
+                    <span id="avgOrder">₹0</span>
                 </div>
             </div>
         </div>
@@ -897,38 +672,27 @@
                     <button class="btn btn-success" onclick="addNewProduct()">
                         <i class="fas fa-plus"></i> Add Product
                     </button>
-                    <button class="btn btn-warning" onclick="resetToDefault()">
-                        <i class="fas fa-redo"></i> Reset to Default
-                    </button>
-                    <button class="btn btn-info" onclick="exportProducts()">
-                        <i class="fas fa-download"></i> Export JSON
-                    </button>
-                    <button class="btn btn-primary" onclick="importProducts()">
-                        <i class="fas fa-upload"></i> Import JSON
+                    <button class="btn btn-info" onclick="refreshData()">
+                        <i class="fas fa-sync"></i> Refresh
                     </button>
                 </div>
             </div>
 
-            <!-- Excel-like Inventory Table -->
             <div class="table-wrapper">
-                <table class="excel-table" id="inventoryTable">
+                <table class="excel-table">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Product Name</th>
                             <th>Category</th>
                             <th>Price (₹)</th>
-                            <th>Stock Status</th>
-                            <th>Images</th>
+                            <th>Stock</th>
+                            <th>Images (Google Drive)</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody">
-                        <tr>
-                            <td colspan="7" class="loading">
-                                <i class="fas fa-spinner fa-spin"></i> Loading inventory...
-                            </td>
-                        </tr>
+                    <tbody id="productsTableBody">
+                        <tr><td colspan="7" class="loading">Loading products...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -940,7 +704,7 @@
                 <div class="filter-group">
                     <label>Status:</label>
                     <select id="orderStatusFilter" onchange="filterOrders()">
-                        <option value="all">All Status</option>
+                        <option value="all">All</option>
                         <option value="Pending">Pending</option>
                         <option value="Processing">Processing</option>
                         <option value="Shipped">Shipped</option>
@@ -948,33 +712,19 @@
                         <option value="Cancelled">Cancelled</option>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <label>Date:</label>
-                    <select id="orderDateFilter" onchange="filterOrders()">
-                        <option value="all">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="year">This Year</option>
-                    </select>
-                </div>
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="orderSearch" placeholder="Search by Order ID, Customer, Email, Phone..." onkeyup="filterOrders()">
+                    <input type="text" id="orderSearch" placeholder="Search orders..." onkeyup="filterOrders()">
                 </div>
-                <button class="btn btn-info" onclick="exportOrders()">
-                    <i class="fas fa-download"></i> Export Orders
-                </button>
             </div>
 
-            <div class="orders-table-wrapper">
-                <table class="orders-table" id="ordersTable">
+            <div class="table-wrapper">
+                <table class="excel-table">
                     <thead>
                         <tr>
                             <th>Order ID</th>
                             <th>Date</th>
                             <th>Customer</th>
-                            <th>Contact</th>
                             <th>Items</th>
                             <th>Total</th>
                             <th>Status</th>
@@ -982,277 +732,166 @@
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
-                        <tr>
-                            <td colspan="8" class="loading">
-                                <i class="fas fa-spinner fa-spin"></i> Loading orders...
-                            </td>
-                        </tr>
+                        <tr><td colspan="7" class="loading">Loading orders...</td></tr>
                     </tbody>
                 </table>
             </div>
-
-            <div class="pagination" id="ordersPagination"></div>
         </div>
 
         <!-- Analytics Tab -->
         <div id="analyticsTab" class="tab-content">
-            <div class="analytics-grid">
-                <div class="analytics-card">
-                    <h3>Orders by Status</h3>
-                    <div id="statusChart" class="chart-container"></div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-chart-pie"></i></div>
+                    <div class="stat-info">
+                        <h3>Orders by Status</h3>
+                        <div id="statusStats"></div>
+                    </div>
                 </div>
-                <div class="analytics-card">
-                    <h3>Revenue by Month</h3>
-                    <div id="revenueChart" class="chart-container"></div>
-                </div>
-                <div class="analytics-card">
-                    <h3>Top Products</h3>
-                    <div id="topProductsChart" class="chart-container"></div>
-                </div>
-                <div class="analytics-card">
-                    <h3>Category Distribution</h3>
-                    <div id="categoryChart" class="chart-container"></div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-calendar"></i></div>
+                    <div class="stat-info">
+                        <h3>Monthly Revenue</h3>
+                        <div id="monthlyStats"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <footer class="footer">
-        <p>Style Of Life · Enterprise Edition · Real-time updates active</p>
+        <p>Style Of Life · Google Drive Integration · Real-time sync with Google Sheets</p>
     </footer>
 
     <script>
+        // Configuration - Replace with your Google Apps Script URL
+        const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
+        
         let products = [];
         let orders = [];
-        let currentOrderPage = 1;
-        const ordersPerPage = 10;
-        let filteredOrders = [];
+        let categories = [];
 
-        const DEFAULT_PRODUCTS = [
-            { 
-                id: 'SOL001', 
-                name: 'Golden Peacock Choker', 
-                category: 'Necklace', 
-                price: 1850, 
-                stock: 'In Stock', 
-                images: [
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ]
-            },
-            { 
-                id: 'SOL002', 
-                name: 'Oxidized Jhumka Earrings', 
-                category: 'Earrings', 
-                price: 1299, 
-                stock: 'In Stock', 
-                images: [
-                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ]
-            },
-            { 
-                id: 'SOL003', 
-                name: 'Polki Bangle Set', 
-                category: 'Bangles', 
-                price: 2400, 
-                stock: 'Limited', 
-                images: [
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ]
-            }
-        ];
-
-        // Sample orders for demo
-        const SAMPLE_ORDERS = [
-            {
-                id: 'ORD1743509158000',
-                customer: 'Rajesh Kumar',
-                email: 'rajesh@email.com',
-                phone: '9876543210',
-                address: '123 Main St, Mumbai',
-                date: '2026-03-14T10:30:00.000Z',
-                items: [
-                    { id: 'SOL001', name: 'Golden Peacock Choker', price: 1850, quantity: 1 }
-                ],
-                total: 1850,
-                status: 'Delivered'
-            },
-            {
-                id: 'ORD1743509102809',
-                customer: 'Priya Singh',
-                email: 'priya@email.com',
-                phone: '9876543211',
-                address: '456 Park Ave, Delhi',
-                date: '2026-03-14T11:45:00.000Z',
-                items: [
-                    { id: 'SOL002', name: 'Oxidized Jhumka Earrings', price: 1299, quantity: 2 }
-                ],
-                total: 2598,
-                status: 'Processing'
-            },
-            {
-                id: 'ORD1743509203845',
-                customer: 'Amit Patel',
-                email: 'amit@email.com',
-                phone: '9876543212',
-                address: '789 Lake Road, Bangalore',
-                date: '2026-03-13T15:20:00.000Z',
-                items: [
-                    { id: 'SOL003', name: 'Polki Bangle Set', price: 2400, quantity: 1 },
-                    { id: 'SOL001', name: 'Golden Peacock Choker', price: 1850, quantity: 1 }
-                ],
-                total: 4250,
-                status: 'Shipped'
-            }
-        ];
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        // Initialize
+        window.onload = function() {
+            checkConnection();
+            loadDashboardStats();
+            loadProducts();
+            loadOrders();
+            loadCategories();
             
-            if (tab === 'products') {
-                document.querySelector('.tab-btn').classList.add('active');
-                document.getElementById('productsTab').classList.add('active');
-            } else if (tab === 'orders') {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('ordersTab').classList.add('active');
-                renderOrdersTable();
-            } else if (tab === 'analytics') {
-                document.querySelectorAll('.tab-btn')[2].classList.add('active');
-                document.getElementById('analyticsTab').classList.add('active');
-                renderAnalytics();
-            }
+            // Auto refresh every 30 seconds
+            setInterval(() => {
+                loadDashboardStats();
+                loadProducts();
+                loadOrders();
+            }, 30000);
+        };
+
+        function checkConnection() {
+            const dot = document.getElementById('connectionDot');
+            const text = document.getElementById('connectionText');
+            
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'getDashboardStats' })
+            })
+            .then(() => {
+                dot.classList.remove('disconnected');
+                text.textContent = 'Connected to Drive';
+            })
+            .catch(() => {
+                dot.classList.add('disconnected');
+                text.textContent = 'Disconnected';
+            });
+        }
+
+        function apiCall(action, data = {}) {
+            return fetch(SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, ...data })
+            })
+            .then(response => response.json());
+        }
+
+        function loadDashboardStats() {
+            apiCall('getDashboardStats')
+                .then(data => {
+                    if (data.stats) {
+                        document.getElementById('totalProducts').textContent = data.stats.totalProducts;
+                        document.getElementById('totalCategories').textContent = data.stats.totalCategories;
+                        document.getElementById('totalOrders').textContent = data.stats.totalOrders;
+                        document.getElementById('totalRevenue').textContent = '₹' + data.stats.totalRevenue;
+                        document.getElementById('avgOrder').textContent = '₹' + data.stats.avgOrderValue;
+                    }
+                })
+                .catch(console.error);
         }
 
         function loadProducts() {
-            const saved = localStorage.getItem('sol_products');
-            if (saved) {
-                products = JSON.parse(saved);
-            } else {
-                products = [...DEFAULT_PRODUCTS];
-                saveToLocalStorage(false);
-            }
-            renderProductsTable();
-            updateStats();
+            apiCall('getProducts')
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        products = data;
+                        renderProducts();
+                    }
+                })
+                .catch(console.error);
         }
 
-        function loadOrders() {
-            const saved = localStorage.getItem('sol_orders');
-            if (saved && JSON.parse(saved).length > 0) {
-                orders = JSON.parse(saved);
-            } else {
-                orders = [...SAMPLE_ORDERS];
-                localStorage.setItem('sol_orders', JSON.stringify(orders));
-            }
-            filteredOrders = [...orders];
-            renderOrdersTable();
-            updateStats();
-        }
-
-        function saveToLocalStorage(showNotification = true) {
-            localStorage.setItem('sol_products', JSON.stringify(products));
+        function renderProducts() {
+            const tbody = document.getElementById('productsTableBody');
             
-            if (showNotification) {
-                const status = document.getElementById('saveStatus');
-                status.style.display = 'flex';
-                setTimeout(() => {
-                    status.style.display = 'none';
-                }, 2000);
-            }
-            
-            // Trigger storage event for customer portal
-            window.dispatchEvent(new StorageEvent('storage', {
-                key: 'sol_products',
-                newValue: JSON.stringify(products)
-            }));
-            
-            updateStats();
-        }
-
-        function updateStats() {
-            document.getElementById('totalProducts').textContent = products.length;
-            
-            const categories = products.length > 0 ? [...new Set(products.map(p => p.category))].length : 0;
-            document.getElementById('totalCategories').textContent = categories;
-            
-            const savedOrders = localStorage.getItem('sol_orders');
-            if (savedOrders) {
-                orders = JSON.parse(savedOrders);
-            }
-            document.getElementById('totalOrders').textContent = orders.length;
-            
-            const revenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
-            document.getElementById('totalRevenue').textContent = '₹' + revenue;
-            
-            const avgOrder = orders.length > 0 ? Math.round(revenue / orders.length) : 0;
-            document.getElementById('avgOrderValue').textContent = '₹' + avgOrder;
-        }
-
-        function renderProductsTable() {
-            const tbody = document.getElementById('tableBody');
-            const categories = ['Necklace', 'Earrings', 'Bangles', 'Headpiece', 'Bracelet', 'Ring', 'Anklet'];
-            const stockOptions = ['In Stock', 'Limited', 'Out of Stock'];
-
             if (products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="loading">No products found. Click "Add Product" to create one.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">No products found</td></tr>';
                 return;
             }
 
             let html = '';
-            products.forEach((p, index) => {
-                let catOptions = '';
-                categories.forEach(cat => {
-                    catOptions += `<option value="${cat}" ${p.category === cat ? 'selected' : ''}>${cat}</option>`;
-                });
-
-                let stockOpts = '';
-                stockOptions.forEach(s => {
-                    stockOpts += `<option value="${s}" ${p.stock === s ? 'selected' : ''}>${s}</option>`;
-                });
-
+            products.forEach((product, index) => {
                 let imageHtml = '<div class="image-preview-container">';
-                if (p.images && p.images.length > 0) {
-                    p.images.forEach((img) => {
-                        imageHtml += `<img class="table-image-preview" src="${img}" alt="Product" onclick="openImageModal('${img}')">`;
+                if (product.images && product.images.length > 0) {
+                    product.images.forEach(img => {
+                        imageHtml += `<img class="table-image-preview" src="${img.url}" alt="Product" onclick="openImageModal('${img.url}')">`;
                     });
                 } else {
                     imageHtml += '<span class="no-image">No images</span>';
                 }
                 imageHtml += '</div>';
-
+                
                 imageHtml += `
-                    <div class="image-upload-btn" onclick="document.getElementById('fileInput_${index}').click()">
-                        <i class="fas fa-camera"></i> Add Images
+                    <div class="image-upload-btn" onclick="uploadImages(${index})">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload to Drive
                     </div>
-                    <input type="file" id="fileInput_${index}" multiple accept="image/*" style="display: none;" onchange="uploadImages(${index}, this.files)">
+                    <input type="file" id="fileInput_${index}" multiple accept="image/*" style="display:none;" onchange="handleImageUpload(${index}, this.files)">
                 `;
 
                 html += `
-                    <tr data-index="${index}">
-                        <td><input type="text" value="${p.id}" class="edit-field" data-field="id" data-index="${index}" placeholder="ID"></td>
-                        <td><input type="text" value="${p.name.replace(/"/g, '&quot;')}" class="edit-field" data-field="name" data-index="${index}"></td>
+                    <tr>
+                        <td><input type="text" value="${product.id}" onchange="updateProduct('${product.id}', 'id', this.value)"></td>
+                        <td><input type="text" value="${product.name}" onchange="updateProduct('${product.id}', 'name', this.value)"></td>
                         <td>
-                            <select class="edit-field" data-field="category" data-index="${index}">
-                                ${catOptions}
+                            <select onchange="updateProduct('${product.id}', 'category', this.value)">
+                                <option value="Necklace" ${product.category === 'Necklace' ? 'selected' : ''}>Necklace</option>
+                                <option value="Earrings" ${product.category === 'Earrings' ? 'selected' : ''}>Earrings</option>
+                                <option value="Bangles" ${product.category === 'Bangles' ? 'selected' : ''}>Bangles</option>
+                                <option value="Rings" ${product.category === 'Rings' ? 'selected' : ''}>Rings</option>
                             </select>
                         </td>
-                        <td><input type="number" value="${p.price}" class="edit-field" data-field="price" data-index="${index}" step="1" min="0"></td>
+                        <td><input type="number" value="${product.price}" onchange="updateProduct('${product.id}', 'price', this.value)"></td>
                         <td>
-                            <select class="edit-field" data-field="stock" data-index="${index}">
-                                ${stockOpts}
+                            <select onchange="updateProduct('${product.id}', 'stock', this.value)">
+                                <option value="In Stock" ${product.stock === 'In Stock' ? 'selected' : ''}>In Stock</option>
+                                <option value="Limited" ${product.stock === 'Limited' ? 'selected' : ''}>Limited</option>
+                                <option value="Out of Stock" ${product.stock === 'Out of Stock' ? 'selected' : ''}>Out of Stock</option>
                             </select>
                         </td>
                         <td class="image-cell">${imageHtml}</td>
                         <td>
                             <div class="action-btns">
-                                <button class="action-btn" onclick="moveUp(${index})" ${index === 0 ? 'disabled' : ''}>
-                                    <i class="fas fa-arrow-up"></i>
-                                </button>
-                                <button class="action-btn" onclick="moveDown(${index})" ${index === products.length-1 ? 'disabled' : ''}>
-                                    <i class="fas fa-arrow-down"></i>
-                                </button>
-                                <button class="action-btn delete" onclick="deleteProduct(${index})">
+                                <button class="action-btn" onclick="deleteProduct('${product.id}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -1262,56 +901,39 @@
             });
 
             tbody.innerHTML = html;
-
-            document.querySelectorAll('.edit-field').forEach(el => {
-                el.addEventListener('change', function(e) {
-                    const index = this.dataset.index;
-                    const field = this.dataset.field;
-                    let value = this.value;
-                    
-                    if (field === 'price') value = parseFloat(value) || 0;
-                    
-                    if (products[index]) {
-                        products[index][field] = value;
-                        saveToLocalStorage();
-                    }
-                });
-            });
         }
 
-        function renderOrdersTable() {
+        function loadOrders() {
+            apiCall('getOrders')
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        orders = data;
+                        renderOrders();
+                    }
+                })
+                .catch(console.error);
+        }
+
+        function renderOrders() {
             const tbody = document.getElementById('ordersTableBody');
             
-            if (filteredOrders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="loading">No orders found</td></tr>';
-                document.getElementById('ordersPagination').innerHTML = '';
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">No orders found</td></tr>';
                 return;
             }
 
-            // Pagination
-            const start = (currentOrderPage - 1) * ordersPerPage;
-            const end = start + ordersPerPage;
-            const paginatedOrders = filteredOrders.slice(start, end);
-
             let html = '';
-            paginatedOrders.forEach(order => {
+            orders.slice().reverse().forEach(order => {
                 const date = new Date(order.date).toLocaleDateString();
-                const statusClass = `status-badge status-${order.status?.toLowerCase() || 'pending'}`;
-                
-                let itemsHtml = '<div class="order-items-list">';
-                order.items.forEach(item => {
-                    itemsHtml += `<div class="order-item-row"><span>${item.name} x${item.quantity}</span><span>₹${item.price * item.quantity}</span></div>`;
-                });
-                itemsHtml += '</div>';
+                const itemsList = order.items.map(item => `${item.name} x${item.quantity}`).join(', ');
 
                 html += `
                     <tr>
-                        <td><strong>${order.id}</strong></td>
+                        <td>${order.id}</td>
                         <td>${date}</td>
-                        <td>${order.customer || 'N/A'}</td>
-                        <td>${order.email || 'N/A'}<br><small>${order.phone || 'N/A'}</small></td>
-                        <td>${itemsHtml}</td>
-                        <td><strong>₹${order.total || 0}</strong></td>
+                        <td>${order.customer}<br><small>${order.email}</small></td>
+                        <td>${itemsList}</td>
+                        <td>₹${order.total}</td>
                         <td>
                             <select class="status-select" onchange="updateOrderStatus('${order.id}', this.value)">
                                 <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -1322,378 +944,199 @@
                             </select>
                         </td>
                         <td>
-                            <div class="action-btns">
-                                <button class="action-btn" onclick="viewOrderDetails('${order.id}')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="action-btn delete" onclick="deleteOrder('${order.id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
+                            <button class="action-btn delete" onclick="deleteOrder('${order.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 `;
             });
 
             tbody.innerHTML = html;
-            renderPagination();
         }
 
-        function renderPagination() {
-            const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-            let paginationHtml = '';
-            
-            for (let i = 1; i <= totalPages; i++) {
-                paginationHtml += `<button class="pagination-btn ${i === currentOrderPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
-            }
-            
-            document.getElementById('ordersPagination').innerHTML = paginationHtml;
+        function loadCategories() {
+            apiCall('getCategories')
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        categories = data;
+                    }
+                })
+                .catch(console.error);
         }
 
-        window.goToPage = function(page) {
-            currentOrderPage = page;
-            renderOrdersTable();
-        };
-
-        window.filterOrders = function() {
-            const statusFilter = document.getElementById('orderStatusFilter').value;
-            const dateFilter = document.getElementById('orderDateFilter').value;
-            const searchTerm = document.getElementById('orderSearch').value.toLowerCase();
-
-            filteredOrders = orders.filter(order => {
-                // Status filter
-                if (statusFilter !== 'all' && order.status !== statusFilter) {
-                    return false;
-                }
-
-                // Date filter
-                if (dateFilter !== 'all') {
-                    const orderDate = new Date(order.date);
-                    const today = new Date();
-                    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-                    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                    const startOfYear = new Date(today.getFullYear(), 0, 1);
-
-                    if (dateFilter === 'today' && orderDate.toDateString() !== new Date().toDateString()) {
-                        return false;
-                    }
-                    if (dateFilter === 'week' && orderDate < startOfWeek) {
-                        return false;
-                    }
-                    if (dateFilter === 'month' && orderDate < startOfMonth) {
-                        return false;
-                    }
-                    if (dateFilter === 'year' && orderDate < startOfYear) {
-                        return false;
-                    }
-                }
-
-                // Search filter
-                if (searchTerm) {
-                    return order.id.toLowerCase().includes(searchTerm) ||
-                           (order.customer && order.customer.toLowerCase().includes(searchTerm)) ||
-                           (order.email && order.email.toLowerCase().includes(searchTerm)) ||
-                           (order.phone && order.phone.includes(searchTerm));
-                }
-
-                return true;
-            });
-
-            currentOrderPage = 1;
-            renderOrdersTable();
-        };
-
-        window.updateOrderStatus = function(orderId, newStatus) {
-            const order = orders.find(o => o.id === orderId);
-            if (order) {
-                order.status = newStatus;
-                localStorage.setItem('sol_orders', JSON.stringify(orders));
-                filterOrders();
-                updateStats();
-                showNotification('Order status updated');
-            }
-        };
-
-        window.viewOrderDetails = function(orderId) {
-            const order = orders.find(o => o.id === orderId);
-            if (!order) return;
-
-            const date = new Date(order.date).toLocaleString();
-            const content = `
-                <div class="order-info">
-                    <div class="info-row">
-                        <span class="info-label">Order ID:</span>
-                        <span class="info-value">${order.id}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Date:</span>
-                        <span class="info-value">${date}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Customer:</span>
-                        <span class="info-value">${order.customer || 'N/A'}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Email:</span>
-                        <span class="info-value">${order.email || 'N/A'}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Phone:</span>
-                        <span class="info-value">${order.phone || 'N/A'}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Address:</span>
-                        <span class="info-value">${order.address || 'N/A'}</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Items:</span>
-                        <span class="info-value">
-                            ${order.items.map(item => `${item.name} x${item.quantity} - ₹${item.price * item.quantity}`).join('<br>')}
-                        </span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Total:</span>
-                        <span class="info-value"><strong>₹${order.total}</strong></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Status:</span>
-                        <span class="info-value">
-                            <select class="status-select" onchange="updateOrderStatus('${order.id}', this.value)">
-                                <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
-                                <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                                <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                                <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                            </select>
-                        </span>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('orderDetailContent').innerHTML = content;
-            document.getElementById('orderModal').classList.add('show');
-            document.getElementById('orderModalOverlay').classList.add('show');
-        };
-
-        window.closeOrderModal = function() {
-            document.getElementById('orderModal').classList.remove('show');
-            document.getElementById('orderModalOverlay').classList.remove('show');
-        };
-
-        window.deleteOrder = function(orderId) {
-            if (confirm('Delete this order?')) {
-                orders = orders.filter(o => o.id !== orderId);
-                localStorage.setItem('sol_orders', JSON.stringify(orders));
-                filteredOrders = filteredOrders.filter(o => o.id !== orderId);
-                renderOrdersTable();
-                updateStats();
-                showNotification('Order deleted');
-            }
-        };
-
-        window.exportOrders = function() {
-            const dataStr = JSON.stringify(filteredOrders, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            const exportFileDefaultName = `orders_${new Date().toISOString().slice(0,10)}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        };
-
-        function renderAnalytics() {
-            // Orders by Status Chart
-            const statusCounts = {
-                'Pending': orders.filter(o => o.status === 'Pending').length,
-                'Processing': orders.filter(o => o.status === 'Processing').length,
-                'Shipped': orders.filter(o => o.status === 'Shipped').length,
-                'Delivered': orders.filter(o => o.status === 'Delivered').length,
-                'Cancelled': orders.filter(o => o.status === 'Cancelled').length
-            };
-
-            const maxStatus = Math.max(...Object.values(statusCounts));
-            let statusHtml = '';
-            for (let [status, count] of Object.entries(statusCounts)) {
-                const height = count > 0 ? (count / maxStatus) * 180 : 0;
-                statusHtml += `
-                    <div style="flex: 1; text-align: center;">
-                        <div class="chart-bar" style="height: ${height}px;"></div>
-                        <div class="chart-label">${status}<br>(${count})</div>
-                    </div>
-                `;
-            }
-            document.getElementById('statusChart').innerHTML = statusHtml;
-
-            // Revenue by Month Chart
-            const monthlyRevenue = {};
-            orders.forEach(order => {
-                const month = new Date(order.date).toLocaleString('default', { month: 'short' });
-                monthlyRevenue[month] = (monthlyRevenue[month] || 0) + order.total;
-            });
-
-            const maxRevenue = Math.max(...Object.values(monthlyRevenue));
-            let revenueHtml = '';
-            for (let [month, revenue] of Object.entries(monthlyRevenue)) {
-                const height = (revenue / maxRevenue) * 180;
-                revenueHtml += `
-                    <div style="flex: 1; text-align: center;">
-                        <div class="chart-bar" style="height: ${height}px;"></div>
-                        <div class="chart-label">${month}<br>₹${revenue}</div>
-                    </div>
-                `;
-            }
-            document.getElementById('revenueChart').innerHTML = revenueHtml || '<div style="color: white;">No data</div>';
-
-            // Top Products Chart
-            const productSales = {};
-            orders.forEach(order => {
-                order.items.forEach(item => {
-                    productSales[item.name] = (productSales[item.name] || 0) + item.quantity;
-                });
-            });
-
-            const sortedProducts = Object.entries(productSales).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            const maxSales = sortedProducts.length > 0 ? Math.max(...sortedProducts.map(([_, qty]) => qty)) : 1;
-            
-            let productsHtml = '';
-            sortedProducts.forEach(([name, qty]) => {
-                const height = (qty / maxSales) * 180;
-                productsHtml += `
-                    <div style="flex: 1; text-align: center;">
-                        <div class="chart-bar" style="height: ${height}px;"></div>
-                        <div class="chart-label">${name.substring(0, 10)}...<br>${qty} sold</div>
-                    </div>
-                `;
-            });
-            document.getElementById('topProductsChart').innerHTML = productsHtml || '<div style="color: white;">No data</div>';
-
-            // Category Distribution Chart
-            const categoryCounts = {};
-            products.forEach(product => {
-                categoryCounts[product.category] = (categoryCounts[product.category] || 0) + 1;
-            });
-
-            const maxCategory = Math.max(...Object.values(categoryCounts));
-            let categoryHtml = '';
-            for (let [category, count] of Object.entries(categoryCounts)) {
-                const height = (count / maxCategory) * 180;
-                categoryHtml += `
-                    <div style="flex: 1; text-align: center;">
-                        <div class="chart-bar" style="height: ${height}px;"></div>
-                        <div class="chart-label">${category}<br>${count}</div>
-                    </div>
-                `;
-            }
-            document.getElementById('categoryChart').innerHTML = categoryHtml || '<div style="color: white;">No data</div>';
-        }
-
-        window.uploadImages = function(index, files) {
-            if (!products[index]) return;
-            
-            if (!products[index].images) {
-                products[index].images = [];
-            }
-
-            let filesProcessed = 0;
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    products[index].images.push(e.target.result);
-                    filesProcessed++;
-                    
-                    if (filesProcessed === files.length) {
-                        saveToLocalStorage();
-                        renderProductsTable();
-                    }
-                };
-                reader.readAsDataURL(file);
-            });
-        };
-
-        window.moveUp = function(index) {
-            if (index > 0) {
-                [products[index - 1], products[index]] = [products[index], products[index - 1]];
-                saveToLocalStorage();
-                renderProductsTable();
-            }
-        };
-
-        window.moveDown = function(index) {
-            if (index < products.length - 1) {
-                [products[index], products[index + 1]] = [products[index + 1], products[index]];
-                saveToLocalStorage();
-                renderProductsTable();
-            }
-        };
-
-        window.deleteProduct = function(index) {
-            if (confirm('Delete this product?')) {
-                products.splice(index, 1);
-                saveToLocalStorage();
-                renderProductsTable();
-            }
-        };
-
+        // Product functions
         window.addNewProduct = function() {
-            const newId = 'SOL' + String(products.length + 101).padStart(3, '0');
-            products.push({
+            const newId = 'SOL' + Date.now().toString().slice(-6);
+            const product = {
                 id: newId,
                 name: 'New Product',
                 category: 'Necklace',
                 price: 999,
                 stock: 'In Stock',
                 images: []
-            });
-            saveToLocalStorage();
-            renderProductsTable();
+            };
+            
+            apiCall('saveProduct', { data: product })
+                .then(() => {
+                    loadProducts();
+                    loadDashboardStats();
+                    showNotification('Product added');
+                });
         };
 
-        window.resetToDefault = function() {
-            if (confirm('Reset to default products? All changes will be lost.')) {
-                products = [...DEFAULT_PRODUCTS];
-                saveToLocalStorage();
-                renderProductsTable();
+        window.updateProduct = function(productId, field, value) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                product[field] = value;
+                apiCall('saveProduct', { data: product })
+                    .then(() => showNotification('Product updated'));
             }
         };
 
-        window.exportProducts = function() {
-            const dataStr = JSON.stringify(products, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            const exportFileDefaultName = `products_${new Date().toISOString().slice(0,10)}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
+        window.deleteProduct = function(productId) {
+            if (confirm('Delete this product?')) {
+                apiCall('deleteProduct', { productId })
+                    .then(() => {
+                        loadProducts();
+                        loadDashboardStats();
+                        showNotification('Product deleted');
+                    });
+            }
         };
 
-        window.importProducts = function() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(e) {
-                const file = e.target.files[0];
+        // Image functions
+        window.uploadImages = function(index) {
+            document.getElementById(`fileInput_${index}`).click();
+        };
+
+        window.handleImageUpload = function(index, files) {
+            const product = products[index];
+            
+            Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    try {
-                        const imported = JSON.parse(e.target.result);
-                        if (Array.isArray(imported)) {
-                            products = imported;
-                            saveToLocalStorage();
-                            renderProductsTable();
-                            alert('Products imported successfully!');
+                    const base64Data = e.target.result;
+                    
+                    apiCall('uploadImage', {
+                        base64Data: base64Data,
+                        fileName: file.name
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            if (!product.images) product.images = [];
+                            product.images.push({
+                                id: data.fileId,
+                                url: data.url
+                            });
+                            
+                            return apiCall('saveProduct', { data: product });
                         }
-                    } catch (error) {
-                        alert('Invalid JSON file');
-                    }
+                    })
+                    .then(() => {
+                        loadProducts();
+                        showNotification('Image uploaded to Drive');
+                    });
                 };
-                reader.readAsText(file);
-            };
-            input.click();
+                reader.readAsDataURL(file);
+            });
         };
 
-        // Image modal functions
+        // Order functions
+        window.updateOrderStatus = function(orderId, status) {
+            apiCall('updateOrderStatus', { orderId, status })
+                .then(() => {
+                    loadOrders();
+                    loadDashboardStats();
+                    showNotification('Order status updated');
+                });
+        };
+
+        window.deleteOrder = function(orderId) {
+            if (confirm('Delete this order?')) {
+                apiCall('deleteOrder', { orderId })
+                    .then(() => {
+                        loadOrders();
+                        loadDashboardStats();
+                        showNotification('Order deleted');
+                    });
+            }
+        };
+
+        window.filterOrders = function() {
+            const status = document.getElementById('orderStatusFilter').value;
+            const search = document.getElementById('orderSearch').value.toLowerCase();
+            
+            const filtered = orders.filter(order => {
+                if (status !== 'all' && order.status !== status) return false;
+                if (search) {
+                    return order.id.toLowerCase().includes(search) ||
+                           order.customer.toLowerCase().includes(search) ||
+                           order.email.toLowerCase().includes(search);
+                }
+                return true;
+            });
+            
+            renderFilteredOrders(filtered);
+        };
+
+        function renderFilteredOrders(filteredOrders) {
+            const tbody = document.getElementById('ordersTableBody');
+            
+            if (filteredOrders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="loading">No matching orders</td></tr>';
+                return;
+            }
+
+            let html = '';
+            filteredOrders.slice().reverse().forEach(order => {
+                const date = new Date(order.date).toLocaleDateString();
+                const itemsList = order.items.map(item => `${item.name} x${item.quantity}`).join(', ');
+
+                html += `
+                    <tr>
+                        <td>${order.id}</td>
+                        <td>${date}</td>
+                        <td>${order.customer}<br><small>${order.email}</small></td>
+                        <td>${itemsList}</td>
+                        <td>₹${order.total}</td>
+                        <td><span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></td>
+                        <td>
+                            <button class="action-btn delete" onclick="deleteOrder('${order.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'products') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('productsTab').classList.add('active');
+            } else if (tab === 'orders') {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('ordersTab').classList.add('active');
+            } else if (tab === 'analytics') {
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                document.getElementById('analyticsTab').classList.add('active');
+                loadDashboardStats();
+            }
+        };
+
+        window.refreshData = function() {
+            loadProducts();
+            loadOrders();
+            loadDashboardStats();
+            showNotification('Data refreshed');
+        };
+
         window.openImageModal = function(imgSrc) {
             document.getElementById('modalImage').src = imgSrc;
             document.getElementById('imageModal').classList.add('show');
@@ -1709,57 +1152,8 @@
             const status = document.getElementById('saveStatus');
             status.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
             status.style.display = 'flex';
-            setTimeout(() => {
-                status.style.display = 'none';
-            }, 2000);
+            setTimeout(() => status.style.display = 'none', 2000);
         }
-
-        // Listen for storage events
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'sol_orders') {
-                orders = JSON.parse(e.newValue) || [];
-                filteredOrders = [...orders];
-                renderOrdersTable();
-                updateStats();
-                if (document.getElementById('analyticsTab').classList.contains('active')) {
-                    renderAnalytics();
-                }
-            }
-            if (e.key === 'sol_products') {
-                products = JSON.parse(e.newValue) || [];
-                renderProductsTable();
-                updateStats();
-            }
-        });
-
-        // Initialize
-        loadProducts();
-        loadOrders();
-        updateStats();
-
-        // Refresh every 2 seconds
-        setInterval(() => {
-            const savedOrders = localStorage.getItem('sol_orders');
-            if (savedOrders) {
-                const newOrders = JSON.parse(savedOrders);
-                if (JSON.stringify(orders) !== JSON.stringify(newOrders)) {
-                    orders = newOrders;
-                    filteredOrders = [...orders];
-                    renderOrdersTable();
-                    updateStats();
-                }
-            }
-            
-            const savedProducts = localStorage.getItem('sol_products');
-            if (savedProducts) {
-                const newProducts = JSON.parse(savedProducts);
-                if (JSON.stringify(products) !== JSON.stringify(newProducts)) {
-                    products = newProducts;
-                    renderProductsTable();
-                    updateStats();
-                }
-            }
-        }, 2000);
     </script>
 </body>
 </html>
