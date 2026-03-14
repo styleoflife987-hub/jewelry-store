@@ -19,11 +19,9 @@
             --gold-light: #E5C87B;
             --gold-dark: #8B6F2C;
             --rose: #D4A5A5;
-            --rose-dark: #B88A8A;
             --cream: #FFF9F0;
             --ivory: #FFFFF0;
             --charcoal: #2C2C2C;
-            --champagne: #F7E7CE;
             --onyx: #353935;
             --ruby: #E0115F;
         }
@@ -32,21 +30,18 @@
             font-family: 'Montserrat', sans-serif;
             background: linear-gradient(135deg, var(--ivory) 0%, var(--cream) 100%);
             color: var(--charcoal);
-            overflow-x: hidden;
         }
 
-        /* Header */
         .header {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             z-index: 1000;
-            transition: 0.4s;
-            padding: 20px 0;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 20px 0;
         }
 
         .nav-container {
@@ -82,17 +77,9 @@
         .logo-text h1 {
             font-family: 'Cormorant Garamond', serif;
             font-size: 2.2rem;
-            font-weight: 700;
             background: linear-gradient(45deg, var(--gold-dark), var(--gold), var(--rose));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-
-        .logo-text p {
-            font-size: 0.9rem;
-            letter-spacing: 3px;
-            color: var(--rose);
-            text-transform: uppercase;
         }
 
         .nav-links {
@@ -146,16 +133,10 @@
             border: 3px solid white;
         }
 
-        /* Hero Slider */
-        .hero-slider {
+        .hero {
             height: 100vh;
-            position: relative;
-            overflow: hidden;
             margin-top: 110px;
-        }
-
-        .swiper-slide {
-            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -163,140 +144,19 @@
             color: white;
         }
 
-        .slide-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-            z-index: -2;
-            transition: transform 6s ease;
-        }
-
-        .swiper-slide-active .slide-bg {
-            transform: scale(1.1);
-        }
-
-        .slide-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(197, 160, 40, 0.3));
-            z-index: -1;
-        }
-
-        .slide-content {
-            max-width: 1000px;
+        .hero-content {
+            max-width: 800px;
             padding: 0 20px;
-            animation: fadeInUp 1.5s ease;
         }
 
-        .slide-subtitle {
-            font-size: 1.2rem;
-            letter-spacing: 5px;
-            margin-bottom: 20px;
-            color: var(--gold-light);
-            text-transform: uppercase;
-        }
-
-        .slide-title {
+        .hero h1 {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 6rem;
-            font-weight: 700;
-            margin-bottom: 30px;
-            line-height: 1.1;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 4rem;
+            margin-bottom: 20px;
         }
 
-        .slide-title span {
-            color: var(--gold);
-        }
-
-        .slide-description {
-            font-size: 1.2rem;
-            margin-bottom: 40px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.8;
-        }
-
-        .btn {
-            padding: 18px 45px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--gold), var(--rose));
-            color: white;
-            box-shadow: 0 10px 30px rgba(197, 160, 40, 0.4);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 40px rgba(197, 160, 40, 0.5);
-        }
-
-        .swiper-button-prev, .swiper-button-next {
-            color: var(--gold) !important;
-            background: rgba(255,255,255,0.2);
-            width: 50px !important;
-            height: 50px !important;
-            border-radius: 50%;
-            backdrop-filter: blur(5px);
-        }
-
-        .swiper-button-prev:after, .swiper-button-next:after {
-            font-size: 20px !important;
-        }
-
-        .swiper-pagination-bullet {
-            background: white !important;
-            opacity: 0.5 !important;
-        }
-
-        .swiper-pagination-bullet-active {
-            background: var(--gold) !important;
-            opacity: 1 !important;
-        }
-
-        .hero-scroll {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: bounce 2s infinite;
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        .hero-scroll i {
-            font-size: 2rem;
-            color: white;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(5px);
-            padding: 15px;
-            border-radius: 50%;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateX(-50%) translateY(0); }
-            50% { transform: translateX(-50%) translateY(-10px); }
-        }
-
-        /* Products Section */
         .products-section {
             padding: 100px 40px;
-            background: linear-gradient(135deg, var(--cream), white);
         }
 
         .products-container {
@@ -309,19 +169,10 @@
             margin-bottom: 60px;
         }
 
-        .section-subtitle {
-            color: var(--gold);
-            font-size: 1rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .section-title {
+        .section-header h2 {
             font-family: 'Cormorant Garamond', serif;
             font-size: 3rem;
             color: var(--charcoal);
-            margin-bottom: 20px;
         }
 
         .filters-wrapper {
@@ -376,12 +227,6 @@
             border: 2px solid rgba(197, 160, 40, 0.2);
             border-radius: 50px;
             font-size: 1rem;
-            background: white;
-        }
-
-        .search-wrapper input:focus {
-            outline: none;
-            border-color: var(--gold);
         }
 
         .products-grid {
@@ -412,11 +257,9 @@
             padding: 8px 20px;
             border-radius: 40px;
             font-weight: 600;
-            font-size: 0.9rem;
             z-index: 10;
         }
 
-        /* Product Image Carousel */
         .product-img-wrapper {
             position: relative;
             height: 350px;
@@ -454,21 +297,12 @@
             height: 30px !important;
             background: rgba(255,255,255,0.3);
             border-radius: 50%;
-            backdrop-filter: blur(5px);
         }
 
         .product-swiper .swiper-button-prev:after,
         .product-swiper .swiper-button-next:after {
             font-size: 12px !important;
             color: white;
-        }
-
-        .product-swiper .swiper-button-prev {
-            left: 5px;
-        }
-
-        .product-swiper .swiper-button-next {
-            right: 5px;
         }
 
         .no-image-placeholder {
@@ -478,18 +312,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-            gap: 10px;
         }
 
         .no-image-placeholder i {
             font-size: 4rem;
             color: var(--gold);
-        }
-
-        .no-image-placeholder span {
-            color: var(--charcoal);
-            font-size: 0.9rem;
         }
 
         .product-info {
@@ -527,17 +354,17 @@
         }
 
         .stock-instock {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            background: #d4edda;
             color: #155724;
         }
 
         .stock-limited {
-            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            background: #fff3cd;
             color: #856404;
         }
 
         .stock-out {
-            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            background: #f8d7da;
             color: #721c24;
         }
 
@@ -556,15 +383,10 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
         }
 
         .add-to-cart-btn:hover:not(:disabled) {
             background: linear-gradient(135deg, var(--gold), var(--rose));
-            transform: translateY(-2px);
         }
 
         .add-to-cart-btn:disabled {
@@ -602,9 +424,6 @@
             max-width: 1000px;
             z-index: 2002;
             transition: 0.3s;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
-            max-height: 90vh;
-            overflow-y: auto;
         }
 
         .quick-view-modal.show {
@@ -618,7 +437,7 @@
         }
 
         .quick-view-images {
-            height: 500px;
+            height: 400px;
             border-radius: 20px;
             overflow: hidden;
         }
@@ -628,38 +447,10 @@
             height: 100%;
         }
 
-        .quick-view-images .swiper-slide {
-            width: 100%;
-            height: 100%;
-        }
-
         .quick-view-images .swiper-slide img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-
-        .quick-view-details {
-            padding: 20px;
-        }
-
-        .quick-view-details h2 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-        }
-
-        .quick-view-details .price {
-            font-size: 2.5rem;
-            color: var(--gold);
-            font-weight: 700;
-            margin: 20px 0;
-        }
-
-        .quick-view-details .description {
-            color: #666;
-            line-height: 1.8;
-            margin-bottom: 30px;
         }
 
         .close-quick-view {
@@ -671,11 +462,6 @@
             font-size: 2rem;
             cursor: pointer;
             color: #999;
-            z-index: 10;
-        }
-
-        .close-quick-view:hover {
-            color: var(--ruby);
         }
 
         /* Cart Sidebar */
@@ -701,13 +487,6 @@
             background: linear-gradient(135deg, var(--gold), var(--rose));
             color: white;
             padding: 30px;
-        }
-
-        .cart-header h3 {
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
         }
 
         .close-cart {
@@ -737,61 +516,10 @@
         }
 
         .cart-item-img {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 15px;
             object-fit: cover;
-        }
-
-        .cart-item-details {
-            flex: 1;
-        }
-
-        .cart-item-name {
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .cart-item-price {
-            color: var(--gold);
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .cart-controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .cart-controls button {
-            width: 35px;
-            height: 35px;
-            border: none;
-            background: white;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 600;
-        }
-
-        .cart-controls button:hover {
-            background: var(--gold);
-            color: white;
-        }
-
-        .cart-controls span {
-            font-weight: 600;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .remove-item {
-            color: var(--ruby);
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
         }
 
         .cart-footer {
@@ -819,17 +547,9 @@
             border: none;
             border-radius: 15px;
             font-weight: 600;
-            font-size: 1.2rem;
             cursor: pointer;
-            transition: 0.3s;
         }
 
-        .checkout-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 40px rgba(197, 160, 40, 0.4);
-        }
-
-        /* Overlay */
         .overlay {
             position: fixed;
             top: 0;
@@ -848,7 +568,6 @@
             visibility: visible;
         }
 
-        /* Notification */
         .notification {
             position: fixed;
             bottom: 30px;
@@ -857,116 +576,15 @@
             color: white;
             padding: 20px 40px;
             border-radius: 60px;
-            box-shadow: 0 20px 40px rgba(197, 160, 40, 0.3);
             transform: translateX(500px);
             transition: 0.3s;
             z-index: 2001;
-            display: flex;
-            align-items: center;
-            gap: 15px;
         }
 
         .notification.show {
             transform: translateX(0);
         }
 
-        /* Checkout Modal */
-        .checkout-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: white;
-            border-radius: 40px;
-            padding: 50px;
-            width: 90%;
-            max-width: 600px;
-            z-index: 2002;
-            transition: 0.3s;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .checkout-modal.show {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .checkout-modal h2 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--charcoal);
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #eee;
-            border-radius: 15px;
-            font-size: 1rem;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--gold);
-        }
-
-        .payment-methods {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin: 20px 0;
-        }
-
-        .payment-method {
-            padding: 20px;
-            border: 2px solid #eee;
-            border-radius: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .payment-method:hover,
-        .payment-method.selected {
-            border-color: var(--gold);
-            background: linear-gradient(135deg, #fff9f0, #fff);
-        }
-
-        .payment-method i {
-            font-size: 2rem;
-            color: var(--gold);
-            margin-bottom: 10px;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 2rem;
-            cursor: pointer;
-            color: #999;
-        }
-
-        .close-modal:hover {
-            color: var(--ruby);
-        }
-
-        /* Admin Link */
         .admin-link {
             position: fixed;
             bottom: 30px;
@@ -979,64 +597,16 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             z-index: 1000;
-            transition: 0.3s;
         }
 
-        .admin-link:hover {
-            background: var(--gold);
-            transform: translateY(-3px);
-        }
-
-        /* Footer */
         .footer {
             background: var(--charcoal);
             color: white;
-            padding: 80px 40px 30px;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 50px;
-        }
-
-        .footer-section h4 {
-            color: var(--gold);
-            margin-bottom: 25px;
-        }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
-        .footer-section ul li {
-            margin-bottom: 15px;
-        }
-
-        .footer-section ul li a {
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .footer-section ul li a:hover {
-            color: var(--gold);
-            padding-left: 10px;
-        }
-
-        .copyright {
+            padding: 60px 40px 30px;
             text-align: center;
-            padding-top: 50px;
-            margin-top: 50px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.7);
         }
 
-        /* Loading */
         .loading {
             text-align: center;
             padding: 100px;
@@ -1059,28 +629,20 @@
         }
 
         @media (max-width: 768px) {
-            .slide-title {
-                font-size: 3rem;
-            }
-            .cart-sidebar {
-                width: 100%;
-            }
             .quick-view-content {
                 grid-template-columns: 1fr;
             }
-            .quick-view-images {
-                height: 300px;
+            .cart-sidebar {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Admin Link -->
     <a href="admin.html" class="admin-link" target="_blank">
         <i class="fas fa-lock"></i> Admin Portal
     </a>
 
-    <!-- Header -->
     <header class="header">
         <div class="nav-container">
             <div class="logo">
@@ -1089,13 +651,11 @@
                 </div>
                 <div class="logo-text">
                     <h1>Style Of Life</h1>
-                    <p>LUXURY REDEFINED</p>
                 </div>
             </div>
             <div class="nav-links">
                 <a href="#home">Home</a>
                 <a href="#products">Collection</a>
-                <a href="#contact">Contact</a>
                 <div class="cart-icon" onclick="toggleCart()">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cartCount">0</span>
@@ -1104,30 +664,19 @@
         </div>
     </header>
 
-    <!-- Hero Slider -->
-    <div class="hero-slider" id="home">
-        <div class="swiper heroSwiper">
-            <div class="swiper-wrapper" id="heroSlides">
-                <!-- Slides will be populated from admin -->
-            </div>
-            <div class="swiper-pagination"></div>
-            <div class="swiper-button-prev"></div>
-            <div class="swiper-button-next"></div>
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Timeless Beauty, Modern Elegance</h1>
+            <p>Discover our exquisite collection of handcrafted luxury imitation jewelry</p>
         </div>
-        <div class="hero-scroll" onclick="scrollToProducts()">
-            <i class="fas fa-chevron-down"></i>
-        </div>
-    </div>
+    </section>
 
-    <!-- Products Section -->
     <section class="products-section" id="products">
         <div class="products-container">
             <div class="section-header">
-                <div class="section-subtitle">Exclusive</div>
-                <h2 class="section-title">Our Collection</h2>
+                <h2>Our Collection</h2>
             </div>
 
-            <!-- Filters -->
             <div class="filters-wrapper">
                 <div class="filter-group" id="filterButtons">
                     <button class="filter-btn active" onclick="filterProducts('all')">All</button>
@@ -1138,7 +687,6 @@
                 </div>
             </div>
 
-            <!-- Products Grid -->
             <div class="products-grid" id="productsGrid">
                 <div class="loading">
                     <div class="loader"></div>
@@ -1148,46 +696,19 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer" id="contact">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>Style Of Life</h4>
-                <p style="line-height: 1.8;">Redefining luxury with exquisite imitation jewelry that speaks to your soul.</p>
-            </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#products">Collection</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>Contact Info</h4>
-                <ul>
-                    <li><i class="fas fa-map-marker-alt"></i> Mumbai, India</li>
-                    <li><i class="fas fa-phone"></i> +91 98765 43210</li>
-                    <li><i class="fas fa-envelope"></i> hello@styleoflife.com</li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            <p>&copy; 2024 Style Of Life. All rights reserved.</p>
-        </div>
+    <footer class="footer">
+        <p>&copy; 2024 Style Of Life. All rights reserved.</p>
     </footer>
 
-    <!-- Cart Sidebar -->
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
-            <h3><i class="fas fa-shopping-cart"></i> Your Cart</h3>
+            <h3>Your Cart</h3>
             <button class="close-cart" onclick="toggleCart()"><i class="fas fa-times"></i></button>
         </div>
         <div class="cart-items" id="cartItems">
-            <div class="empty-state" style="text-align: center; padding: 60px 20px;">
-                <i class="fas fa-shopping-bag" style="font-size: 4rem; color: var(--gold); margin-bottom: 20px;"></i>
+            <div style="text-align: center; padding: 60px 20px;">
+                <i class="fas fa-shopping-bag" style="font-size: 4rem; color: var(--gold);"></i>
                 <h3>Your cart is empty</h3>
-                <p>Add some beautiful jewelry to get started!</p>
             </div>
         </div>
         <div class="cart-footer">
@@ -1196,246 +717,57 @@
                 <span id="cartTotal">₹0</span>
             </div>
             <button class="checkout-btn" onclick="openCheckout()">
-                <i class="fas fa-lock"></i> Secure Checkout
+                Secure Checkout
             </button>
         </div>
     </div>
 
-    <!-- Overlay -->
     <div class="overlay" id="overlay" onclick="toggleCart()"></div>
 
-    <!-- Notification -->
     <div class="notification" id="notification">
-        <i class="fas fa-check-circle"></i>
         <span id="notificationMessage">Item added to cart!</span>
     </div>
 
-    <!-- Quick View Modal -->
     <div class="quick-view-modal" id="quickViewModal">
         <button class="close-quick-view" onclick="closeQuickView()"><i class="fas fa-times"></i></button>
         <div class="quick-view-content" id="quickViewContent"></div>
     </div>
 
-    <!-- Checkout Modal -->
-    <div class="checkout-modal" id="checkoutModal">
-        <button class="close-modal" onclick="closeCheckout()"><i class="fas fa-times"></i></button>
-        <h2>Complete Your Order</h2>
-        <div class="form-group">
-            <label>Full Name</label>
-            <input type="text" id="checkoutName" placeholder="Enter your full name">
-        </div>
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="checkoutEmail" placeholder="Enter your email">
-        </div>
-        <div class="form-group">
-            <label>Phone</label>
-            <input type="tel" id="checkoutPhone" placeholder="Enter your phone number">
-        </div>
-        <div class="form-group">
-            <label>Address</label>
-            <input type="text" id="checkoutAddress" placeholder="Enter delivery address">
-        </div>
-        
-        <h3 style="margin-top: 20px;">Payment Method</h3>
-        <div class="payment-methods">
-            <div class="payment-method selected" onclick="selectPayment('cod')" id="paymentCOD">
-                <i class="fas fa-money-bill-wave"></i>
-                <p>Cash on Delivery</p>
-            </div>
-            <div class="payment-method" onclick="selectPayment('card')" id="paymentCard">
-                <i class="fas fa-credit-card"></i>
-                <p>Card Payment</p>
-            </div>
-            <div class="payment-method" onclick="selectPayment('upi')" id="paymentUPI">
-                <i class="fas fa-mobile-alt"></i>
-                <p>UPI</p>
-            </div>
-        </div>
-        
-        <button class="checkout-btn" onclick="placeOrder()" style="margin-top: 20px;">
-            <i class="fas fa-check"></i> Place Order
-        </button>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        // Initialize data
         let products = [];
         let cart = JSON.parse(localStorage.getItem('sol_cart')) || [];
         let currentFilter = 'all';
         let searchQuery = '';
-        let selectedPayment = 'cod';
-        let heroSwiper = null;
         let productSwipers = {};
 
-        // Default hero slides
-        const DEFAULT_SLIDES = [
-            {
-                id: 'slide1',
-                image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-                title: 'Timeless Beauty',
-                subtitle: 'Elegance In Every Detail',
-                description: 'Discover our exquisite collection of handcrafted luxury imitation jewelry'
-            },
-            {
-                id: 'slide2',
-                image: 'https://images.unsplash.com/photo-1512152272829-e3139592d56f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-                title: 'Modern Elegance',
-                subtitle: 'Contemporary Design',
-                description: 'Where traditional craftsmanship meets modern aesthetics'
-            },
-            {
-                id: 'slide3',
-                image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-                title: 'Luxury Redefined',
-                subtitle: 'Exclusive Collection',
-                description: 'Each piece tells a unique story of elegance and sophistication'
-            }
-        ];
-
-        // Default products with multiple images
-        const DEFAULT_PRODUCTS = [
-            { 
-                id: 'SOL001', 
-                name: 'Golden Peacock Choker', 
-                category: 'Necklace', 
-                price: 1850, 
-                stock: 'In Stock', 
-                images: [
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Exquisite gold-plated choker with peacock design, featuring intricate detailing and traditional craftsmanship.'
-            },
-            { 
-                id: 'SOL002', 
-                name: 'Oxidized Jhumka Earrings', 
-                category: 'Earrings', 
-                price: 1299, 
-                stock: 'In Stock', 
-                images: [
-                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Traditional oxidized silver jhumkas with bell-shaped design, perfect for festive occasions.'
-            },
-            { 
-                id: 'SOL003', 
-                name: 'Polki Bangle Set', 
-                category: 'Bangles', 
-                price: 2400, 
-                stock: 'Limited', 
-                images: [
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Set of 4 Polki bangles with uncut diamond look, gold-plated finish.'
-            },
-            { 
-                id: 'SOL004', 
-                name: 'Kundan Maang Tikka', 
-                category: 'Headpiece', 
-                price: 990, 
-                stock: 'In Stock', 
-                images: [
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Traditional Kundan maang tikka with pearl drops, perfect for bridal wear.'
-            },
-            { 
-                id: 'SOL005', 
-                name: 'Pearl Gold Bracelet', 
-                category: 'Bracelet', 
-                price: 750, 
-                stock: 'In Stock', 
-                images: [
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Elegant gold-plated bracelet with freshwater pearl accents.'
-            }
-        ];
-
-        // Load hero slides
-        function loadHeroSlides() {
-            const saved = localStorage.getItem('sol_hero_slides');
-            let slides = saved ? JSON.parse(saved) : DEFAULT_SLIDES;
-            
-            if (!saved) {
-                localStorage.setItem('sol_hero_slides', JSON.stringify(DEFAULT_SLIDES));
-            }
-            
-            renderHeroSlides(slides);
-        }
-
-        // Render hero slides
-        function renderHeroSlides(slides) {
-            const container = document.getElementById('heroSlides');
-            
-            let html = '';
-            slides.forEach((slide, index) => {
-                html += `
-                    <div class="swiper-slide">
-                        <div class="slide-bg" style="background-image: url('${slide.image}');"></div>
-                        <div class="slide-overlay"></div>
-                        <div class="slide-content">
-                            <div class="slide-subtitle">${slide.subtitle}</div>
-                            <h1 class="slide-title">${slide.title}</h1>
-                            <p class="slide-description">${slide.description}</p>
-                            <button class="btn btn-primary" onclick="scrollToProducts()">
-                                <i class="fas fa-shopping-bag"></i> Shop Now
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-            
-            // Initialize or update Swiper
-            if (heroSwiper) {
-                heroSwiper.update();
-            } else {
-                heroSwiper = new Swiper('.heroSwiper', {
-                    loop: true,
-                    autoplay: {
-                        delay: 5000,
-                        disableOnInteraction: false,
-                    },
-                    pagination: {
-                        el: '.swiper-pagination',
-                        clickable: true,
-                    },
-                    navigation: {
-                        nextEl: '.swiper-button-next',
-                        prevEl: '.swiper-button-prev',
-                    },
-                    effect: 'fade',
-                    fadeEffect: {
-                        crossFade: true
-                    },
-                });
-            }
-        }
-
-        // Load products from localStorage or use defaults
+        // Load products
         function loadProducts() {
             const saved = localStorage.getItem('sol_products');
             if (saved) {
                 products = JSON.parse(saved);
             } else {
-                products = DEFAULT_PRODUCTS;
+                // Default products if none in localStorage
+                products = [
+                    { 
+                        id: 'SOL001', 
+                        name: 'Golden Peacock Choker', 
+                        category: 'Necklace', 
+                        price: 1850, 
+                        stock: 'In Stock', 
+                        images: [
+                            'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                            'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                        ],
+                        description: 'Exquisite gold-plated choker.'
+                    }
+                ];
                 localStorage.setItem('sol_products', JSON.stringify(products));
             }
             renderFilterButtons();
             renderProducts();
         }
 
-        // Render filter buttons
         function renderFilterButtons() {
             const categories = [...new Set(products.map(p => p.category))];
             const filterDiv = document.getElementById('filterButtons');
@@ -1447,27 +779,18 @@
             filterDiv.innerHTML = html;
         }
 
-        // Filter products
         window.filterProducts = function(category) {
             currentFilter = category;
-            
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.textContent === category || (category === 'all' && btn.textContent === 'All')) {
-                    btn.classList.add('active');
-                }
-            });
-            
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
             renderProducts();
         };
 
-        // Search products
         window.searchProducts = function() {
             searchQuery = document.getElementById('searchInput').value;
             renderProducts();
         };
 
-        // Render products with image carousels
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
             
@@ -1485,22 +808,14 @@
             }
 
             if (filtered.length === 0) {
-                grid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 80px;">
-                        <i class="fas fa-gem" style="font-size: 5rem; color: var(--gold); margin-bottom: 20px;"></i>
-                        <h3>No products found</h3>
-                    </div>
-                `;
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 80px;">No products found</div>';
                 return;
             }
 
             let html = '';
             filtered.forEach((p, index) => {
-                let stockClass = 'stock-instock';
-                if (p.stock === 'Limited') stockClass = 'stock-limited';
-                if (p.stock === 'Out of Stock') stockClass = 'stock-out';
+                let stockClass = p.stock === 'In Stock' ? 'stock-instock' : p.stock === 'Limited' ? 'stock-limited' : 'stock-out';
 
-                // Generate image carousel slides
                 let imageSlides = '';
                 if (p.images && p.images.length > 0) {
                     p.images.forEach(img => {
@@ -1511,14 +826,12 @@
                         <div class="swiper-slide">
                             <div class="no-image-placeholder">
                                 <i class="fas fa-gem"></i>
-                                <span>No Image</span>
                             </div>
                         </div>
                     `;
                 }
 
-                // Create a unique ID for this product's swiper
-                const swiperId = `product-swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}-${index}`;
+                const swiperId = `swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}-${index}`;
 
                 html += `
                     <div class="product-card">
@@ -1540,15 +853,14 @@
                             <div class="product-name">${p.name}</div>
                             <div class="product-price">₹${p.price}</div>
                             <div class="product-stock ${stockClass}">
-                                <i class="fas ${p.stock === 'In Stock' ? 'fa-check-circle' : p.stock === 'Limited' ? 'fa-exclamation-circle' : 'fa-times-circle'}"></i>
                                 ${p.stock}
                             </div>
                             <div class="product-actions">
                                 <button class="add-to-cart-btn" onclick="addToCart('${p.id}')" ${p.stock === 'Out of Stock' ? 'disabled' : ''}>
-                                    <i class="fas fa-shopping-cart"></i> Add
+                                    Add to Cart
                                 </button>
                                 <button class="quick-view-btn" onclick="quickView('${p.id}')">
-                                    <i class="fas fa-eye"></i> Quick View
+                                    Quick View
                                 </button>
                             </div>
                         </div>
@@ -1558,47 +870,32 @@
             
             grid.innerHTML = html;
 
-            // Initialize product swipers after they're added to DOM
+            // Initialize swipers
             setTimeout(() => {
                 filtered.forEach((p, idx) => {
-                    const swiperClass = `.product-swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}-${idx}`;
+                    const swiperClass = `.swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}-${idx}`;
                     const swiperEl = document.querySelector(swiperClass);
-                    if (swiperEl) {
-                        // Destroy existing swiper if any
-                        if (productSwipers[p.id]) {
-                            try {
-                                productSwipers[p.id].destroy(true, true);
-                            } catch (e) {
-                                console.log('Swiper destroy error:', e);
-                            }
-                        }
-                        
-                        // Create new swiper
-                        try {
-                            productSwipers[p.id] = new Swiper(swiperEl, {
-                                loop: p.images && p.images.length > 1,
-                                pagination: {
-                                    el: swiperEl.querySelector('.swiper-pagination'),
-                                    clickable: true,
-                                },
-                                navigation: p.images && p.images.length > 1 ? {
-                                    nextEl: swiperEl.querySelector('.swiper-button-next'),
-                                    prevEl: swiperEl.querySelector('.swiper-button-prev'),
-                                } : false,
-                                autoplay: p.images && p.images.length > 1 ? {
-                                    delay: 3000,
-                                    disableOnInteraction: false,
-                                } : false,
-                            });
-                        } catch (e) {
-                            console.log('Swiper init error:', e);
-                        }
+                    if (swiperEl && !productSwipers[p.id]) {
+                        productSwipers[p.id] = new Swiper(swiperEl, {
+                            loop: p.images && p.images.length > 1,
+                            pagination: {
+                                el: swiperEl.querySelector('.swiper-pagination'),
+                                clickable: true,
+                            },
+                            navigation: p.images && p.images.length > 1 ? {
+                                nextEl: swiperEl.querySelector('.swiper-button-next'),
+                                prevEl: swiperEl.querySelector('.swiper-button-prev'),
+                            } : false,
+                            autoplay: p.images && p.images.length > 1 ? {
+                                delay: 3000,
+                                disableOnInteraction: false,
+                            } : false,
+                        });
                     }
                 });
             }, 100);
         }
 
-        // Quick view
         window.quickView = function(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
@@ -1609,19 +906,12 @@
                     imageSlides += `<div class="swiper-slide"><img src="${img}" alt="${product.name}"></div>`;
                 });
             } else {
-                imageSlides = `
-                    <div class="swiper-slide">
-                        <div class="no-image-placeholder">
-                            <i class="fas fa-gem"></i>
-                            <span>No Image</span>
-                        </div>
-                    </div>
-                `;
+                imageSlides = '<div class="swiper-slide"><div class="no-image-placeholder"><i class="fas fa-gem"></i></div></div>';
             }
 
             const content = `
                 <div class="quick-view-images">
-                    <div class="swiper quick-view-swiper-${product.id}">
+                    <div class="swiper quick-view-swiper">
                         <div class="swiper-wrapper">
                             ${imageSlides}
                         </div>
@@ -1637,15 +927,12 @@
                     <p class="product-id">${product.id}</p>
                     <p class="price">₹${product.price}</p>
                     <p class="description">${product.description || 'No description available.'}</p>
-                    <div class="product-stock ${product.stock === 'In Stock' ? 'stock-instock' : product.stock === 'Limited' ? 'stock-limited' : 'stock-out'}">
-                        <i class="fas ${product.stock === 'In Stock' ? 'fa-check-circle' : product.stock === 'Limited' ? 'fa-exclamation-circle' : 'fa-times-circle'}"></i>
+                    <div class="product-stock ${product.stock === 'In Stock' ? 'stock-instock' : 'stock-limited'}">
                         ${product.stock}
                     </div>
-                    <div class="product-actions" style="margin-top: 30px;">
-                        <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" ${product.stock === 'Out of Stock' ? 'disabled' : ''}>
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" style="width: 100%; margin-top: 20px;">
+                        Add to Cart
+                    </button>
                 </div>
             `;
 
@@ -1653,27 +940,15 @@
             document.getElementById('quickViewModal').classList.add('show');
             document.getElementById('overlay').classList.add('show');
 
-            // Initialize quick view swiper
             setTimeout(() => {
-                try {
-                    new Swiper(`.quick-view-swiper-${product.id}`, {
-                        loop: product.images && product.images.length > 1,
-                        pagination: {
-                            el: '.quick-view-swiper .swiper-pagination',
-                            clickable: true,
-                        },
-                        navigation: product.images && product.images.length > 1 ? {
-                            nextEl: '.quick-view-swiper .swiper-button-next',
-                            prevEl: '.quick-view-swiper .swiper-button-prev',
-                        } : false,
-                        autoplay: product.images && product.images.length > 1 ? {
-                            delay: 3000,
-                            disableOnInteraction: false,
-                        } : false,
-                    });
-                } catch (e) {
-                    console.log('Quick view swiper error:', e);
-                }
+                new Swiper('.quick-view-swiper', {
+                    loop: product.images && product.images.length > 1,
+                    pagination: { el: '.quick-view-swiper .swiper-pagination', clickable: true },
+                    navigation: product.images && product.images.length > 1 ? {
+                        nextEl: '.quick-view-swiper .swiper-button-next',
+                        prevEl: '.quick-view-swiper .swiper-button-prev',
+                    } : false,
+                });
             }, 100);
         };
 
@@ -1684,12 +959,6 @@
             }
         };
 
-        // Scroll to products
-        window.scrollToProducts = function() {
-            document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        // Add to cart
         window.addToCart = function(productId) {
             const product = products.find(p => p.id === productId);
             if (!product || product.stock === 'Out of Stock') return;
@@ -1711,24 +980,16 @@
             localStorage.setItem('sol_cart', JSON.stringify(cart));
             updateCartCount();
             renderCart();
-            showNotification(`✨ ${product.name} added to cart!`);
-            
-            // Close quick view if open
+            showNotification(`${product.name} added to cart!`);
             closeQuickView();
         };
 
-        // Render cart
         function renderCart() {
             const cartDiv = document.getElementById('cartItems');
             const totalSpan = document.getElementById('cartTotal');
             
             if (cart.length === 0) {
-                cartDiv.innerHTML = `
-                    <div style="text-align: center; padding: 60px 20px;">
-                        <i class="fas fa-shopping-bag" style="font-size: 4rem; color: var(--gold); margin-bottom: 20px;"></i>
-                        <h3>Your cart is empty</h3>
-                    </div>
-                `;
+                cartDiv.innerHTML = '<div style="text-align: center; padding: 60px 20px;">Your cart is empty</div>';
                 totalSpan.textContent = '₹0';
                 return;
             }
@@ -1738,28 +999,14 @@
 
             cart.forEach((item, index) => {
                 total += item.price * item.quantity;
-                
-                const imgSrc = (item.images && item.images.length > 0) ? item.images[0] : '';
+                const imgSrc = item.images && item.images.length > 0 ? item.images[0] : '';
 
                 html += `
                     <div class="cart-item">
-                        ${imgSrc ? 
-                            `<img class="cart-item-img" src="${imgSrc}" alt="${item.name}">` : 
-                            `<div class="cart-item-img" style="background: linear-gradient(135deg, #f8f4f0, #e8e0d8); display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-gem" style="color: var(--gold);"></i>
-                            </div>`
-                        }
-                        <div class="cart-item-details">
-                            <div class="cart-item-name">${item.name}</div>
-                            <div class="cart-item-price">₹${item.price}</div>
-                            <div class="cart-controls">
-                                <button onclick="updateQuantity(${index}, -1)">−</button>
-                                <span>${item.quantity}</span>
-                                <button onclick="updateQuantity(${index}, 1)">+</button>
-                                <button class="remove-item" onclick="removeItem(${index})">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
+                        ${imgSrc ? `<img class="cart-item-img" src="${imgSrc}">` : '<div class="cart-item-img" style="background: #eee;"></div>'}
+                        <div>
+                            <div>${item.name}</div>
+                            <div>₹${item.price} x ${item.quantity}</div>
                         </div>
                     </div>
                 `;
@@ -1769,129 +1016,30 @@
             totalSpan.textContent = `₹${total}`;
         }
 
-        // Update quantity
-        window.updateQuantity = function(index, change) {
-            if (cart[index]) {
-                cart[index].quantity += change;
-                
-                if (cart[index].quantity <= 0) {
-                    cart.splice(index, 1);
-                }
-                
-                localStorage.setItem('sol_cart', JSON.stringify(cart));
-                updateCartCount();
-                renderCart();
-            }
-        };
-
-        // Remove item
-        window.removeItem = function(index) {
-            cart.splice(index, 1);
-            localStorage.setItem('sol_cart', JSON.stringify(cart));
-            updateCartCount();
-            renderCart();
-        };
-
-        // Update cart count
         function updateCartCount() {
             const count = cart.reduce((sum, item) => sum + item.quantity, 0);
             document.getElementById('cartCount').textContent = count;
         }
 
-        // Toggle cart
         window.toggleCart = function() {
             document.getElementById('cartSidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('show');
             closeQuickView();
         };
 
-        // Show notification
         function showNotification(message) {
             const notif = document.getElementById('notification');
             document.getElementById('notificationMessage').textContent = message;
             notif.classList.add('show');
-            setTimeout(() => {
-                notif.classList.remove('show');
-            }, 3000);
+            setTimeout(() => notif.classList.remove('show'), 2000);
         }
 
-        // Open checkout
         window.openCheckout = function() {
             if (cart.length === 0) {
                 showNotification('Your cart is empty!');
                 return;
             }
-            
-            document.getElementById('checkoutModal').classList.add('show');
-            document.getElementById('overlay').classList.add('show');
-            closeQuickView();
-        };
-
-        // Close checkout
-        window.closeCheckout = function() {
-            document.getElementById('checkoutModal').classList.remove('show');
-            if (!document.getElementById('cartSidebar').classList.contains('open')) {
-                document.getElementById('overlay').classList.remove('show');
-            }
-        };
-
-        // Select payment
-        window.selectPayment = function(method) {
-            selectedPayment = method;
-            
-            document.querySelectorAll('.payment-method').forEach(el => {
-                el.classList.remove('selected');
-            });
-            document.getElementById(`payment${method.toUpperCase()}`).classList.add('selected');
-        };
-
-        // Place order
-        window.placeOrder = function() {
-            const name = document.getElementById('checkoutName').value;
-            const email = document.getElementById('checkoutEmail').value;
-            const phone = document.getElementById('checkoutPhone').value;
-            const address = document.getElementById('checkoutAddress').value;
-
-            if (!name || !email || !phone || !address) {
-                showNotification('Please fill all fields!');
-                return;
-            }
-
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-            const order = {
-                id: 'ORD' + Date.now(),
-                customer: { name, email, phone, address },
-                items: [...cart],
-                total: total,
-                payment: selectedPayment,
-                date: new Date().toISOString(),
-                status: 'confirmed'
-            };
-
-            // Save order
-            const orders = JSON.parse(localStorage.getItem('sol_orders')) || [];
-            orders.push(order);
-            localStorage.setItem('sol_orders', JSON.stringify(orders));
-
-            // Clear cart
-            cart = [];
-            localStorage.setItem('sol_cart', JSON.stringify(cart));
-            updateCartCount();
-            renderCart();
-
-            // Close modals
-            closeCheckout();
-            toggleCart();
-
-            // Show success
-            showNotification(`✅ Order placed! Total: ₹${total}`);
-            
-            // Clear form
-            document.getElementById('checkoutName').value = '';
-            document.getElementById('checkoutEmail').value = '';
-            document.getElementById('checkoutPhone').value = '';
-            document.getElementById('checkoutAddress').value = '';
+            alert('Checkout functionality would go here!');
         };
 
         // Listen for updates from admin
@@ -1902,47 +1050,24 @@
                 renderProducts();
                 showNotification('✨ New collection available!');
             }
-            if (e.key === 'sol_hero_slides') {
-                const slides = JSON.parse(e.newValue);
-                renderHeroSlides(slides);
-                showNotification('🎨 Hero slider updated!');
-            }
         });
 
         // Check for updates every 2 seconds
         setInterval(() => {
-            // Check products
-            const updatedProducts = localStorage.getItem('sol_products');
-            if (updatedProducts) {
+            const updated = localStorage.getItem('sol_products');
+            if (updated) {
                 try {
-                    const newProducts = JSON.parse(updatedProducts);
+                    const newProducts = JSON.parse(updated);
                     if (JSON.stringify(products) !== JSON.stringify(newProducts)) {
                         products = newProducts;
                         renderFilterButtons();
                         renderProducts();
                     }
-                } catch (e) {
-                    console.log('Error parsing products:', e);
-                }
-            }
-            
-            // Check hero slides
-            const updatedSlides = localStorage.getItem('sol_hero_slides');
-            if (updatedSlides) {
-                try {
-                    const newSlides = JSON.parse(updatedSlides);
-                    const currentSlides = JSON.parse(localStorage.getItem('sol_hero_slides')) || DEFAULT_SLIDES;
-                    if (JSON.stringify(currentSlides) !== JSON.stringify(newSlides)) {
-                        renderHeroSlides(newSlides);
-                    }
-                } catch (e) {
-                    console.log('Error parsing slides:', e);
-                }
+                } catch (e) {}
             }
         }, 2000);
 
         // Initialize
-        loadHeroSlides();
         loadProducts();
         updateCartCount();
         renderCart();
