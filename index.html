@@ -225,6 +225,27 @@
             line-height: 1.8;
         }
 
+        .btn {
+            padding: 18px 45px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--rose));
+            color: white;
+            box-shadow: 0 10px 30px rgba(197, 160, 40, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(197, 160, 40, 0.5);
+        }
+
         .swiper-button-prev, .swiper-button-next {
             color: var(--gold) !important;
             background: rgba(255,255,255,0.2);
@@ -1496,11 +1517,14 @@
                     `;
                 }
 
+                // Create a unique ID for this product's swiper
+                const swiperId = `product-swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}-${index}`;
+
                 html += `
                     <div class="product-card">
                         <div class="product-badge">${p.category}</div>
                         <div class="product-img-wrapper">
-                            <div class="swiper product-swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}" data-product-id="${p.id}">
+                            <div class="swiper ${swiperId}">
                                 <div class="swiper-wrapper">
                                     ${imageSlides}
                                 </div>
@@ -1536,31 +1560,39 @@
 
             // Initialize product swipers after they're added to DOM
             setTimeout(() => {
-                filtered.forEach(p => {
-                    const swiperClass = `.product-swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}`;
+                filtered.forEach((p, idx) => {
+                    const swiperClass = `.product-swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}-${idx}`;
                     const swiperEl = document.querySelector(swiperClass);
                     if (swiperEl) {
                         // Destroy existing swiper if any
                         if (productSwipers[p.id]) {
-                            productSwipers[p.id].destroy(true, true);
+                            try {
+                                productSwipers[p.id].destroy(true, true);
+                            } catch (e) {
+                                console.log('Swiper destroy error:', e);
+                            }
                         }
                         
                         // Create new swiper
-                        productSwipers[p.id] = new Swiper(swiperEl, {
-                            loop: p.images && p.images.length > 1,
-                            pagination: {
-                                el: swiperEl.querySelector('.swiper-pagination'),
-                                clickable: true,
-                            },
-                            navigation: p.images && p.images.length > 1 ? {
-                                nextEl: swiperEl.querySelector('.swiper-button-next'),
-                                prevEl: swiperEl.querySelector('.swiper-button-prev'),
-                            } : false,
-                            autoplay: p.images && p.images.length > 1 ? {
-                                delay: 3000,
-                                disableOnInteraction: false,
-                            } : false,
-                        });
+                        try {
+                            productSwipers[p.id] = new Swiper(swiperEl, {
+                                loop: p.images && p.images.length > 1,
+                                pagination: {
+                                    el: swiperEl.querySelector('.swiper-pagination'),
+                                    clickable: true,
+                                },
+                                navigation: p.images && p.images.length > 1 ? {
+                                    nextEl: swiperEl.querySelector('.swiper-button-next'),
+                                    prevEl: swiperEl.querySelector('.swiper-button-prev'),
+                                } : false,
+                                autoplay: p.images && p.images.length > 1 ? {
+                                    delay: 3000,
+                                    disableOnInteraction: false,
+                                } : false,
+                            });
+                        } catch (e) {
+                            console.log('Swiper init error:', e);
+                        }
                     }
                 });
             }, 100);
@@ -1623,21 +1655,25 @@
 
             // Initialize quick view swiper
             setTimeout(() => {
-                new Swiper(`.quick-view-swiper-${product.id}`, {
-                    loop: product.images && product.images.length > 1,
-                    pagination: {
-                        el: '.quick-view-swiper .swiper-pagination',
-                        clickable: true,
-                    },
-                    navigation: product.images && product.images.length > 1 ? {
-                        nextEl: '.quick-view-swiper .swiper-button-next',
-                        prevEl: '.quick-view-swiper .swiper-button-prev',
-                    } : false,
-                    autoplay: product.images && product.images.length > 1 ? {
-                        delay: 3000,
-                        disableOnInteraction: false,
-                    } : false,
-                });
+                try {
+                    new Swiper(`.quick-view-swiper-${product.id}`, {
+                        loop: product.images && product.images.length > 1,
+                        pagination: {
+                            el: '.quick-view-swiper .swiper-pagination',
+                            clickable: true,
+                        },
+                        navigation: product.images && product.images.length > 1 ? {
+                            nextEl: '.quick-view-swiper .swiper-button-next',
+                            prevEl: '.quick-view-swiper .swiper-button-prev',
+                        } : false,
+                        autoplay: product.images && product.images.length > 1 ? {
+                            delay: 3000,
+                            disableOnInteraction: false,
+                        } : false,
+                    });
+                } catch (e) {
+                    console.log('Quick view swiper error:', e);
+                }
             }, 100);
         };
 
@@ -1876,18 +1912,32 @@
         // Check for updates every 2 seconds
         setInterval(() => {
             // Check products
-            const updatedProducts = JSON.parse(localStorage.getItem('sol_products'));
-            if (JSON.stringify(products) !== JSON.stringify(updatedProducts)) {
-                products = updatedProducts || [];
-                renderFilterButtons();
-                renderProducts();
+            const updatedProducts = localStorage.getItem('sol_products');
+            if (updatedProducts) {
+                try {
+                    const newProducts = JSON.parse(updatedProducts);
+                    if (JSON.stringify(products) !== JSON.stringify(newProducts)) {
+                        products = newProducts;
+                        renderFilterButtons();
+                        renderProducts();
+                    }
+                } catch (e) {
+                    console.log('Error parsing products:', e);
+                }
             }
             
             // Check hero slides
-            const updatedSlides = JSON.parse(localStorage.getItem('sol_hero_slides'));
-            const currentSlides = JSON.parse(localStorage.getItem('sol_hero_slides')) || DEFAULT_SLIDES;
-            if (updatedSlides && JSON.stringify(currentSlides) !== JSON.stringify(updatedSlides)) {
-                renderHeroSlides(updatedSlides);
+            const updatedSlides = localStorage.getItem('sol_hero_slides');
+            if (updatedSlides) {
+                try {
+                    const newSlides = JSON.parse(updatedSlides);
+                    const currentSlides = JSON.parse(localStorage.getItem('sol_hero_slides')) || DEFAULT_SLIDES;
+                    if (JSON.stringify(currentSlides) !== JSON.stringify(newSlides)) {
+                        renderHeroSlides(newSlides);
+                    }
+                } catch (e) {
+                    console.log('Error parsing slides:', e);
+                }
             }
         }, 2000);
 
