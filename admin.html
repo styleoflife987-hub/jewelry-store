@@ -274,7 +274,7 @@
         </div>
         <div class="connection-status">
             <div class="status-dot" id="statusDot"></div>
-            <span id="statusText">Connected</span>
+            <span id="statusText">Connecting...</span>
         </div>
     </header>
 
@@ -296,6 +296,7 @@
             <div class="admin-controls">
                 <button class="btn btn-success" onclick="addProduct()"><i class="fas fa-plus"></i> Add Product</button>
                 <button class="btn btn-info" onclick="loadProducts()"><i class="fas fa-sync"></i> Refresh</button>
+                <button class="btn btn-warning" onclick="runSetup()"><i class="fas fa-cog"></i> Run Setup</button>
             </div>
             <div class="table-wrapper">
                 <table>
@@ -324,67 +325,61 @@
     <script>
         // ==================== CONFIGURATION ====================
         // REPLACE WITH YOUR ACTUAL GOOGLE APPS SCRIPT URL
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzH2BKk8AXwqW58p186P5qmctSOvJC_eYPVzSlef65B5yIFqw1-iQVAoqA1zh3K049Kiw/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6_of-vLu6MN4QDTH2EDJWCLfDjT7kls04iyo7XvF6kn3sVyo2SXN2zdQfhT-xCbIJaA/exec';
         
         let products = [], orders = [];
 
-        // ==================== API CALL WITH JSONP (CORS FIX) ====================
-        function apiCall(action, data = {}) {
-            return new Promise((resolve) => {
-                // Create a unique callback name
-                const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                
-                // Create script element
-                const script = document.createElement('script');
-                
-                // Build URL with parameters
-                const params = new URLSearchParams({
-                    action: action,
-                    data: JSON.stringify(data),
-                    callback: callbackName
+        // ==================== SIMPLE API CALL ====================
+        async function apiCall(action, data = {}) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action, ...data })
                 });
                 
-                script.src = SCRIPT_URL + '?' + params.toString();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
-                // Define callback function
-                window[callbackName] = function(response) {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    
-                    if (response && response.error) {
-                        console.error('API Error:', response.error);
-                        document.getElementById('statusDot').classList.add('disconnected');
-                        document.getElementById('statusText').textContent = 'Disconnected';
-                        resolve(null);
-                    } else {
-                        document.getElementById('statusDot').classList.remove('disconnected');
-                        document.getElementById('statusText').textContent = 'Connected';
-                        resolve(response);
-                    }
-                };
+                const result = await response.json();
                 
-                // Handle errors
-                script.onerror = function() {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    document.getElementById('statusDot').classList.add('disconnected');
-                    document.getElementById('statusText').textContent = 'Disconnected';
-                    resolve(null);
-                };
+                // Update connection status
+                document.getElementById('statusDot').classList.remove('disconnected');
+                document.getElementById('statusText').textContent = 'Connected';
                 
-                // Add script to document
-                document.body.appendChild(script);
-            });
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                document.getElementById('statusDot').classList.add('disconnected');
+                document.getElementById('statusText').textContent = 'Disconnected';
+                return null;
+            }
+        }
+
+        // ==================== RUN SETUP ====================
+        async function runSetup() {
+            const result = await apiCall('setup');
+            if (result && result.success) {
+                alert('Setup completed successfully!');
+                loadStats();
+                loadProducts();
+            } else {
+                alert('Setup failed. Check console for errors.');
+            }
         }
 
         // ==================== LOAD FUNCTIONS ====================
         async function loadStats() {
             const data = await apiCall('getDashboardStats');
             if (data?.stats) {
-                document.getElementById('totalProducts').textContent = data.stats.totalProducts;
-                document.getElementById('totalCategories').textContent = data.stats.totalCategories;
-                document.getElementById('totalOrders').textContent = data.stats.totalOrders;
-                document.getElementById('totalRevenue').textContent = '₹' + data.stats.totalRevenue;
+                document.getElementById('totalProducts').textContent = data.stats.totalProducts || 0;
+                document.getElementById('totalCategories').textContent = data.stats.totalCategories || 0;
+                document.getElementById('totalOrders').textContent = data.stats.totalOrders || 0;
+                document.getElementById('totalRevenue').textContent = '₹' + (data.stats.totalRevenue || 0);
             }
         }
 
@@ -398,23 +393,25 @@
 
         function renderProducts() {
             const tbody = document.getElementById('productsTable');
+            if (!products.length) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No products yet. Click "Add Product" to create one.</td></tr>';
+                return;
+            }
+            
             let html = '';
             products.forEach((p, i) => {
                 let imagesHtml = '<div class="image-preview">';
                 if (p.images?.length) {
                     p.images.forEach(img => imagesHtml += `<img class="preview-img" src="${img.url}" onclick="openImageModal('${img.url}')">`);
                 }
-                imagesHtml += '</div><div class="upload-btn" onclick="uploadImage(${i})">📷 Add Images</div>';
+                imagesHtml += '</div>';
+                
                 html += `<tr>
-                    <td><input value="${p.id}" onchange="updateProduct('${p.id}', 'id', this.value)"></td>
-                    <td><input value="${p.name}" onchange="updateProduct('${p.id}', 'name', this.value)"></td>
-                    <td><input value="${p.category}" onchange="updateProduct('${p.id}', 'category', this.value)"></td>
-                    <td><input type="number" value="${p.price}" onchange="updateProduct('${p.id}', 'price', this.value)"></td>
-                    <td><select onchange="updateProduct('${p.id}', 'stock', this.value)">
-                        <option ${p.stock === 'In Stock' ? 'selected' : ''}>In Stock</option>
-                        <option ${p.stock === 'Limited' ? 'selected' : ''}>Limited</option>
-                        <option ${p.stock === 'Out of Stock' ? 'selected' : ''}>Out of Stock</option>
-                    </select></td>
+                    <td>${p.id}</td>
+                    <td>${p.name}</td>
+                    <td>${p.category}</td>
+                    <td>₹${p.price}</td>
+                    <td>${p.stock}</td>
                     <td>${imagesHtml}</td>
                     <td><button class="action-btn delete" onclick="deleteProduct('${p.id}')">🗑️</button></td>
                 </tr>`;
@@ -432,20 +429,20 @@
 
         function renderOrders() {
             const tbody = document.getElementById('ordersTable');
+            if (!orders.length) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No orders yet</td></tr>';
+                return;
+            }
+            
             let html = '';
             orders.slice().reverse().forEach(o => {
                 html += `<tr>
-                    <td>${o.id}</td><td>${new Date(o.date).toLocaleDateString()}</td>
+                    <td>${o.id}</td>
+                    <td>${new Date(o.date).toLocaleDateString()}</td>
                     <td>${o.customer}<br><small>${o.email}</small></td>
                     <td>${o.items.map(i => `${i.name} x${i.quantity}`).join(', ')}</td>
                     <td>₹${o.total}</td>
-                    <td><select onchange="updateOrderStatus('${o.id}', this.value)">
-                        <option ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                        <option ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
-                        <option ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                        <option ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                        <option ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                    </select></td>
+                    <td>${o.status}</td>
                     <td><button class="action-btn delete" onclick="deleteOrder('${o.id}')">🗑️</button></td>
                 </tr>`;
             });
@@ -454,76 +451,23 @@
 
         // ==================== PRODUCT ACTIONS ====================
         async function addProduct() {
-            const newId = 'SOL' + Date.now().toString().slice(-6);
-            await apiCall('saveProduct', { data: { 
-                id: newId, 
-                name: 'New Product', 
-                category: 'Necklace', 
-                price: 999, 
-                stock: 'In Stock', 
-                images: [] 
-            }});
-            loadProducts(); 
-            loadStats();
-        }
-
-        async function updateProduct(id, field, value) {
-            const p = products.find(x => x.id === id);
-            if (p) { 
-                p[field] = field === 'price' ? Number(value) : value;
-                await apiCall('saveProduct', { data: p });
-            }
+            // For now, just show an alert since we need full saveProduct implementation
+            alert('Add product functionality - You need to implement saveProduct in Apps Script first');
         }
 
         async function deleteProduct(id) {
-            if (confirm('Delete this product?')) { 
-                await apiCall('deleteProduct', { productId: id }); 
-                loadProducts(); 
-                loadStats(); 
+            if (confirm('Delete this product?')) {
+                alert('Delete functionality - You need to implement deleteProduct in Apps Script first');
             }
         }
 
-        // ==================== ORDER ACTIONS ====================
-        async function updateOrderStatus(id, status) {
-            await apiCall('updateOrderStatus', { orderId: id, status });
-            loadOrders(); 
-            loadStats();
-        }
-
         async function deleteOrder(id) {
-            if (confirm('Delete this order?')) { 
-                await apiCall('deleteOrder', { orderId: id }); 
-                loadOrders(); 
-                loadStats(); 
+            if (confirm('Delete this order?')) {
+                alert('Delete functionality - You need to implement deleteOrder in Apps Script first');
             }
         }
 
         // ==================== IMAGE FUNCTIONS ====================
-        function uploadImage(index) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const result = await apiCall('uploadImage', { 
-                        base64Data: e.target.result, 
-                        fileName: file.name 
-                    });
-                    if (result?.success) {
-                        const p = products[index];
-                        if (!p.images) p.images = [];
-                        p.images.push({ id: result.fileId, url: result.url });
-                        await apiCall('saveProduct', { data: p });
-                        loadProducts();
-                    }
-                };
-                reader.readAsDataURL(file);
-            };
-            input.click();
-        }
-
         function openImageModal(src) {
             document.getElementById('modalImage').src = src;
             document.getElementById('imageModal').classList.add('show');
@@ -545,6 +489,7 @@
             } else {
                 document.querySelectorAll('.tab-btn')[1].classList.add('active');
                 document.getElementById('ordersTab').classList.add('active');
+                loadOrders();
             }
         }
 
@@ -552,11 +497,9 @@
         window.onload = () => { 
             loadStats(); 
             loadProducts(); 
-            loadOrders(); 
             setInterval(() => { 
                 loadStats(); 
                 loadProducts(); 
-                loadOrders(); 
             }, 30000); 
         };
     </script>
