@@ -411,7 +411,6 @@
             color: white;
         }
 
-        /* Quick View Modal */
         .quick-view-modal {
             position: fixed;
             top: 50%;
@@ -464,7 +463,6 @@
             color: #999;
         }
 
-        /* Cart Sidebar */
         .cart-sidebar {
             position: fixed;
             right: -500px;
@@ -741,13 +739,11 @@
         let searchQuery = '';
         let productSwipers = {};
 
-        // Load products
         function loadProducts() {
             const saved = localStorage.getItem('sol_products');
             if (saved) {
                 products = JSON.parse(saved);
             } else {
-                // Default products if none in localStorage
                 products = [
                     { 
                         id: 'SOL001', 
@@ -758,11 +754,9 @@
                         images: [
                             'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
                             'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                        ],
-                        description: 'Exquisite gold-plated choker.'
+                        ]
                     }
                 ];
-                localStorage.setItem('sol_products', JSON.stringify(products));
             }
             renderFilterButtons();
             renderProducts();
@@ -870,7 +864,6 @@
             
             grid.innerHTML = html;
 
-            // Initialize swipers
             setTimeout(() => {
                 filtered.forEach((p, idx) => {
                     const swiperClass = `.swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}-${idx}`;
@@ -926,7 +919,6 @@
                     <h2>${product.name}</h2>
                     <p class="product-id">${product.id}</p>
                     <p class="price">₹${product.price}</p>
-                    <p class="description">${product.description || 'No description available.'}</p>
                     <div class="product-stock ${product.stock === 'In Stock' ? 'stock-instock' : 'stock-limited'}">
                         ${product.stock}
                     </div>
@@ -1042,7 +1034,6 @@
             alert('Checkout functionality would go here!');
         };
 
-        // Listen for updates from admin
         window.addEventListener('storage', function(e) {
             if (e.key === 'sol_products') {
                 products = JSON.parse(e.newValue);
@@ -1052,7 +1043,6 @@
             }
         });
 
-        // Check for updates every 2 seconds
         setInterval(() => {
             const updated = localStorage.getItem('sol_products');
             if (updated) {
@@ -1067,7 +1057,6 @@
             }
         }, 2000);
 
-        // Initialize
         loadProducts();
         updateCartCount();
         renderCart();
