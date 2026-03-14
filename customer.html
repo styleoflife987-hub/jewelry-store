@@ -704,7 +704,7 @@
     <script>
         // ==================== CONFIGURATION ====================
         // REPLACE WITH YOUR ACTUAL GOOGLE APPS SCRIPT URL
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzH2BKk8AXwqW58p186P5qmctSOvJC_eYPVzSlef65B5yIFqw1-iQVAoqA1zh3K049Kiw/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6_of-vLu6MN4QDTH2EDJWCLfDjT7kls04iyo7XvF6kn3sVyo2SXN2zdQfhT-xCbIJaA/exec';
         
         // ==================== GLOBAL VARIABLES ====================
         let products = [];
@@ -719,34 +719,27 @@
             renderCart();
         };
 
-        // ==================== API CALL WITH JSONP (CORS FIX) ====================
-        function apiCall(action, data = {}) {
-            return new Promise((resolve) => {
-                const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                const script = document.createElement('script');
-                
-                const params = new URLSearchParams({
-                    action: action,
-                    data: JSON.stringify(data),
-                    callback: callbackName
+        // ==================== SIMPLE API CALL ====================
+        async function apiCall(action, data = {}) {
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action, ...data })
                 });
                 
-                script.src = SCRIPT_URL + '?' + params.toString();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
-                window[callbackName] = function(response) {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    resolve(response);
-                };
-                
-                script.onerror = function() {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    resolve(null);
-                };
-                
-                document.body.appendChild(script);
-            });
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return null;
+            }
         }
 
         // ==================== PRODUCT FUNCTIONS ====================
