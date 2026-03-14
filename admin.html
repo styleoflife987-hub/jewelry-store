@@ -211,9 +211,17 @@
             color: #0f1722;
         }
 
+        .btn-warning:hover {
+            background: #d4ac0d;
+        }
+
         .btn-info {
             background: #3498db;
             color: white;
+        }
+
+        .btn-info:hover {
+            background: #2980b9;
         }
 
         /* Excel-like Table */
@@ -420,6 +428,12 @@
             border-radius: 15px;
             padding: 20px;
             border: 1px solid #2c3e50;
+            transition: 0.3s;
+        }
+
+        .order-card:hover {
+            border-color: #f39c12;
+            transform: translateY(-3px);
         }
 
         .order-header {
@@ -444,6 +458,18 @@
             font-weight: 600;
             background: #27ae60;
             color: white;
+        }
+
+        .order-customer {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .order-contact {
+            color: #95a5a6;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
         }
 
         .order-date {
@@ -730,6 +756,7 @@
                 orders = JSON.parse(saved);
             } else {
                 orders = [];
+                localStorage.setItem('sol_orders', JSON.stringify(orders));
             }
             renderOrders();
         }
@@ -756,7 +783,9 @@
 
         function updateStats() {
             document.getElementById('totalProducts').textContent = products.length;
-            const categories = [...new Set(products.map(p => p.category))].length;
+            
+            // Calculate unique categories
+            const categories = products.length > 0 ? [...new Set(products.map(p => p.category))].length : 0;
             document.getElementById('totalCategories').textContent = categories;
             
             // Load orders for stats
@@ -765,6 +794,8 @@
                 orders = JSON.parse(savedOrders);
             }
             document.getElementById('totalOrders').textContent = orders.length;
+            
+            // Calculate total revenue
             const revenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
             document.getElementById('totalRevenue').textContent = '₹' + revenue;
         }
@@ -796,7 +827,7 @@
                 // Generate image previews
                 let imageHtml = '<div class="image-preview-container">';
                 if (p.images && p.images.length > 0) {
-                    p.images.forEach((img, imgIndex) => {
+                    p.images.forEach((img) => {
                         imageHtml += `<img class="table-image-preview" src="${img}" alt="Product" onclick="openImageModal('${img}')">`;
                     });
                 } else {
@@ -873,7 +904,8 @@
             }
 
             let html = '';
-            orders.slice(-6).reverse().forEach(order => {
+            // Show most recent orders first
+            orders.slice().reverse().forEach(order => {
                 const date = new Date(order.date).toLocaleDateString();
                 html += `
                     <div class="order-card">
@@ -881,6 +913,8 @@
                             <span class="order-id">${order.id}</span>
                             <span class="order-status">${order.status || 'Pending'}</span>
                         </div>
+                        <div class="order-customer">${order.customer || 'Customer'}</div>
+                        <div class="order-contact">${order.email || 'No email'} · ${order.phone || 'No phone'}</div>
                         <div class="order-date">${date}</div>
                         <div class="order-items">
                             ${order.items.map(item => `
@@ -902,16 +936,23 @@
         }
 
         window.uploadImages = function(index, files) {
+            if (!products[index]) return;
+            
             if (!products[index].images) {
                 products[index].images = [];
             }
 
+            let filesProcessed = 0;
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     products[index].images.push(e.target.result);
-                    saveToLocalStorage();
-                    renderTable();
+                    filesProcessed++;
+                    
+                    if (filesProcessed === files.length) {
+                        saveToLocalStorage();
+                        renderTable();
+                    }
                 };
                 reader.readAsDataURL(file);
             });
@@ -942,7 +983,7 @@
         };
 
         window.addNewProduct = function() {
-            const newId = 'SOL' + String(products.length + 100).padStart(3, '0');
+            const newId = 'SOL' + String(products.length + 101).padStart(3, '0');
             products.push({
                 id: newId,
                 name: 'New Product',
@@ -1018,6 +1059,11 @@
                 renderOrders();
                 updateStats();
             }
+            if (e.key === 'sol_products') {
+                products = JSON.parse(e.newValue) || [];
+                renderTable();
+                updateStats();
+            }
         });
 
         // Initialize
@@ -1033,6 +1079,16 @@
                 if (JSON.stringify(orders) !== JSON.stringify(newOrders)) {
                     orders = newOrders;
                     renderOrders();
+                    updateStats();
+                }
+            }
+            
+            const savedProducts = localStorage.getItem('sol_products');
+            if (savedProducts) {
+                const newProducts = JSON.parse(savedProducts);
+                if (JSON.stringify(products) !== JSON.stringify(newProducts)) {
+                    products = newProducts;
+                    renderTable();
                     updateStats();
                 }
             }
