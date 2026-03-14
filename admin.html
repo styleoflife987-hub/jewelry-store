@@ -1166,6 +1166,16 @@
             localStorage.setItem('sol_products', JSON.stringify(products));
             updateStats();
             
+            // Show save indicator
+            const statusDiv = document.querySelector('.save-indicator');
+            if (statusDiv) {
+                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Saved!';
+                statusDiv.style.background = '#27ae60';
+                setTimeout(() => {
+                    statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> All Changes Saved';
+                }, 2000);
+            }
+            
             // Notify customer portal
             window.dispatchEvent(new StorageEvent('storage', {
                 key: 'sol_products',
@@ -1255,16 +1265,21 @@
         window.updateProductField = function(index, field, value) {
             if (field === 'price') value = parseFloat(value) || 0;
             products[index][field] = value;
+            // Auto-save on field change
+            saveProducts();
         };
 
         window.uploadProductImages = function(index, files) {
             const product = products[index];
             if (!product.images) product.images = [];
 
+            let filesProcessed = 0;
+            
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     product.images.push(e.target.result);
+                    filesProcessed++;
                     
                     // Update image grid
                     const imageGrid = document.getElementById(`imageGrid_${index}`);
@@ -1276,6 +1291,11 @@
                         </div>
                     `;
                     imageGrid.insertAdjacentHTML('beforeend', imgHtml);
+                    
+                    // Save after all files are processed
+                    if (filesProcessed === files.length) {
+                        saveProducts();
+                    }
                 };
                 reader.readAsDataURL(file);
             });
@@ -1284,11 +1304,21 @@
         window.removeProductImage = function(productIndex, imageIndex) {
             if (confirm('Remove this image?')) {
                 products[productIndex].images.splice(imageIndex, 1);
-                renderProductsGrid();
+                saveProducts();
+                renderProductsGrid(); // Re-render to update image grid
             }
         };
 
         window.saveProduct = function(index) {
+            // Get latest values from inputs
+            const product = products[index];
+            product.id = document.getElementById(`id_${index}`).value;
+            product.name = document.getElementById(`name_${index}`).value;
+            product.description = document.getElementById(`desc_${index}`).value;
+            product.category = document.getElementById(`cat_${index}`).value;
+            product.price = parseFloat(document.getElementById(`price_${index}`).value) || 0;
+            product.stock = document.getElementById(`stock_${index}`).value;
+            
             saveProducts();
             showNotification('Product saved successfully!');
         };
@@ -1312,6 +1342,7 @@
                 images: [],
                 description: 'New product description'
             });
+            saveProducts();
             renderProductsGrid();
         };
 
