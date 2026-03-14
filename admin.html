@@ -147,74 +147,27 @@
             font-weight: 700;
         }
 
-        .admin-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            padding: 15px 30px;
-            background: #0f1722;
-            border: 1px solid #2c3e50;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .tab-btn:hover {
-            border-color: #f39c12;
-        }
-
-        .tab-btn.active {
-            background: #f39c12;
-            color: #0f1722;
-            border-color: #f39c12;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .product-management {
+        .admin-controls {
             background: #0f1722;
             border-radius: 20px;
-            padding: 30px;
-            border: 2px solid #f39c12;
-        }
-
-        .product-header {
+            padding: 25px;
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            color: white;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid #2c3e50;
         }
 
-        .product-header h2 {
+        .btn-group {
             display: flex;
-            align-items: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
 
-        .product-header h2 i {
-            color: #f39c12;
-        }
-
-        .btn-add-product {
-            background: #27ae60;
-            color: white;
-            padding: 15px 30px;
+        .btn {
+            padding: 12px 25px;
             border: none;
             border-radius: 12px;
             font-weight: 600;
@@ -225,176 +178,181 @@
             transition: 0.3s;
         }
 
-        .btn-add-product:hover {
-            background: #229954;
+        .btn-primary {
+            background: #f39c12;
+            color: #0f1722;
+        }
+
+        .btn-primary:hover {
+            background: #e67e22;
             transform: scale(1.02);
         }
 
-        .products-admin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-            gap: 25px;
-        }
-
-        .product-admin-card {
-            background: #1a2634;
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid #2c3e50;
-        }
-
-        .product-admin-card h3 {
-            color: #f39c12;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        .product-fields {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .product-fields input,
-        .product-fields select,
-        .product-fields textarea {
-            padding: 12px;
-            background: #0f1722;
-            border: 1px solid #2c3e50;
-            border-radius: 8px;
-            color: white;
-            width: 100%;
-        }
-
-        .product-fields textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        .product-fields input:focus,
-        .product-fields select:focus,
-        .product-fields textarea:focus {
-            outline: none;
-            border-color: #f39c12;
-        }
-
-        .image-upload-section {
-            margin: 20px 0;
-            padding: 15px;
-            background: #0f1722;
-            border-radius: 10px;
-        }
-
-        .image-upload-section h4 {
-            color: #f39c12;
-            margin-bottom: 15px;
-            font-size: 1rem;
-        }
-
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 5px;
-        }
-
-        .image-preview {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px solid #2c3e50;
-        }
-
-        .image-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .image-preview .remove-image {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 20px;
-            height: 20px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            z-index: 10;
-        }
-
-        .image-preview .remove-image:hover {
-            background: #c0392b;
-        }
-
-        .upload-multiple-btn {
-            width: 100%;
-            padding: 20px;
-            border: 2px dashed #f39c12;
-            border-radius: 10px;
-            background: #0f1722;
-            color: #f39c12;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            transition: 0.3s;
-        }
-
-        .upload-multiple-btn:hover {
-            background: #1a2634;
-            border-color: #e67e22;
-        }
-
-        .upload-multiple-btn i {
-            font-size: 2rem;
-        }
-
-        .product-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .product-actions button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .btn-save-product {
+        .btn-success {
             background: #27ae60;
             color: white;
         }
 
-        .btn-save-product:hover {
+        .btn-success:hover {
             background: #229954;
         }
 
-        .btn-delete-product {
+        .btn-danger {
             background: #e74c3c;
             color: white;
         }
 
-        .btn-delete-product:hover {
+        .btn-danger:hover {
             background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f1c40f;
+            color: #0f1722;
+        }
+
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+
+        /* Excel-like Table */
+        .table-wrapper {
+            background: #0f1722;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #2c3e50;
+            margin-bottom: 40px;
+            overflow-x: auto;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .excel-table th {
+            background: #1a2634;
+            color: #f39c12;
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 3px solid #f39c12;
+            position: sticky;
+            top: 0;
+        }
+
+        .excel-table td {
+            padding: 15px;
+            border-bottom: 1px solid #2c3e50;
+            color: white;
+            vertical-align: middle;
+        }
+
+        .excel-table input, .excel-table select {
+            width: 100%;
+            padding: 10px;
+            background: #1a2634;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .excel-table input:focus, .excel-table select:focus {
+            outline: none;
+            border-color: #f39c12;
+        }
+
+        .excel-table input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        .excel-table input[type="number"]::-webkit-outer-spin-button,
+        .excel-table input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .image-cell {
+            position: relative;
+            min-width: 150px;
+        }
+
+        .image-preview-container {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+        }
+
+        .table-image-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #2c3e50;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .table-image-preview:hover {
+            border-color: #f39c12;
+            transform: scale(1.1);
+        }
+
+        .image-upload-btn {
+            background: #1a2634;
+            border: 2px dashed #f39c12;
+            border-radius: 8px;
+            padding: 8px;
+            color: #f39c12;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .image-upload-btn:hover {
+            background: #2c3e50;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: #1a2634;
+            border: 1px solid #2c3e50;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f39c12;
+            color: #0f1722;
+            border-color: #f39c12;
+        }
+
+        .action-btn.delete:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .no-image {
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.9rem;
         }
 
         .save-status {
@@ -410,6 +368,7 @@
             gap: 10px;
             z-index: 1000;
             animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
         @keyframes slideIn {
@@ -455,15 +414,8 @@
             border-radius: 40px;
             font-size: 0.9rem;
             font-weight: 600;
-        }
-
-        .status-confirmed {
             background: #27ae60;
             color: white;
-        }
-
-        .order-details {
-            margin-bottom: 15px;
         }
 
         .order-detail {
@@ -516,6 +468,61 @@
             padding: 50px;
             color: #f39c12;
         }
+
+        /* Modal for image preview */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: #0f1722;
+            border-radius: 20px;
+            padding: 30px;
+            z-index: 2000;
+            transition: 0.3s;
+            border: 2px solid #f39c12;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal img {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1999;
+            display: none;
+        }
+
+        .modal-overlay.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -525,6 +532,13 @@
 
     <div class="save-status" id="saveStatus">
         <i class="fas fa-check-circle"></i> Changes Saved!
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeImageModal()"></div>
+    <div class="modal" id="imageModal">
+        <button class="modal-close" onclick="closeImageModal()"><i class="fas fa-times"></i></button>
+        <img id="modalImage" src="" alt="Preview">
     </div>
 
     <header class="admin-header">
@@ -582,32 +596,45 @@
             </div>
         </div>
 
-        <div class="admin-tabs">
-            <button class="tab-btn active" onclick="switchTab('products')">
-                <i class="fas fa-box"></i> Products
-            </button>
-            <button class="tab-btn" onclick="switchTab('orders')">
-                <i class="fas fa-shopping-cart"></i> Orders
-            </button>
-        </div>
-
-        <div class="tab-content active" id="productsTab">
-            <div class="product-management">
-                <div class="product-header">
-                    <h2><i class="fas fa-box"></i> Product Management</h2>
-                    <button class="btn-add-product" onclick="addNewProduct()">
-                        <i class="fas fa-plus"></i> Add New Product
-                    </button>
-                </div>
-
-                <div class="products-admin-grid" id="productsAdminGrid"></div>
+        <div class="admin-controls">
+            <div class="btn-group">
+                <button class="btn btn-success" onclick="addNewProduct()">
+                    <i class="fas fa-plus"></i> Add Product
+                </button>
+                <button class="btn btn-warning" onclick="resetToDefault()">
+                    <i class="fas fa-redo"></i> Reset
+                </button>
+                <button class="btn btn-info" onclick="exportProducts()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="btn btn-primary" onclick="importProducts()">
+                    <i class="fas fa-upload"></i> Import
+                </button>
             </div>
         </div>
 
-        <div class="tab-content" id="ordersTab">
-            <div class="orders-grid" id="ordersGrid">
-                <div class="loading">Loading orders...</div>
-            </div>
+        <!-- Excel-like Inventory Table -->
+        <div class="table-wrapper">
+            <table class="excel-table" id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price (₹)</th>
+                        <th>Stock Status</th>
+                        <th>Images</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="7" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> Loading inventory...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -628,10 +655,8 @@
                 stock: 'In Stock', 
                 images: [
                     'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Exquisite gold-plated choker with peacock design.'
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ]
             },
             { 
                 id: 'SOL002', 
@@ -642,25 +667,19 @@
                 images: [
                     'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
                     'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Traditional oxidized silver jhumkas.'
+                ]
+            },
+            { 
+                id: 'SOL003', 
+                name: 'Polki Bangle Set', 
+                category: 'Bangles', 
+                price: 2400, 
+                stock: 'Limited', 
+                images: [
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ]
             }
         ];
-
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.tab-btn').classList.add('active');
-
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            
-            if (tabName === 'products') {
-                document.getElementById('productsTab').classList.add('active');
-                renderProductsGrid();
-            } else {
-                document.getElementById('ordersTab').classList.add('active');
-                renderOrders();
-            }
-        }
 
         function loadProducts() {
             const saved = localStorage.getItem('sol_products');
@@ -668,20 +687,22 @@
                 products = JSON.parse(saved);
             } else {
                 products = [...DEFAULT_PRODUCTS];
-                saveToLocalStorage();
+                saveToLocalStorage(false);
             }
+            renderTable();
             updateStats();
         }
 
-        function saveToLocalStorage() {
+        function saveToLocalStorage(showNotification = true) {
             localStorage.setItem('sol_products', JSON.stringify(products));
             
-            // Show save status
-            const status = document.getElementById('saveStatus');
-            status.style.display = 'flex';
-            setTimeout(() => {
-                status.style.display = 'none';
-            }, 2000);
+            if (showNotification) {
+                const status = document.getElementById('saveStatus');
+                status.style.display = 'flex';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 2000);
+            }
             
             // Trigger storage event for customer portal
             window.dispatchEvent(new StorageEvent('storage', {
@@ -701,129 +722,139 @@
             document.getElementById('totalRevenue').textContent = '₹' + revenue;
         }
 
-        function renderProductsGrid() {
-            const grid = document.getElementById('productsAdminGrid');
-            const categories = ['Necklace', 'Earrings', 'Bangles', 'Headpiece', 'Bracelet', 'Ring'];
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const categories = ['Necklace', 'Earrings', 'Bangles', 'Headpiece', 'Bracelet', 'Ring', 'Anklet'];
             const stockOptions = ['In Stock', 'Limited', 'Out of Stock'];
 
-            if (products.length === 0) {
-                grid.innerHTML = '<div class="loading">No products yet. Click "Add New Product" to get started!</div>';
-                return;
-            }
-
             let html = '';
-            products.forEach((product, index) => {
-                let imagePreviews = '';
-                if (product.images && product.images.length > 0) {
-                    product.images.forEach((img, imgIndex) => {
-                        imagePreviews += `
-                            <div class="image-preview">
-                                <img src="${img}" alt="Product image">
-                                <button class="remove-image" onclick="removeProductImage(${index}, ${imgIndex})">×</button>
-                            </div>
-                        `;
+            products.forEach((p, index) => {
+                // Generate category options
+                let catOptions = '';
+                categories.forEach(cat => {
+                    catOptions += `<option value="${cat}" ${p.category === cat ? 'selected' : ''}>${cat}</option>`;
+                });
+
+                // Generate stock options
+                let stockOpts = '';
+                stockOptions.forEach(s => {
+                    stockOpts += `<option value="${s}" ${p.stock === s ? 'selected' : ''}>${s}</option>`;
+                });
+
+                // Generate image previews
+                let imageHtml = '<div class="image-preview-container">';
+                if (p.images && p.images.length > 0) {
+                    p.images.forEach((img, imgIndex) => {
+                        imageHtml += `<img class="table-image-preview" src="${img}" alt="Product" onclick="openImageModal('${img}')">`;
                     });
+                } else {
+                    imageHtml += '<span class="no-image">No images</span>';
                 }
+                imageHtml += '</div>';
+
+                // Image upload button
+                imageHtml += `
+                    <div class="image-upload-btn" onclick="document.getElementById('fileInput_${index}').click()">
+                        <i class="fas fa-camera"></i> Add Images
+                    </div>
+                    <input type="file" id="fileInput_${index}" multiple accept="image/*" style="display: none;" onchange="uploadImages(${index}, this.files)">
+                `;
 
                 html += `
-                    <div class="product-admin-card">
-                        <h3>${product.id}</h3>
-                        <div class="product-fields">
-                            <input type="text" placeholder="Product ID" value="${product.id}" onchange="updateField(${index}, 'id', this.value)">
-                            <input type="text" placeholder="Product Name" value="${product.name}" onchange="updateField(${index}, 'name', this.value)">
-                            <textarea placeholder="Description" onchange="updateField(${index}, 'description', this.value)">${product.description || ''}</textarea>
-                            <select onchange="updateField(${index}, 'category', this.value)">
-                                ${categories.map(c => `<option value="${c}" ${product.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+                    <tr data-index="${index}">
+                        <td><input type="text" value="${p.id}" class="edit-field" data-field="id" data-index="${index}" placeholder="ID"></td>
+                        <td><input type="text" value="${p.name.replace(/"/g, '&quot;')}" class="edit-field" data-field="name" data-index="${index}"></td>
+                        <td>
+                            <select class="edit-field" data-field="category" data-index="${index}">
+                                ${catOptions}
                             </select>
-                            <input type="number" placeholder="Price" value="${product.price}" onchange="updateField(${index}, 'price', this.value)">
-                            <select onchange="updateField(${index}, 'stock', this.value)">
-                                ${stockOptions.map(s => `<option value="${s}" ${product.stock === s ? 'selected' : ''}>${s}</option>`).join('')}
+                        </td>
+                        <td><input type="number" value="${p.price}" class="edit-field" data-field="price" data-index="${index}" step="1" min="0"></td>
+                        <td>
+                            <select class="edit-field" data-field="stock" data-index="${index}">
+                                ${stockOpts}
                             </select>
-                        </div>
-
-                        <div class="image-upload-section">
-                            <h4>Product Images (${product.images ? product.images.length : 0})</h4>
-                            <div class="image-grid" id="imageGrid_${index}">
-                                ${imagePreviews}
+                        </td>
+                        <td class="image-cell">${imageHtml}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn" onclick="moveUp(${index})" ${index === 0 ? 'disabled' : ''}>
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                                <button class="action-btn" onclick="moveDown(${index})" ${index === products.length-1 ? 'disabled' : ''}>
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteProduct(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
-                            <div class="upload-multiple-btn" onclick="document.getElementById('fileInput_${index}').click()">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <span>Click to upload multiple images</span>
-                                <input type="file" id="fileInput_${index}" multiple accept="image/*" style="display: none;" onchange="uploadImages(${index}, this.files)">
-                            </div>
-                        </div>
-
-                        <div class="product-actions">
-                            <button class="btn-save-product" onclick="saveProduct(${index})">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                            <button class="btn-delete-product" onclick="deleteProduct(${index})">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
                 `;
             });
 
-            grid.innerHTML = html;
-        }
+            tbody.innerHTML = html;
 
-        window.updateField = function(index, field, value) {
-            if (field === 'price') value = parseFloat(value) || 0;
-            products[index][field] = value;
-        };
+            // Add event listeners to edit fields
+            document.querySelectorAll('.edit-field').forEach(el => {
+                el.addEventListener('change', function(e) {
+                    const index = this.dataset.index;
+                    const field = this.dataset.field;
+                    let value = this.value;
+                    
+                    if (field === 'price') value = parseFloat(value) || 0;
+                    
+                    if (products[index]) {
+                        products[index][field] = value;
+                        saveToLocalStorage();
+                    }
+                });
+            });
+        }
 
         window.uploadImages = function(index, files) {
             if (!products[index].images) {
                 products[index].images = [];
             }
 
+            let filesProcessed = 0;
+            
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     products[index].images.push(e.target.result);
+                    filesProcessed++;
                     
-                    // Update image grid
-                    const imageGrid = document.getElementById(`imageGrid_${index}`);
-                    const imgHtml = `
-                        <div class="image-preview">
-                            <img src="${e.target.result}" alt="Product image">
-                            <button class="remove-image" onclick="removeProductImage(${index}, ${products[index].images.length - 1})">×</button>
-                        </div>
-                    `;
-                    imageGrid.insertAdjacentHTML('beforeend', imgHtml);
-                    
-                    // Auto-save after each image
-                    saveToLocalStorage();
+                    if (filesProcessed === files.length) {
+                        saveToLocalStorage();
+                        renderTable(); // Re-render to show new images
+                    }
                 };
                 reader.readAsDataURL(file);
             });
         };
 
-        window.removeProductImage = function(productIndex, imageIndex) {
-            products[productIndex].images.splice(imageIndex, 1);
-            saveToLocalStorage();
-            renderProductsGrid(); // Re-render to update image grid
+        window.moveUp = function(index) {
+            if (index > 0) {
+                [products[index - 1], products[index]] = [products[index], products[index - 1]];
+                saveToLocalStorage();
+                renderTable();
+            }
         };
 
-        window.saveProduct = function(index) {
-            // Get latest values from inputs
-            const product = products[index];
-            product.id = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) input[placeholder="Product ID"]`).value;
-            product.name = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) input[placeholder="Product Name"]`).value;
-            product.description = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) textarea`).value;
-            product.category = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) select`).value;
-            product.price = parseFloat(document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) input[type="number"]`).value) || 0;
-            product.stock = document.querySelector(`#productsAdminGrid .product-admin-card:nth-child(${index + 1}) select:last-of-type`).value;
-            
-            saveToLocalStorage();
+        window.moveDown = function(index) {
+            if (index < products.length - 1) {
+                [products[index], products[index + 1]] = [products[index + 1], products[index]];
+                saveToLocalStorage();
+                renderTable();
+            }
         };
 
         window.deleteProduct = function(index) {
             if (confirm('Delete this product?')) {
                 products.splice(index, 1);
                 saveToLocalStorage();
-                renderProductsGrid();
+                renderTable();
             }
         };
 
@@ -835,72 +866,78 @@
                 category: 'Necklace',
                 price: 999,
                 stock: 'In Stock',
-                images: [],
-                description: 'New product description'
+                images: []
             });
             saveToLocalStorage();
-            renderProductsGrid();
+            renderTable();
         };
 
-        function renderOrders() {
-            const grid = document.getElementById('ordersGrid');
-            
-            if (orders.length === 0) {
-                grid.innerHTML = '<div class="loading">No orders yet</div>';
-                return;
+        window.resetToDefault = function() {
+            if (confirm('Reset to default products? All changes will be lost.')) {
+                products = [...DEFAULT_PRODUCTS];
+                saveToLocalStorage();
+                renderTable();
             }
+        };
 
-            let html = '';
-            orders.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(order => {
-                const date = new Date(order.date).toLocaleString();
+        window.exportProducts = function() {
+            const dataStr = JSON.stringify(products, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `products_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        };
 
-                html += `
-                    <div class="order-card">
-                        <div class="order-header">
-                            <span class="order-id"><i class="fas fa-hashtag"></i> ${order.id}</span>
-                            <span class="order-status status-confirmed">${order.status.toUpperCase()}</span>
-                        </div>
-                        <div class="order-details">
-                            <div class="order-detail"><i class="fas fa-user"></i> ${order.customer.name}</div>
-                            <div class="order-detail"><i class="fas fa-phone"></i> ${order.customer.phone}</div>
-                            <div class="order-detail"><i class="fas fa-envelope"></i> ${order.customer.email}</div>
-                            <div class="order-detail"><i class="fas fa-map-marker-alt"></i> ${order.customer.address}</div>
-                            <div class="order-detail"><i class="fas fa-calendar"></i> ${date}</div>
-                        </div>
-                        <div class="order-items">
-                            ${order.items.map(item => `
-                                <div class="order-item">
-                                    <span>${item.name} × ${item.quantity}</span>
-                                    <span>₹${item.price * item.quantity}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="order-total">
-                            <span>Total:</span>
-                            <span>₹${order.total}</span>
-                        </div>
-                    </div>
-                `;
-            });
+        window.importProducts = function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported)) {
+                            products = imported;
+                            saveToLocalStorage();
+                            renderTable();
+                            alert('Products imported successfully!');
+                        }
+                    } catch (error) {
+                        alert('Invalid JSON file');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        };
 
-            grid.innerHTML = html;
-        }
+        // Image modal functions
+        window.openImageModal = function(imgSrc) {
+            document.getElementById('modalImage').src = imgSrc;
+            document.getElementById('imageModal').classList.add('show');
+            document.getElementById('modalOverlay').classList.add('show');
+        };
+
+        window.closeImageModal = function() {
+            document.getElementById('imageModal').classList.remove('show');
+            document.getElementById('modalOverlay').classList.remove('show');
+        };
 
         // Listen for storage events
         window.addEventListener('storage', function(e) {
             if (e.key === 'sol_orders') {
                 orders = JSON.parse(e.newValue) || [];
                 updateStats();
-                if (document.getElementById('ordersTab').classList.contains('active')) {
-                    renderOrders();
-                }
             }
         });
 
         // Initialize
         loadProducts();
-        renderProductsGrid();
-        updateStats();
     </script>
 </body>
 </html>
