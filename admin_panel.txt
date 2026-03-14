@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style Of Life · Admin Panel v2.0</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #1a2634;
+            min-height: 100vh;
+        }
+
+        /* Admin Header */
+        .admin-header {
+            background: #0f1722;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #f39c12;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            background: #f39c12;
+            color: #0f1722;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        .logo-text h1 {
+            color: white;
+            font-size: 1.8rem;
+        }
+
+        .logo-text p {
+            color: #f39c12;
+            font-size: 0.9rem;
+        }
+
+        .admin-badge {
+            background: #f39c12;
+            color: #0f1722;
+            padding: 10px 25px;
+            border-radius: 40px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 40px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #0f1722;
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid #2c3e50;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            border-color: #f39c12;
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            background: #1a2634;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #f39c12;
+        }
+
+        .stat-info h3 {
+            color: #95a5a6;
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 5px;
+        }
+
+        .stat-info span {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Admin Controls */
+        .admin-controls {
+            background: #0f1722;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            border: 1px solid #2c3e50;
+        }
+
+        .save-indicator {
+            background: #27ae60;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: #f39c12;
+            color: #0f1722;
+        }
+
+        .btn-primary:hover {
+            background: #e67e22;
+            transform: scale(1.02);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-warning {
+            background: #f1c40f;
+            color: #0f1722;
+        }
+
+        .btn-info {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #2980b9;
+        }
+
+        /* Tab Navigation */
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 15px 30px;
+            background: #0f1722;
+            border: 1px solid #2c3e50;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-btn:hover {
+            border-color: #f39c12;
+        }
+
+        .tab-btn.active {
+            background: #f39c12;
+            color: #0f1722;
+            border-color: #f39c12;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Excel-like Table */
+        .table-wrapper {
+            background: #0f1722;
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid #2c3e50;
+            margin-bottom: 40px;
+            overflow-x: auto;
+        }
+
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .excel-table th {
+            background: #1a2634;
+            color: #f39c12;
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 3px solid #f39c12;
+        }
+
+        .excel-table td {
+            padding: 15px;
+            border-bottom: 1px solid #2c3e50;
+            color: white;
+        }
+
+        .excel-table input, .excel-table select {
+            width: 100%;
+            padding: 10px;
+            background: #1a2634;
+            border: 2px solid #2c3e50;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        .excel-table input:focus, .excel-table select:focus {
+            outline: none;
+            border-color: #f39c12;
+        }
+
+        .excel-table input::placeholder {
+            color: #7f8c8d;
+        }
+
+        .table-img-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .no-img {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: #1a2634;
+            border: 1px solid #2c3e50;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f39c12;
+            color: #0f1722;
+            border-color: #f39c12;
+        }
+
+        .action-btn.delete:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Orders Grid */
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .order-card {
+            background: #0f1722;
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid #2c3e50;
+            transition: 0.3s;
+        }
+
+        .order-card:hover {
+            border-color: #f39c12;
+            transform: translateY(-5px);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2c3e50;
+        }
+
+        .order-id {
+            color: #f39c12;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .order-status {
+            padding: 5px 15px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-confirmed {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-processing {
+            background: #f39c12;
+            color: #0f1722;
+        }
+
+        .status-shipped {
+            background: #3498db;
+            color: white;
+        }
+
+        .status-delivered {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .status-cancelled {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .order-details {
+            margin-bottom: 15px;
+        }
+
+        .order-detail {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+            color: #95a5a6;
+        }
+
+        .order-detail i {
+            color: #f39c12;
+            width: 20px;
+        }
+
+        .order-items {
+            background: #1a2634;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            color: #f39c12;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #2c3e50;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Upload Panel */
+        .upload-panel {
+            background: #0f1722;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px dashed #f39c12;
+            margin-bottom: 40px;
+        }
+
+        .upload-panel h2 {
+            color: white;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .upload-panel h2 i {
+            color: #f39c12;
+        }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .upload-form {
+            background: #1a2634;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #f39c12;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 15px;
+            background: #0f1722;
+            border: 2px solid #2c3e50;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .upload-status {
+            background: #1a2634;
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        .status-box {
+            background: #0f1722;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border-left: 4px solid #f39c12;
+        }
+
+        /* Analytics Section */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .chart-card {
+            background: #0f1722;
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid #2c3e50;
+        }
+
+        .chart-card h3 {
+            color: white;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-card h3 i {
+            color: #f39c12;
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #7f8c8d;
+            border-top: 1px solid #2c3e50;
+            margin-top: 60px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #f39c12;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: #0f1722;
+            border-radius: 25px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            z-index: 2000;
+            transition: 0.3s;
+            border: 2px solid #f39c12;
+        }
+
+        .modal.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .modal-header h2 {
+            color: #f39c12;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #95a5a6;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1999;
+            display: none;
+        }
+
+        .modal-overlay.show {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+            .orders-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+
+    <!-- Order Details Modal -->
+    <div class="modal" id="orderModal">
+        <div class="modal-header">
+            <h2><i class="fas fa-box"></i> Order Details</h2>
+            <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="orderModalContent" style="color: white;"></div>
+    </div>
+
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="logo-text">
+                <h1>Style Of Life</h1>
+                <p>Administration Panel v2.0</p>
+            </div>
+        </div>
+        <div class="admin-badge">
+            <i class="fas fa-lock"></i> Admin Access
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card" onclick="switchTab('products')">
+                <div class="stat-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Total Products</h3>
+                    <span id="totalProducts">0</span>
+                </div>
+            </div>
+            <div class="stat-card" onclick="switchTab('categories')">
+                <div class="stat-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Categories</h3>
+                    <span id="totalCategories">0</span>
+                </div>
+            </div>
+            <div class="stat-card" onclick="switchTab('orders')">
+                <div class="stat-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Total Orders</h3>
+                    <span id="totalOrders">0</span>
+                </div>
+            </div>
+            <div class="stat-card" onclick="switchTab('revenue')">
+                <div class="stat-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Total Revenue</h3>
+                    <span id="totalRevenue">₹0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tabs -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchTab('products')">
+                <i class="fas fa-box"></i> Products
+            </button>
+            <button class="tab-btn" onclick="switchTab('orders')">
+                <i class="fas fa-shopping-cart"></i> Orders
+            </button>
+            <button class="tab-btn" onclick="switchTab('analytics')">
+                <i class="fas fa-chart-line"></i> Analytics
+            </button>
+            <button class="tab-btn" onclick="switchTab('customers')">
+                <i class="fas fa-users"></i> Customers
+            </button>
+        </div>
+
+        <!-- Products Tab -->
+        <div class="tab-content active" id="productsTab">
+            <!-- Admin Controls -->
+            <div class="admin-controls">
+                <div class="save-indicator" id="saveIndicator">
+                    <i class="fas fa-check-circle"></i> All Changes Saved
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-success" onclick="addNewProduct()">
+                        <i class="fas fa-plus"></i> Add Product
+                    </button>
+                    <button class="btn btn-warning" onclick="resetToDefault()">
+                        <i class="fas fa-redo"></i> Reset
+                    </button>
+                    <button class="btn btn-primary" onclick="exportProducts()">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <button class="btn btn-info" onclick="importProducts()">
+                        <i class="fas fa-upload"></i> Import
+                    </button>
+                </div>
+            </div>
+
+            <!-- Excel-like Inventory Table -->
+            <div class="table-wrapper">
+                <table class="excel-table" id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Price (₹)</th>
+                            <th>Stock Status</th>
+                            <th>Image</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="7" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Loading inventory...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Backend Image Upload Panel -->
+            <div class="upload-panel">
+                <h2>
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    Product Image Management
+                </h2>
+                
+                <div class="upload-grid">
+                    <div class="upload-form">
+                        <div class="form-group">
+                            <label><i class="fas fa-tag"></i> Select Product</label>
+                            <select id="productSelect">
+                                <option value="">Choose a product...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label><i class="fas fa-image"></i> Upload Image</label>
+                            <input type="file" id="imageUpload" accept="image/*">
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px;">
+                            <button class="btn btn-primary" onclick="uploadImage()">
+                                <i class="fas fa-upload"></i> Upload to Backend
+                            </button>
+                            <button class="btn btn-warning" onclick="addPlaceholder()">
+                                <i class="fas fa-image"></i> Add Placeholder
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-status">
+                        <h3 style="color: #f39c12; margin-bottom: 15px;">
+                            <i class="fas fa-server"></i> Backend Status
+                        </h3>
+                        <div class="status-box" id="backendStatus">
+                            <i class="fas fa-check-circle" style="color: #27ae60;"></i> System Ready
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <p style="color: #95a5a6; margin-bottom: 10px;">Quick Stats:</p>
+                            <p><i class="fas fa-database"></i> <span id="storageSize">0</span> MB used</p>
+                            <p><i class="fas fa-images"></i> <span id="imagesCount">0</span> images stored</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Tab -->
+        <div class="tab-content" id="ordersTab">
+            <div class="admin-controls">
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="refreshOrders()">
+                        <i class="fas fa-sync-alt"></i> Refresh Orders
+                    </button>
+                    <button class="btn btn-success" onclick="exportOrders()">
+                        <i class="fas fa-download"></i> Export Orders
+                    </button>
+                </div>
+            </div>
+
+            <div class="orders-grid" id="ordersGrid">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Loading orders...
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div class="tab-content" id="analyticsTab">
+            <div class="analytics-grid">
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-pie"></i> Sales by Category</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-line"></i> Daily Orders</h3>
+                    <canvas id="ordersChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-bar"></i> Stock Status</h3>
+                    <canvas id="stockChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-pie"></i> Payment Methods</h3>
+                    <canvas id="paymentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers Tab -->
+        <div class="tab-content" id="customersTab">
+            <div class="table-wrapper">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Total Orders</th>
+                            <th>Total Spent</th>
+                            <th>Last Order</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody">
+                        <tr>
+                            <td colspan="6" class="loading">
+                                <i class="fas fa-spinner fa-spin"></i> Loading customers...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Style Of Life · Admin Panel v2.0</p>
+        <p style="margin-top: 10px; font-size: 0.8rem;">Changes are automatically synced to Customer Store • Real-time updates active</p>
+    </footer>
+
+    <script>
+        // ========== ADMIN DATA ==========
+        let products = [];
+        let orders = JSON.parse(localStorage.getItem('sol_orders')) || [];
+        let charts = {};
+
+        const DEFAULT_PRODUCTS = [
+            { id: 'SOL001', name: 'Golden Peacock Choker', category: 'Necklace', price: 1850, stock: 'In Stock', img: '' },
+            { id: 'SOL002', name: 'Oxidized Jhumka Earrings', category: 'Earrings', price: 1299, stock: 'In Stock', img: '' },
+            { id: 'SOL003', name: 'Polki Bangle Set', category: 'Bangles', price: 2400, stock: 'Limited', img: '' },
+            { id: 'SOL004', name: 'Kundan Maang Tikka', category: 'Headpiece', price: 990, stock: 'In Stock', img: '' },
+            { id: 'SOL005', name: 'Pearl Gold Bracelet', category: 'Bracelet', price: 750, stock: 'In Stock', img: '' },
+            { id: 'SOL006', name: 'Traditional Necklace Set', category: 'Necklace', price: 3200, stock: 'In Stock', img: '' },
+            { id: 'SOL007', name: 'Gold Plated Rings', category: 'Ring', price: 450, stock: 'In Stock', img: '' },
+            { id: 'SOL008', name: 'Diamond Stud Earrings', category: 'Earrings', price: 2100, stock: 'Limited', img: '' },
+            { id: 'SOL009', name: 'Bridal Bangles Set', category: 'Bangles', price: 3600, stock: 'In Stock', img: '' },
+        ];
+
+        // ========== TAB SWITCHING ==========
+        window.switchTab = function(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.tab-btn').classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // Load tab-specific data
+            if (tabName === 'orders') {
+                renderOrders();
+            } else if (tabName === 'analytics') {
+                renderCharts();
+            } else if (tabName === 'customers') {
+                renderCustomers();
+            }
+        };
+
+        // ========== PRODUCT MANAGEMENT ==========
+        function loadProducts() {
+            const saved = localStorage.getItem('sol_products');
+            products = saved ? JSON.parse(saved) : [...DEFAULT_PRODUCTS];
+            localStorage.setItem('sol_products', JSON.stringify(products));
+            renderTable();
+            updateStats();
+            populateSelect();
+        }
+
+        function saveProducts() {
+            localStorage.setItem('sol_products', JSON.stringify(products));
+            showSaveIndicator();
+            updateStats();
+            calculateStorage();
+            
+            // Notify customer portal of changes
+            window.dispatchEvent(new StorageEvent('storage', {
+                key: 'sol_products',
+                newValue: JSON.stringify(products)
+            }));
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.innerHTML = '<i class="fas fa-check-circle"></i> Saved ✓';
+            indicator.style.background = '#27ae60';
+            setTimeout(() => {
+                indicator.innerHTML = '<i class="fas fa-check-circle"></i> All Changes Saved';
+            }, 2000);
+        }
+
+        function updateStats() {
+            document.getElementById('totalProducts').textContent = products.length;
+            
+            const categories = new Set(products.map(p => p.category)).size;
+            document.getElementById('totalCategories').textContent = categories;
+            
+            const totalValue = products.reduce((sum, p) => sum + p.price, 0);
+            document.getElementById('totalValue').textContent = totalValue;
+            
+            const imagesCount = products.filter(p => p.img).length;
+            document.getElementById('imagesCount').textContent = imagesCount;
+
+            // Update order stats
+            document.getElementById('totalOrders').textContent = orders.length;
+            const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+            document.getElementById('totalRevenue').textContent = '₹' + totalRevenue;
+        }
+
+        function calculateStorage() {
+            let totalSize = 0;
+            products.forEach(p => {
+                if (p.img) {
+                    totalSize += p.img.length;
+                }
+            });
+            const sizeInMB = (totalSize * 1.33) / (1024 * 1024);
+            document.getElementById('storageSize').textContent = sizeInMB.toFixed(2);
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const categories = ['Necklace', 'Earrings', 'Bangles', 'Headpiece', 'Bracelet', 'Ring', 'Anklet'];
+            const stockOptions = ['In Stock', 'Limited', 'Out of Stock'];
+
+            let html = '';
+            products.forEach((p, index) => {
+                let catOptions = categories.map(cat => 
+                    `<option value="${cat}" ${p.category === cat ? 'selected' : ''}>${cat}</option>`
+                ).join('');
+
+                let stockOpts = stockOptions.map(s => 
+                    `<option value="${s}" ${p.stock === s ? 'selected' : ''}>${s}</option>`
+                ).join('');
+
+                const imgHtml = p.img ? 
+                    `<img class="table-img-preview" src="${p.img}" alt="preview">` : 
+                    '<span class="no-img"><i class="far fa-image"></i> No image</span>';
+
+                html += `
+                    <tr data-index="${index}">
+                        <td><input type="text" value="${p.id}" class="edit-field" data-field="id" placeholder="ID"></td>
+                        <td><input type="text" value="${p.name.replace(/"/g, '&quot;')}" class="edit-field" data-field="name"></td>
+                        <td><select class="edit-field" data-field="category">${catOptions}</select></td>
+                        <td><input type="number" value="${p.price}" class="edit-field" data-field="price" step="1" min="0"></td>
+                        <td><select class="edit-field" data-field="stock">${stockOpts}</select></td>
+                        <td>${imgHtml}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn" onclick="moveUp(${index})" ${index === 0 ? 'disabled' : ''}>
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                                <button class="action-btn" onclick="moveDown(${index})" ${index === products.length-1 ? 'disabled' : ''}>
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                                <button class="action-btn delete" onclick="deleteProduct(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+
+            document.querySelectorAll('.edit-field').forEach(el => {
+                el.addEventListener('change', function(e) {
+                    const row = this.closest('tr');
+                    const index = row.dataset.index;
+                    const field = this.dataset.field;
+                    let value = this.value;
+                    
+                    if (field === 'price') value = parseFloat(value) || 0;
+                    
+                    if (products[index]) {
+                        products[index][field] = value;
+                        saveProducts();
+                        populateSelect();
+                    }
+                });
+            });
+        }
+
+        window.moveUp = function(index) {
+            if (index > 0) {
+                [products[index - 1], products[index]] = [products[index], products[index - 1]];
+                saveProducts();
+                renderTable();
+                populateSelect();
+            }
+        };
+
+        window.moveDown = function(index) {
+            if (index < products.length - 1) {
+                [products[index], products[index + 1]] = [products[index + 1], products[index]];
+                saveProducts();
+                renderTable();
+                populateSelect();
+            }
+        };
+
+        window.deleteProduct = function(index) {
+            if (confirm('Delete this product?')) {
+                products.splice(index, 1);
+                saveProducts();
+                renderTable();
+                populateSelect();
+            }
+        };
+
+        window.addNewProduct = function() {
+            const newId = 'SOL' + String(products.length + 100).padStart(3, '0');
+            products.push({
+                id: newId,
+                name: 'New Product',
+                category: 'Necklace',
+                price: 999,
+                stock: 'In Stock',
+                img: ''
+            });
+            saveProducts();
+            renderTable();
+            populateSelect();
+        };
+
+        window.resetToDefault = function() {
+            if (confirm('Reset to default products? All changes will be lost.')) {
+                products = [...DEFAULT_PRODUCTS];
+                saveProducts();
+                renderTable();
+                populateSelect();
+            }
+        };
+
+        window.exportProducts = function() {
+            const dataStr = JSON.stringify(products, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `products_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        };
+
+        window.importProducts = function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported)) {
+                            products = imported;
+                            saveProducts();
+                            renderTable();
+                            populateSelect();
+                            alert('Products imported successfully!');
+                        }
+                    } catch (error) {
+                        alert('Invalid JSON file');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        };
+
+        function populateSelect() {
+            const select = document.getElementById('productSelect');
+            let options = '<option value="">Select product for image upload</option>';
+            products.forEach((p, index) => {
+                options += `<option value="${index}">${p.id} - ${p.name}</option>`;
+            });
+            select.innerHTML = options;
+        }
+
+        window.uploadImage = function() {
+            const select = document.getElementById('productSelect');
+            const fileInput = document.getElementById('imageUpload');
+            const index = select.value;
+            const file = fileInput.files[0];
+            const statusDiv = document.getElementById('backendStatus');
+
+            if (!index) {
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Please select a product';
+                return;
+            }
+            
+            if (!file) {
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Please select an image';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                products[index].img = e.target.result;
+                saveProducts();
+                renderTable();
+                populateSelect();
+                statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Image uploaded successfully!';
+                fileInput.value = '';
+                calculateStorage();
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.addPlaceholder = function() {
+            const select = document.getElementById('productSelect');
+            const index = select.value;
+            const statusDiv = document.getElementById('backendStatus');
+
+            if (!index) {
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Please select a product';
+                return;
+            }
+
+            const colors = ['f39c12', '27ae60', 'e74c3c', '3498db', '9b59b6'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            products[index].img = `https://via.placeholder.com/300x300/${color}/ffffff?text=SOL`;
+            saveProducts();
+            renderTable();
+            populateSelect();
+            statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Placeholder added';
+            calculateStorage();
+        };
+
+        // ========== ORDER MANAGEMENT ==========
+        function renderOrders() {
+            const grid = document.getElementById('ordersGrid');
+            
+            if (orders.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 60px; color: #7f8c8d;">
+                        <i class="fas fa-shopping-cart" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                        <h3>No orders yet</h3>
+                        <p>Orders from customers will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            orders.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(order => {
+                const date = new Date(order.date).toLocaleString();
+                const statusClass = 'status-' + order.status;
+
+                html += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-id"><i class="fas fa-hashtag"></i> ${order.id}</span>
+                            <span class="order-status ${statusClass}">${order.status.toUpperCase()}</span>
+                        </div>
+                        <div class="order-details">
+                            <div class="order-detail">
+                                <i class="fas fa-user"></i>
+                                <span>${order.customer.name}</span>
+                            </div>
+                            <div class="order-detail">
+                                <i class="fas fa-phone"></i>
+                                <span>${order.customer.phone}</span>
+                            </div>
+                            <div class="order-detail">
+                                <i class="fas fa-envelope"></i>
+                                <span>${order.customer.email}</span>
+                            </div>
+                            <div class="order-detail">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${order.customer.address}</span>
+                            </div>
+                            <div class="order-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>${date}</span>
+                            </div>
+                            <div class="order-detail">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Payment: ${order.payment.toUpperCase()}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="order-items">
+                            <h4 style="color: #f39c12; margin-bottom: 10px;">Items:</h4>
+                            ${order.items.map(item => `
+                                <div class="order-item">
+                                    <span>${item.name} × ${item.quantity}</span>
+                                    <span>₹${item.price * item.quantity}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="order-total">
+                            <span>Total Amount:</span>
+                            <span>₹${order.total}</span>
+                        </div>
+                        
+                        <div class="order-actions">
+                            <select class="edit-field" onchange="updateOrderStatus('${order.id}', this.value)" style="flex: 2;">
+                                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                                <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                            <button class="btn btn-danger" onclick="deleteOrder('${order.id}')" style="flex: 1;">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        window.updateOrderStatus = function(orderId, status) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = status;
+                localStorage.setItem('sol_orders', JSON.stringify(orders));
+                renderOrders();
+                updateStats();
+                showNotification(`Order ${orderId} status updated to ${status}`);
+            }
+        };
+
+        window.deleteOrder = function(orderId) {
+            if (confirm('Delete this order?')) {
+                orders = orders.filter(o => o.id !== orderId);
+                localStorage.setItem('sol_orders', JSON.stringify(orders));
+                renderOrders();
+                updateStats();
+                showNotification('Order deleted successfully');
+            }
+        };
+
+        window.refreshOrders = function() {
+            orders = JSON.parse(localStorage.getItem('sol_orders')) || [];
+            renderOrders();
+            updateStats();
+        };
+
+        window.exportOrders = function() {
+            const dataStr = JSON.stringify(orders, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const exportFileDefaultName = `orders_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        };
+
+        // ========== CUSTOMER MANAGEMENT ==========
+        function renderCustomers() {
+            const customers = {};
+            
+            orders.forEach(order => {
+                const email = order.customer.email;
+                if (!customers[email]) {
+                    customers[email] = {
+                        name: order.customer.name,
+                        email: email,
+                        phone: order.customer.phone,
+                        orders: [],
+                        totalSpent: 0,
+                        lastOrder: order.date
+                    };
+                }
+                customers[email].orders.push(order);
+                customers[email].totalSpent += order.total;
+                if (new Date(order.date) > new Date(customers[email].lastOrder)) {
+                    customers[email].lastOrder = order.date;
+                }
+            });
+
+            const tbody = document.getElementById('customersTableBody');
+            
+            if (Object.keys(customers).length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="loading">No customers yet</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            Object.values(customers).forEach(customer => {
+                html += `
+                    <tr>
+                        <td style="color: white;">${customer.name}</td>
+                        <td style="color: white;">${customer.email}</td>
+                        <td style="color: white;">${customer.phone}</td>
+                        <td style="color: white;">${customer.orders.length}</td>
+                        <td style="color: white;">₹${customer.totalSpent}</td>
+                        <td style="color: white;">${new Date(customer.lastOrder).toLocaleDateString()}</td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // ========== ANALYTICS ==========
+        function renderCharts() {
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => chart.destroy());
+            
+            // Category Chart
+            const categoryData = {};
+            orders.forEach(order => {
+                order.items.forEach(item => {
+                    const product = products.find(p => p.name === item.name);
+                    const category = product ? product.category : 'Other';
+                    categoryData[category] = (categoryData[category] || 0) + (item.price * item.quantity);
+                });
+            });
+
+            charts.category = new Chart(document.getElementById('categoryChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(categoryData),
+                    datasets: [{
+                        data: Object.values(categoryData),
+                        backgroundColor: ['#f39c12', '#27ae60', '#e74c3c', '#3498db', '#9b59b6']
+                    }]
+                }
+            });
+
+            // Orders Chart (last 7 days)
+            const last7Days = [];
+            const orderCounts = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                last7Days.push(date.toLocaleDateString());
+                
+                const count = orders.filter(o => {
+                    const orderDate = new Date(o.date);
+                    return orderDate.toLocaleDateString() === date.toLocaleDateString();
+                }).length;
+                orderCounts.push(count);
+            }
+
+            charts.orders = new Chart(document.getElementById('ordersChart'), {
+                type: 'line',
+                data: {
+                    labels: last7Days,
+                    datasets: [{
+                        label: 'Orders',
+                        data: orderCounts,
+                        borderColor: '#f39c12',
+                        tension: 0.1
+                    }]
+                }
+            });
+
+            // Stock Chart
+            const stockCounts = {
+                'In Stock': products.filter(p => p.stock === 'In Stock').length,
+                'Limited': products.filter(p => p.stock === 'Limited').length,
+                'Out of Stock': products.filter(p => p.stock === 'Out of Stock').length
+            };
+
+            charts.stock = new Chart(document.getElementById('stockChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(stockCounts),
+                    datasets: [{
+                        label: 'Products',
+                        data: Object.values(stockCounts),
+                        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c']
+                    }]
+                }
+            });
+
+            // Payment Methods Chart
+            const paymentData = {};
+            orders.forEach(order => {
+                paymentData[order.payment] = (paymentData[order.payment] || 0) + 1;
+            });
+
+            charts.payment = new Chart(document.getElementById('paymentChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(paymentData),
+                    datasets: [{
+                        data: Object.values(paymentData),
+                        backgroundColor: ['#27ae60', '#f39c12', '#3498db']
+                    }]
+                }
+            });
+        }
+
+        // ========== UTILITIES ==========
+        function updateActiveCarts() {
+            const cart = JSON.parse(localStorage.getItem('sol_cart')) || [];
+            document.getElementById('activeCarts').textContent = cart.length;
+        }
+
+        function showNotification(message) {
+            const statusDiv = document.getElementById('backendStatus');
+            statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #27ae60;"></i> ${message}`;
+            setTimeout(() => {
+                statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> System Ready';
+            }, 3000);
+        }
+
+        window.refreshPreview = function() {
+            updateStats();
+            document.getElementById('backendStatus').innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Syncing with store...';
+            setTimeout(() => {
+                document.getElementById('backendStatus').innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Store synchronized';
+            }, 1000);
+        };
+
+        // Modal functions
+        window.openModal = function(order) {
+            document.getElementById('orderModal').classList.add('show');
+            document.getElementById('modalOverlay').classList.add('show');
+            
+            const content = document.getElementById('orderModalContent');
+            content.innerHTML = `<pre>${JSON.stringify(order, null, 2)}</pre>`;
+        };
+
+        window.closeModal = function() {
+            document.getElementById('orderModal').classList.remove('show');
+            document.getElementById('modalOverlay').classList.remove('show');
+        };
+
+        // Listen for storage events (customer orders)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'sol_orders') {
+                orders = JSON.parse(e.newValue) || [];
+                updateStats();
+                
+                // Update current tab if orders tab is active
+                if (document.getElementById('ordersTab').classList.contains('active')) {
+                    renderOrders();
+                }
+                if (document.getElementById('analyticsTab').classList.contains('active')) {
+                    renderCharts();
+                }
+                if (document.getElementById('customersTab').classList.contains('active')) {
+                    renderCustomers();
+                }
+                
+                showNotification('New orders received!');
+            }
+        });
+
+        // Check for updates every 2 seconds
+        setInterval(() => {
+            const newOrders = JSON.parse(localStorage.getItem('sol_orders')) || [];
+            if (JSON.stringify(orders) !== JSON.stringify(newOrders)) {
+                orders = newOrders;
+                updateStats();
+                if (document.getElementById('ordersTab').classList.contains('active')) {
+                    renderOrders();
+                }
+            }
+            updateActiveCarts();
+        }, 2000);
+
+        // Initialize
+        loadProducts();
+        updateActiveCarts();
+        calculateStorage();
+    </script>
+</body>
+</html>
