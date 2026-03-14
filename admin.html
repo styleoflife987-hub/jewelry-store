@@ -384,82 +384,190 @@
             box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3);
         }
 
-        /* Excel-like Table */
-        .table-wrapper {
+        /* Product Management with Multiple Images */
+        .product-management {
             background: #0f1722;
             border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 2px solid #f39c12;
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .product-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .product-header h2 i {
+            color: #f39c12;
+        }
+
+        .products-admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .product-admin-card {
+            background: #1a2634;
+            border-radius: 15px;
             padding: 20px;
             border: 1px solid #2c3e50;
-            margin-bottom: 40px;
-            overflow-x: auto;
         }
 
-        .excel-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1000px;
-        }
-
-        .excel-table th {
-            background: #1a2634;
+        .product-admin-card h3 {
             color: #f39c12;
-            padding: 18px 15px;
-            text-align: left;
-            font-weight: 600;
-            border-bottom: 3px solid #f39c12;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
         }
 
-        .excel-table td {
-            padding: 15px;
-            border-bottom: 1px solid #2c3e50;
-            color: white;
+        .product-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .excel-table input, .excel-table select {
-            width: 100%;
-            padding: 10px;
-            background: #1a2634;
-            border: 2px solid #2c3e50;
+        .product-fields input,
+        .product-fields select {
+            padding: 12px;
+            background: #0f1722;
+            border: 1px solid #2c3e50;
             border-radius: 8px;
             color: white;
+            width: 100%;
         }
 
-        .excel-table input:focus, .excel-table select:focus {
+        .product-fields input:focus,
+        .product-fields select:focus {
             outline: none;
             border-color: #f39c12;
         }
 
-        .table-img-preview {
-            width: 50px;
-            height: 50px;
+        /* Multiple Image Upload */
+        .image-upload-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #0f1722;
+            border-radius: 10px;
+        }
+
+        .image-upload-section h4 {
+            color: #f39c12;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .image-preview {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
             border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #2c3e50;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
         }
 
-        .action-btns {
-            display: flex;
-            gap: 8px;
-        }
-
-        .action-btn {
-            background: #1a2634;
-            border: 1px solid #2c3e50;
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .action-btn:hover {
-            background: #f39c12;
-            color: #0f1722;
-        }
-
-        .action-btn.delete:hover {
+        .image-preview .remove-image {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
             background: #e74c3c;
             color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .upload-multiple-btn {
+            width: 100%;
+            padding: 30px;
+            border: 2px dashed #f39c12;
+            border-radius: 10px;
+            background: #0f1722;
+            color: #f39c12;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .upload-multiple-btn:hover {
+            background: #1a2634;
+            border-color: #e67e22;
+        }
+
+        .upload-multiple-btn i {
+            font-size: 2rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .product-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-save-product {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-delete-product {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-add-product {
+            background: #f39c12;
+            color: #0f1722;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
         }
 
         /* Orders Grid */
@@ -576,70 +684,6 @@
             margin-top: 15px;
         }
 
-        /* Upload Panel */
-        .upload-panel {
-            background: #0f1722;
-            border-radius: 20px;
-            padding: 30px;
-            border: 2px dashed #f39c12;
-            margin-top: 40px;
-        }
-
-        .upload-panel h2 {
-            color: white;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .upload-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 30px;
-        }
-
-        .upload-form {
-            background: #1a2634;
-            padding: 25px;
-            border-radius: 15px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #f39c12;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .form-group select, .form-group input {
-            width: 100%;
-            padding: 15px;
-            background: #0f1722;
-            border: 2px solid #2c3e50;
-            border-radius: 12px;
-            color: white;
-        }
-
-        .upload-status {
-            background: #1a2634;
-            padding: 25px;
-            border-radius: 15px;
-            color: white;
-        }
-
-        .status-box {
-            background: #0f1722;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 15px;
-            border-left: 4px solid #f39c12;
-        }
-
         /* Analytics Grid */
         .analytics-grid {
             display: grid;
@@ -687,9 +731,6 @@
         }
 
         @media (max-width: 768px) {
-            .upload-grid {
-                grid-template-columns: 1fr;
-            }
             .analytics-grid {
                 grid-template-columns: 1fr;
             }
@@ -697,6 +738,9 @@
                 grid-template-columns: 1fr;
             }
             .slides-grid {
+                grid-template-columns: 1fr;
+            }
+            .products-admin-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -804,67 +848,16 @@
 
         <!-- Products Tab -->
         <div class="tab-content" id="productsTab">
-            <div class="admin-controls">
-                <div class="save-indicator" id="saveIndicator">
-                    <i class="fas fa-check-circle"></i> All Changes Saved
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-success" onclick="addNewProduct()">
-                        <i class="fas fa-plus"></i> Add Product
-                    </button>
-                    <button class="btn btn-warning" onclick="resetToDefault()">
-                        <i class="fas fa-redo"></i> Reset to Default
+            <div class="product-management">
+                <div class="product-header">
+                    <h2><i class="fas fa-box"></i> Product Management</h2>
+                    <button class="btn-add-product" onclick="addNewProduct()">
+                        <i class="fas fa-plus"></i> Add New Product
                     </button>
                 </div>
-            </div>
 
-            <!-- Products Table -->
-            <div class="table-wrapper">
-                <table class="excel-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Product Name</th>
-                            <th>Category</th>
-                            <th>Price (₹)</th>
-                            <th>Stock</th>
-                            <th>Image</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <tr>
-                            <td colspan="7" class="loading">
-                                <i class="fas fa-spinner fa-spin"></i> Loading...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Image Upload -->
-            <div class="upload-panel">
-                <h2><i class="fas fa-cloud-upload-alt"></i> Product Image Upload</h2>
-                <div class="upload-grid">
-                    <div class="upload-form">
-                        <div class="form-group">
-                            <label>Select Product</label>
-                            <select id="productSelect"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Upload Image</label>
-                            <input type="file" id="imageUpload" accept="image/*">
-                        </div>
-                        <button class="btn btn-primary" onclick="uploadImage()">
-                            <i class="fas fa-upload"></i> Upload
-                        </button>
-                    </div>
-                    <div class="upload-status">
-                        <h3>Status</h3>
-                        <div class="status-box" id="backendStatus">
-                            <i class="fas fa-check-circle" style="color: #27ae60;"></i> System Ready
-                        </div>
-                    </div>
+                <div class="products-admin-grid" id="productsAdminGrid">
+                    <!-- Products will be populated here -->
                 </div>
             </div>
         </div>
@@ -918,18 +911,6 @@
         let heroSlides = [];
         let charts = {};
 
-        const DEFAULT_PRODUCTS = [
-            { id: 'SOL001', name: 'Golden Peacock Choker', category: 'Necklace', price: 1850, stock: 'In Stock', img: '' },
-            { id: 'SOL002', name: 'Oxidized Jhumka Earrings', category: 'Earrings', price: 1299, stock: 'In Stock', img: '' },
-            { id: 'SOL003', name: 'Polki Bangle Set', category: 'Bangles', price: 2400, stock: 'Limited', img: '' },
-            { id: 'SOL004', name: 'Kundan Maang Tikka', category: 'Headpiece', price: 990, stock: 'In Stock', img: '' },
-            { id: 'SOL005', name: 'Pearl Gold Bracelet', category: 'Bracelet', price: 750, stock: 'In Stock', img: '' },
-            { id: 'SOL006', name: 'Traditional Necklace Set', category: 'Necklace', price: 3200, stock: 'In Stock', img: '' },
-            { id: 'SOL007', name: 'Gold Plated Rings', category: 'Ring', price: 450, stock: 'In Stock', img: '' },
-            { id: 'SOL008', name: 'Diamond Stud Earrings', category: 'Earrings', price: 2100, stock: 'Limited', img: '' },
-            { id: 'SOL009', name: 'Bridal Bangles Set', category: 'Bangles', price: 3600, stock: 'In Stock', img: '' },
-        ];
-
         const DEFAULT_SLIDES = [
             {
                 id: 'slide1',
@@ -954,6 +935,48 @@
             }
         ];
 
+        const DEFAULT_PRODUCTS = [
+            { 
+                id: 'SOL001', 
+                name: 'Golden Peacock Choker', 
+                category: 'Necklace', 
+                price: 1850, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Exquisite gold-plated choker with peacock design, featuring intricate detailing and traditional craftsmanship.'
+            },
+            { 
+                id: 'SOL002', 
+                name: 'Oxidized Jhumka Earrings', 
+                category: 'Earrings', 
+                price: 1299, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Traditional oxidized silver jhumkas with bell-shaped design, perfect for festive occasions.'
+            },
+            { 
+                id: 'SOL003', 
+                name: 'Polki Bangle Set', 
+                category: 'Bangles', 
+                price: 2400, 
+                stock: 'Limited', 
+                images: [
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Set of 4 Polki bangles with uncut diamond look, gold-plated finish.'
+            }
+        ];
+
         // Tab Switching
         window.switchTab = function(tabName) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -967,7 +990,7 @@
             }
             if (tabName === 'products') {
                 document.getElementById('productsTab').classList.add('active');
-                renderTable();
+                renderProductsGrid();
             }
             if (tabName === 'orders') {
                 document.getElementById('ordersTab').classList.add('active');
@@ -1066,14 +1089,16 @@
         function loadProducts() {
             const saved = localStorage.getItem('sol_products');
             products = saved ? JSON.parse(saved) : [...DEFAULT_PRODUCTS];
-            localStorage.setItem('sol_products', JSON.stringify(products));
+            
+            if (!saved) {
+                localStorage.setItem('sol_products', JSON.stringify(products));
+            }
+            
             updateStats();
-            populateSelect();
         }
 
         function saveProducts() {
             localStorage.setItem('sol_products', JSON.stringify(products));
-            showSaveIndicator();
             updateStats();
             
             // Notify customer portal
@@ -1081,15 +1106,6 @@
                 key: 'sol_products',
                 newValue: JSON.stringify(products)
             }));
-        }
-
-        function showSaveIndicator() {
-            const indicator = document.getElementById('saveIndicator');
-            indicator.innerHTML = '<i class="fas fa-check-circle"></i> Saved!';
-            indicator.style.background = '#27ae60';
-            setTimeout(() => {
-                indicator.innerHTML = '<i class="fas fa-check-circle"></i> All Changes Saved';
-            }, 2000);
         }
 
         function updateStats() {
@@ -1103,83 +1119,115 @@
             document.getElementById('totalRevenue').textContent = '₹' + revenue;
         }
 
-        function renderTable() {
-            const tbody = document.getElementById('tableBody');
+        function renderProductsGrid() {
+            const grid = document.getElementById('productsAdminGrid');
             const categories = ['Necklace', 'Earrings', 'Bangles', 'Headpiece', 'Bracelet', 'Ring'];
             const stockOptions = ['In Stock', 'Limited', 'Out of Stock'];
 
             let html = '';
-            products.forEach((p, index) => {
-                const imgHtml = p.img ? 
-                    `<img class="table-img-preview" src="${p.img}">` : 
-                    '<span class="no-img">No image</span>';
+            products.forEach((product, index) => {
+                // Generate image previews
+                let imagePreviews = '';
+                if (product.images && product.images.length > 0) {
+                    product.images.forEach((img, imgIndex) => {
+                        imagePreviews += `
+                            <div class="image-preview">
+                                <img src="${img}" alt="Product image ${imgIndex + 1}">
+                                <button class="remove-image" onclick="removeProductImage(${index}, ${imgIndex})">×</button>
+                            </div>
+                        `;
+                    });
+                }
 
                 html += `
-                    <tr>
-                        <td><input type="text" value="${p.id}" onchange="updateProduct(${index}, 'id', this.value)"></td>
-                        <td><input type="text" value="${p.name}" onchange="updateProduct(${index}, 'name', this.value)"></td>
-                        <td>
-                            <select onchange="updateProduct(${index}, 'category', this.value)">
-                                ${categories.map(c => `<option value="${c}" ${p.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+                    <div class="product-admin-card">
+                        <h3>${product.id}</h3>
+                        <div class="product-fields">
+                            <input type="text" placeholder="Product ID" value="${product.id}" onchange="updateProductField(${index}, 'id', this.value)">
+                            <input type="text" placeholder="Product Name" value="${product.name}" onchange="updateProductField(${index}, 'name', this.value)">
+                            <input type="text" placeholder="Description" value="${product.description || ''}" onchange="updateProductField(${index}, 'description', this.value)">
+                            <select onchange="updateProductField(${index}, 'category', this.value)">
+                                ${categories.map(c => `<option value="${c}" ${product.category === c ? 'selected' : ''}>${c}</option>`).join('')}
                             </select>
-                        </td>
-                        <td><input type="number" value="${p.price}" onchange="updateProduct(${index}, 'price', this.value)"></td>
-                        <td>
-                            <select onchange="updateProduct(${index}, 'stock', this.value)">
-                                ${stockOptions.map(s => `<option value="${s}" ${p.stock === s ? 'selected' : ''}>${s}</option>`).join('')}
+                            <input type="number" placeholder="Price" value="${product.price}" onchange="updateProductField(${index}, 'price', this.value)">
+                            <select onchange="updateProductField(${index}, 'stock', this.value)">
+                                ${stockOptions.map(s => `<option value="${s}" ${product.stock === s ? 'selected' : ''}>${s}</option>`).join('')}
                             </select>
-                        </td>
-                        <td>${imgHtml}</td>
-                        <td>
-                            <div class="action-btns">
-                                <button class="action-btn" onclick="moveUp(${index})" ${index === 0 ? 'disabled' : ''}>
-                                    <i class="fas fa-arrow-up"></i>
-                                </button>
-                                <button class="action-btn" onclick="moveDown(${index})" ${index === products.length-1 ? 'disabled' : ''}>
-                                    <i class="fas fa-arrow-down"></i>
-                                </button>
-                                <button class="action-btn delete" onclick="deleteProduct(${index})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                        </div>
+
+                        <div class="image-upload-section">
+                            <h4>Product Images (${product.images ? product.images.length : 0})</h4>
+                            <div class="image-grid" id="imageGrid_${index}">
+                                ${imagePreviews}
                             </div>
-                        </td>
-                    </tr>
+                            <div class="upload-multiple-btn" onclick="document.getElementById('fileInput_${index}').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Click to upload multiple images</span>
+                                <input type="file" id="fileInput_${index}" multiple accept="image/*" style="display: none;" onchange="uploadProductImages(${index}, this.files)">
+                            </div>
+                        </div>
+
+                        <div class="product-actions">
+                            <button class="btn-save-product" onclick="saveProduct(${index})">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                            <button class="btn-delete-product" onclick="deleteProduct(${index})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
                 `;
             });
-            tbody.innerHTML = html;
+
+            grid.innerHTML = html;
         }
 
-        window.updateProduct = function(index, field, value) {
+        window.updateProductField = function(index, field, value) {
             if (field === 'price') value = parseFloat(value) || 0;
             products[index][field] = value;
+        };
+
+        window.uploadProductImages = function(index, files) {
+            const product = products[index];
+            if (!product.images) product.images = [];
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    product.images.push(e.target.result);
+                    
+                    // Update image grid
+                    const imageGrid = document.getElementById(`imageGrid_${index}`);
+                    const imgIndex = product.images.length - 1;
+                    const imgHtml = `
+                        <div class="image-preview">
+                            <img src="${e.target.result}" alt="Product image">
+                            <button class="remove-image" onclick="removeProductImage(${index}, ${imgIndex})">×</button>
+                        </div>
+                    `;
+                    imageGrid.insertAdjacentHTML('beforeend', imgHtml);
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+
+        window.removeProductImage = function(productIndex, imageIndex) {
+            if (confirm('Remove this image?')) {
+                products[productIndex].images.splice(imageIndex, 1);
+                renderProductsGrid();
+            }
+        };
+
+        window.saveProduct = function(index) {
             saveProducts();
-            populateSelect();
-        };
-
-        window.moveUp = function(index) {
-            if (index > 0) {
-                [products[index-1], products[index]] = [products[index], products[index-1]];
-                saveProducts();
-                renderTable();
-                populateSelect();
-            }
-        };
-
-        window.moveDown = function(index) {
-            if (index < products.length-1) {
-                [products[index], products[index+1]] = [products[index+1], products[index]];
-                saveProducts();
-                renderTable();
-                populateSelect();
-            }
+            showNotification('Product saved successfully!');
         };
 
         window.deleteProduct = function(index) {
             if (confirm('Delete this product?')) {
                 products.splice(index, 1);
                 saveProducts();
-                renderTable();
-                populateSelect();
+                renderProductsGrid();
             }
         };
 
@@ -1191,58 +1239,10 @@
                 category: 'Necklace',
                 price: 999,
                 stock: 'In Stock',
-                img: ''
+                images: [],
+                description: 'New product description'
             });
-            saveProducts();
-            renderTable();
-            populateSelect();
-        };
-
-        window.resetToDefault = function() {
-            if (confirm('Reset to default products?')) {
-                products = [...DEFAULT_PRODUCTS];
-                saveProducts();
-                renderTable();
-                populateSelect();
-            }
-        };
-
-        function populateSelect() {
-            const select = document.getElementById('productSelect');
-            let options = '<option value="">Select product...</option>';
-            products.forEach((p, index) => {
-                options += `<option value="${index}">${p.id} - ${p.name}</option>`;
-            });
-            select.innerHTML = options;
-        }
-
-        window.uploadImage = function() {
-            const select = document.getElementById('productSelect');
-            const fileInput = document.getElementById('imageUpload');
-            const index = select.value;
-            const file = fileInput.files[0];
-            const status = document.getElementById('backendStatus');
-
-            if (!index) {
-                status.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Select a product';
-                return;
-            }
-            
-            if (!file) {
-                status.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Select an image';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                products[index].img = e.target.result;
-                saveProducts();
-                renderTable();
-                populateSelect();
-                status.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Image uploaded!';
-                fileInput.value = '';
-            };
-            reader.readAsDataURL(file);
+            renderProductsGrid();
         };
 
         // Orders
@@ -1419,6 +1419,17 @@
                         }]
                     }
                 });
+            }
+        }
+
+        // Notification
+        function showNotification(message) {
+            const statusDiv = document.getElementById('sliderStatus');
+            if (statusDiv) {
+                statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #27ae60;"></i> ${message}`;
+                setTimeout(() => {
+                    statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> System Ready';
+                }, 3000);
             }
         }
 
