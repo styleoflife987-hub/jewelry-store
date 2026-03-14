@@ -700,7 +700,7 @@
 
     <div class="cart-sidebar" id="cartSidebar">
         <div class="cart-header">
-            <h3>Your Cart</h3>
+            <h2>Your Cart</h2>
             <button class="close-cart" onclick="toggleCart()"><i class="fas fa-times"></i></button>
         </div>
         <div class="cart-items" id="cartItems">
@@ -720,7 +720,7 @@
         </div>
     </div>
 
-    <div class="overlay" id="overlay" onclick="toggleCart()"></div>
+    <div class="overlay" id="overlay" onclick="closeAllModals()"></div>
 
     <div class="notification" id="notification">
         <span id="notificationMessage">Item added to cart!</span>
@@ -739,24 +739,69 @@
         let searchQuery = '';
         let productSwipers = {};
 
+        // Default products
+        const DEFAULT_PRODUCTS = [
+            { 
+                id: 'SOL001', 
+                name: 'Golden Peacock Choker', 
+                category: 'Necklace', 
+                price: 1850, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ]
+            },
+            { 
+                id: 'SOL002', 
+                name: 'Oxidized Jhumka Earrings', 
+                category: 'Earrings', 
+                price: 1299, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ]
+            },
+            { 
+                id: 'SOL003', 
+                name: 'Polki Bangle Set', 
+                category: 'Bangles', 
+                price: 2400, 
+                stock: 'Limited', 
+                images: [
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ]
+            },
+            { 
+                id: 'SOL004', 
+                name: 'Pearl Necklace Set', 
+                category: 'Necklace', 
+                price: 3500, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ]
+            },
+            { 
+                id: 'SOL005', 
+                name: 'Ruby Ring', 
+                category: 'Ring', 
+                price: 1800, 
+                stock: 'Out of Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ]
+            }
+        ];
+
         function loadProducts() {
             const saved = localStorage.getItem('sol_products');
             if (saved) {
                 products = JSON.parse(saved);
             } else {
-                products = [
-                    { 
-                        id: 'SOL001', 
-                        name: 'Golden Peacock Choker', 
-                        category: 'Necklace', 
-                        price: 1850, 
-                        stock: 'In Stock', 
-                        images: [
-                            'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                            'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                        ]
-                    }
-                ];
+                products = [...DEFAULT_PRODUCTS];
+                localStorage.setItem('sol_products', JSON.stringify(products));
             }
             renderFilterButtons();
             renderProducts();
@@ -781,7 +826,7 @@
         };
 
         window.searchProducts = function() {
-            searchQuery = document.getElementById('searchInput').value;
+            searchQuery = document.getElementById('searchInput').value.toLowerCase();
             renderProducts();
         };
 
@@ -796,13 +841,13 @@
             
             if (searchQuery) {
                 filtered = filtered.filter(p => 
-                    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    p.id.toLowerCase().includes(searchQuery.toLowerCase())
+                    p.name.toLowerCase().includes(searchQuery) ||
+                    p.id.toLowerCase().includes(searchQuery)
                 );
             }
 
             if (filtered.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 80px;">No products found</div>';
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 80px; font-size: 1.5rem;">No products found</div>';
                 return;
             }
 
@@ -825,13 +870,13 @@
                     `;
                 }
 
-                const swiperId = `swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}-${index}`;
+                const swiperId = `swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}`;
 
                 html += `
                     <div class="product-card">
                         <div class="product-badge">${p.category}</div>
                         <div class="product-img-wrapper">
-                            <div class="swiper ${swiperId}">
+                            <div class="swiper ${swiperId} product-swiper">
                                 <div class="swiper-wrapper">
                                     ${imageSlides}
                                 </div>
@@ -864,9 +909,10 @@
             
             grid.innerHTML = html;
 
+            // Initialize swipers after products are rendered
             setTimeout(() => {
-                filtered.forEach((p, idx) => {
-                    const swiperClass = `.swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}-${idx}`;
+                filtered.forEach((p) => {
+                    const swiperClass = `.swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}`;
                     const swiperEl = document.querySelector(swiperClass);
                     if (swiperEl && !productSwipers[p.id]) {
                         productSwipers[p.id] = new Swiper(swiperEl, {
@@ -916,13 +962,13 @@
                     </div>
                 </div>
                 <div class="quick-view-details">
-                    <h2>${product.name}</h2>
-                    <p class="product-id">${product.id}</p>
-                    <p class="price">₹${product.price}</p>
-                    <div class="product-stock ${product.stock === 'In Stock' ? 'stock-instock' : 'stock-limited'}">
+                    <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; margin-bottom: 10px;">${product.name}</h2>
+                    <p class="product-id" style="font-size: 1rem; margin-bottom: 15px;">${product.id}</p>
+                    <p style="font-size: 2rem; font-weight: 700; color: var(--gold); margin-bottom: 15px;">₹${product.price}</p>
+                    <div class="product-stock ${product.stock === 'In Stock' ? 'stock-instock' : product.stock === 'Limited' ? 'stock-limited' : 'stock-out'}" style="margin-bottom: 20px;">
                         ${product.stock}
                     </div>
-                    <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" style="width: 100%; margin-top: 20px;">
+                    <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" style="width: 100%; margin-top: 20px; padding: 15px;" ${product.stock === 'Out of Stock' ? 'disabled' : ''}>
                         Add to Cart
                     </button>
                 </div>
@@ -935,7 +981,10 @@
             setTimeout(() => {
                 new Swiper('.quick-view-swiper', {
                     loop: product.images && product.images.length > 1,
-                    pagination: { el: '.quick-view-swiper .swiper-pagination', clickable: true },
+                    pagination: { 
+                        el: '.quick-view-swiper .swiper-pagination', 
+                        clickable: true 
+                    },
                     navigation: product.images && product.images.length > 1 ? {
                         nextEl: '.quick-view-swiper .swiper-button-next',
                         prevEl: '.quick-view-swiper .swiper-button-prev',
@@ -964,7 +1013,7 @@
                     id: product.id,
                     name: product.name,
                     price: product.price,
-                    images: product.images,
+                    image: product.images && product.images.length > 0 ? product.images[0] : '',
                     quantity: 1
                 });
             }
@@ -981,7 +1030,7 @@
             const totalSpan = document.getElementById('cartTotal');
             
             if (cart.length === 0) {
-                cartDiv.innerHTML = '<div style="text-align: center; padding: 60px 20px;">Your cart is empty</div>';
+                cartDiv.innerHTML = '<div style="text-align: center; padding: 60px 20px;"><i class="fas fa-shopping-bag" style="font-size: 4rem; color: var(--gold);"></i><h3 style="margin-top: 20px;">Your cart is empty</h3></div>';
                 totalSpan.textContent = '₹0';
                 return;
             }
@@ -991,14 +1040,21 @@
 
             cart.forEach((item, index) => {
                 total += item.price * item.quantity;
-                const imgSrc = item.images && item.images.length > 0 ? item.images[0] : '';
 
                 html += `
                     <div class="cart-item">
-                        ${imgSrc ? `<img class="cart-item-img" src="${imgSrc}">` : '<div class="cart-item-img" style="background: #eee;"></div>'}
-                        <div>
-                            <div>${item.name}</div>
-                            <div>₹${item.price} x ${item.quantity}</div>
+                        ${item.image ? `<img class="cart-item-img" src="${item.image}" alt="${item.name}">` : '<div class="cart-item-img" style="background: #eee; display: flex; align-items: center; justify-content: center;"><i class="fas fa-gem" style="color: var(--gold);"></i></div>'}
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; margin-bottom: 5px;">${item.name}</div>
+                            <div style="color: var(--gold); font-weight: 600;">₹${item.price} x ${item.quantity}</div>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <button onclick="updateCartItem('${item.id}', ${item.quantity - 1})" style="background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
+                                <span style="font-weight: 600;">${item.quantity}</span>
+                                <button onclick="updateCartItem('${item.id}', ${item.quantity + 1})" style="background: #eee; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">+</button>
+                                <button onclick="removeFromCart('${item.id}')" style="background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; margin-left: auto;">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1007,6 +1063,29 @@
             cartDiv.innerHTML = html;
             totalSpan.textContent = `₹${total}`;
         }
+
+        window.updateCartItem = function(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+
+            const item = cart.find(i => i.id === productId);
+            if (item) {
+                item.quantity = newQuantity;
+                localStorage.setItem('sol_cart', JSON.stringify(cart));
+                updateCartCount();
+                renderCart();
+            }
+        };
+
+        window.removeFromCart = function(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            localStorage.setItem('sol_cart', JSON.stringify(cart));
+            updateCartCount();
+            renderCart();
+            showNotification('Item removed from cart');
+        };
 
         function updateCartCount() {
             const count = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -1017,6 +1096,12 @@
             document.getElementById('cartSidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('show');
             closeQuickView();
+        };
+
+        window.closeAllModals = function() {
+            document.getElementById('cartSidebar').classList.remove('open');
+            document.getElementById('quickViewModal').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
         };
 
         function showNotification(message) {
@@ -1031,9 +1116,31 @@
                 showNotification('Your cart is empty!');
                 return;
             }
-            alert('Checkout functionality would go here!');
+            
+            // Create order
+            const order = {
+                id: 'ORD' + Date.now(),
+                date: new Date().toISOString(),
+                items: [...cart],
+                total: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                status: 'Pending'
+            };
+
+            const orders = JSON.parse(localStorage.getItem('sol_orders')) || [];
+            orders.push(order);
+            localStorage.setItem('sol_orders', JSON.stringify(orders));
+
+            // Clear cart
+            cart = [];
+            localStorage.setItem('sol_cart', JSON.stringify(cart));
+            updateCartCount();
+            renderCart();
+            toggleCart();
+            
+            showNotification('Order placed successfully!');
         };
 
+        // Listen for storage events (updates from admin)
         window.addEventListener('storage', function(e) {
             if (e.key === 'sol_products') {
                 products = JSON.parse(e.newValue);
@@ -1043,6 +1150,7 @@
             }
         });
 
+        // Poll for updates every 2 seconds
         setInterval(() => {
             const updated = localStorage.getItem('sol_products');
             if (updated) {
@@ -1057,6 +1165,7 @@
             }
         }, 2000);
 
+        // Initialize
         loadProducts();
         updateCartCount();
         renderCart();
