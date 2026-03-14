@@ -376,7 +376,7 @@
 
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 30px;
         }
 
@@ -403,19 +403,83 @@
             border-radius: 40px;
             font-weight: 600;
             font-size: 0.9rem;
-            z-index: 2;
+            z-index: 10;
         }
 
+        /* Product Image Carousel */
         .product-img-wrapper {
             position: relative;
-            overflow: hidden;
             height: 350px;
+            overflow: hidden;
         }
 
-        .product-img {
+        .product-swiper {
+            width: 100%;
+            height: 100%;
+        }
+
+        .product-swiper .swiper-slide {
+            width: 100%;
+            height: 100%;
+        }
+
+        .product-swiper .swiper-slide img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .product-swiper .swiper-pagination-bullet {
+            background: white !important;
+            opacity: 0.7 !important;
+        }
+
+        .product-swiper .swiper-pagination-bullet-active {
+            background: var(--gold) !important;
+        }
+
+        .product-swiper .swiper-button-prev,
+        .product-swiper .swiper-button-next {
+            width: 30px !important;
+            height: 30px !important;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            backdrop-filter: blur(5px);
+        }
+
+        .product-swiper .swiper-button-prev:after,
+        .product-swiper .swiper-button-next:after {
+            font-size: 12px !important;
+            color: white;
+        }
+
+        .product-swiper .swiper-button-prev {
+            left: 5px;
+        }
+
+        .product-swiper .swiper-button-next {
+            right: 5px;
+        }
+
+        .no-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8f4f0, #e8e0d8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .no-image-placeholder i {
+            font-size: 4rem;
+            color: var(--gold);
+        }
+
+        .no-image-placeholder span {
+            color: var(--charcoal);
+            font-size: 0.9rem;
         }
 
         .product-info {
@@ -518,6 +582,88 @@
         .buy-now-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* Quick View Modal */
+        .quick-view-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            border-radius: 40px;
+            padding: 40px;
+            width: 90%;
+            max-width: 1000px;
+            z-index: 2002;
+            transition: 0.3s;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+        }
+
+        .quick-view-modal.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .quick-view-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .quick-view-images {
+            height: 500px;
+        }
+
+        .quick-view-images .swiper {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .quick-view-images .swiper-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .quick-view-details {
+            padding: 20px;
+        }
+
+        .quick-view-details h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .quick-view-details .price {
+            font-size: 2.5rem;
+            color: var(--gold);
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .quick-view-details .description {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .close-quick-view {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            z-index: 10;
+        }
+
+        .close-quick-view:hover {
+            color: var(--ruby);
         }
 
         /* Cart Sidebar */
@@ -905,6 +1051,9 @@
             .cart-sidebar {
                 width: 100%;
             }
+            .quick-view-content {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -1044,6 +1193,12 @@
         <span id="notificationMessage">Item added to cart!</span>
     </div>
 
+    <!-- Quick View Modal -->
+    <div class="quick-view-modal" id="quickViewModal">
+        <button class="close-quick-view" onclick="closeQuickView()"><i class="fas fa-times"></i></button>
+        <div class="quick-view-content" id="quickViewContent"></div>
+    </div>
+
     <!-- Checkout Modal -->
     <div class="checkout-modal" id="checkoutModal">
         <button class="close-modal" onclick="closeCheckout()"><i class="fas fa-times"></i></button>
@@ -1095,6 +1250,7 @@
         let searchQuery = '';
         let selectedPayment = 'cod';
         let heroSwiper = null;
+        let productSwipers = {};
 
         // Default hero slides
         const DEFAULT_SLIDES = [
@@ -1121,12 +1277,87 @@
             }
         ];
 
+        // Default products with multiple images
+        const DEFAULT_PRODUCTS = [
+            { 
+                id: 'SOL001', 
+                name: 'Golden Peacock Choker', 
+                category: 'Necklace', 
+                price: 1850, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Exquisite gold-plated choker with peacock design, featuring intricate detailing and traditional craftsmanship.'
+            },
+            { 
+                id: 'SOL002', 
+                name: 'Oxidized Jhumka Earrings', 
+                category: 'Earrings', 
+                price: 1299, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Traditional oxidized silver jhumkas with bell-shaped design, perfect for festive occasions.'
+            },
+            { 
+                id: 'SOL003', 
+                name: 'Polki Bangle Set', 
+                category: 'Bangles', 
+                price: 2400, 
+                stock: 'Limited', 
+                images: [
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Set of 4 Polki bangles with uncut diamond look, gold-plated finish.'
+            },
+            { 
+                id: 'SOL004', 
+                name: 'Kundan Maang Tikka', 
+                category: 'Headpiece', 
+                price: 990, 
+                stock: 'In Stock', 
+                images: [],
+                description: 'Traditional Kundan maang tikka with pearl drops, perfect for bridal wear.'
+            },
+            { 
+                id: 'SOL005', 
+                name: 'Pearl Gold Bracelet', 
+                category: 'Bracelet', 
+                price: 750, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Elegant gold-plated bracelet with freshwater pearl accents.'
+            },
+            { 
+                id: 'SOL006', 
+                name: 'Traditional Necklace Set', 
+                category: 'Necklace', 
+                price: 3200, 
+                stock: 'In Stock', 
+                images: [
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
+                description: 'Complete necklace set with matching earrings, featuring traditional temple jewelry design.'
+            }
+        ];
+
         // Load hero slides
         function loadHeroSlides() {
             const saved = localStorage.getItem('sol_hero_slides');
             let slides = saved ? JSON.parse(saved) : DEFAULT_SLIDES;
             
-            // Save defaults if not exists
             if (!saved) {
                 localStorage.setItem('sol_hero_slides', JSON.stringify(DEFAULT_SLIDES));
             }
@@ -1190,17 +1421,7 @@
             if (saved) {
                 products = JSON.parse(saved);
             } else {
-                products = [
-                    { id: 'SOL001', name: 'Golden Peacock Choker', category: 'Necklace', price: 1850, stock: 'In Stock', img: '' },
-                    { id: 'SOL002', name: 'Oxidized Jhumka Earrings', category: 'Earrings', price: 1299, stock: 'In Stock', img: '' },
-                    { id: 'SOL003', name: 'Polki Bangle Set', category: 'Bangles', price: 2400, stock: 'Limited', img: '' },
-                    { id: 'SOL004', name: 'Kundan Maang Tikka', category: 'Headpiece', price: 990, stock: 'In Stock', img: '' },
-                    { id: 'SOL005', name: 'Pearl Gold Bracelet', category: 'Bracelet', price: 750, stock: 'In Stock', img: '' },
-                    { id: 'SOL006', name: 'Traditional Necklace Set', category: 'Necklace', price: 3200, stock: 'In Stock', img: '' },
-                    { id: 'SOL007', name: 'Gold Plated Rings', category: 'Ring', price: 450, stock: 'In Stock', img: '' },
-                    { id: 'SOL008', name: 'Diamond Stud Earrings', category: 'Earrings', price: 2100, stock: 'Limited', img: '' },
-                    { id: 'SOL009', name: 'Bridal Bangles Set', category: 'Bangles', price: 3600, stock: 'In Stock', img: '' },
-                ];
+                products = DEFAULT_PRODUCTS;
                 localStorage.setItem('sol_products', JSON.stringify(products));
             }
             renderFilterButtons();
@@ -1239,7 +1460,7 @@
             renderProducts();
         };
 
-        // Render products
+        // Render products with image carousels
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
             
@@ -1272,17 +1493,37 @@
                 if (p.stock === 'Limited') stockClass = 'stock-limited';
                 if (p.stock === 'Out of Stock') stockClass = 'stock-out';
 
-                const imgHtml = p.img ? 
-                    `<img class="product-img" src="${p.img}" alt="${p.name}">` : 
-                    `<div class="product-img" style="background: linear-gradient(135deg, #f8f4f0, #e8e0d8); display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-gem" style="font-size: 4rem; color: var(--gold);"></i>
-                    </div>`;
+                // Generate image carousel slides
+                let imageSlides = '';
+                if (p.images && p.images.length > 0) {
+                    p.images.forEach(img => {
+                        imageSlides += `<div class="swiper-slide"><img src="${img}" alt="${p.name}"></div>`;
+                    });
+                } else {
+                    imageSlides = `
+                        <div class="swiper-slide">
+                            <div class="no-image-placeholder">
+                                <i class="fas fa-gem"></i>
+                                <span>No Image</span>
+                            </div>
+                        </div>
+                    `;
+                }
 
                 html += `
                     <div class="product-card">
                         <div class="product-badge">${p.category}</div>
                         <div class="product-img-wrapper">
-                            ${imgHtml}
+                            <div class="swiper product-swiper-${index}" data-product-id="${p.id}">
+                                <div class="swiper-wrapper">
+                                    ${imageSlides}
+                                </div>
+                                <div class="swiper-pagination"></div>
+                                ${p.images && p.images.length > 1 ? `
+                                    <div class="swiper-button-prev"></div>
+                                    <div class="swiper-button-next"></div>
+                                ` : ''}
+                            </div>
                         </div>
                         <div class="product-info">
                             <div class="product-id">${p.id}</div>
@@ -1296,16 +1537,124 @@
                                 <button class="add-to-cart-btn" onclick="addToCart('${p.id}')" ${p.stock === 'Out of Stock' ? 'disabled' : ''}>
                                     <i class="fas fa-shopping-cart"></i> Add
                                 </button>
-                                <button class="buy-now-btn" onclick="buyNow('${p.id}')" ${p.stock === 'Out of Stock' ? 'disabled' : ''}>
-                                    <i class="fas fa-bolt"></i> Buy
+                                <button class="buy-now-btn" onclick="quickView('${p.id}')">
+                                    <i class="fas fa-eye"></i> Quick View
                                 </button>
                             </div>
                         </div>
                     </div>
                 `;
             });
+            
             grid.innerHTML = html;
+
+            // Initialize product swipers after they're added to DOM
+            setTimeout(() => {
+                products.forEach((p, index) => {
+                    if (p.images && p.images.length > 0) {
+                        const swiperEl = document.querySelector(`.product-swiper-${index}`);
+                        if (swiperEl) {
+                            productSwipers[p.id] = new Swiper(swiperEl, {
+                                loop: p.images.length > 1,
+                                pagination: {
+                                    el: swiperEl.querySelector('.swiper-pagination'),
+                                    clickable: true,
+                                },
+                                navigation: p.images.length > 1 ? {
+                                    nextEl: swiperEl.querySelector('.swiper-button-next'),
+                                    prevEl: swiperEl.querySelector('.swiper-button-prev'),
+                                } : false,
+                                autoplay: p.images.length > 1 ? {
+                                    delay: 3000,
+                                    disableOnInteraction: false,
+                                } : false,
+                            });
+                        }
+                    }
+                });
+            }, 100);
         }
+
+        // Quick view
+        window.quickView = function(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            let imageSlides = '';
+            if (product.images && product.images.length > 0) {
+                product.images.forEach(img => {
+                    imageSlides += `<div class="swiper-slide"><img src="${img}" alt="${product.name}"></div>`;
+                });
+            } else {
+                imageSlides = `
+                    <div class="swiper-slide">
+                        <div class="no-image-placeholder">
+                            <i class="fas fa-gem"></i>
+                            <span>No Image</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const content = `
+                <div class="quick-view-images">
+                    <div class="swiper quick-view-swiper">
+                        <div class="swiper-wrapper">
+                            ${imageSlides}
+                        </div>
+                        ${product.images && product.images.length > 1 ? `
+                            <div class="swiper-button-prev"></div>
+                            <div class="swiper-button-next"></div>
+                        ` : ''}
+                        <div class="swiper-pagination"></div>
+                    </div>
+                </div>
+                <div class="quick-view-details">
+                    <h2>${product.name}</h2>
+                    <p class="product-id">${product.id}</p>
+                    <p class="price">₹${product.price}</p>
+                    <p class="description">${product.description || 'No description available.'}</p>
+                    <div class="product-stock ${product.stock === 'In Stock' ? 'stock-instock' : product.stock === 'Limited' ? 'stock-limited' : 'stock-out'}">
+                        <i class="fas ${product.stock === 'In Stock' ? 'fa-check-circle' : product.stock === 'Limited' ? 'fa-exclamation-circle' : 'fa-times-circle'}"></i>
+                        ${product.stock}
+                    </div>
+                    <div class="product-actions" style="margin-top: 30px;">
+                        <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" ${product.stock === 'Out of Stock' ? 'disabled' : ''}>
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <button class="buy-now-btn" onclick="buyNow('${product.id}')" ${product.stock === 'Out of Stock' ? 'disabled' : ''}>
+                            <i class="fas fa-bolt"></i> Buy Now
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('quickViewContent').innerHTML = content;
+            document.getElementById('quickViewModal').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
+
+            // Initialize quick view swiper
+            setTimeout(() => {
+                new Swiper('.quick-view-swiper', {
+                    loop: product.images && product.images.length > 1,
+                    pagination: {
+                        el: '.quick-view-swiper .swiper-pagination',
+                        clickable: true,
+                    },
+                    navigation: product.images && product.images.length > 1 ? {
+                        nextEl: '.quick-view-swiper .swiper-button-next',
+                        prevEl: '.quick-view-swiper .swiper-button-prev',
+                    } : false,
+                });
+            }, 100);
+        };
+
+        window.closeQuickView = function() {
+            document.getElementById('quickViewModal').classList.remove('show');
+            if (!document.getElementById('cartSidebar').classList.contains('open')) {
+                document.getElementById('overlay').classList.remove('show');
+            }
+        };
 
         // Scroll to products
         window.scrollToProducts = function() {
@@ -1326,7 +1675,7 @@
                     id: product.id,
                     name: product.name,
                     price: product.price,
-                    img: product.img,
+                    images: product.images,
                     quantity: 1
                 });
             }
@@ -1335,6 +1684,9 @@
             updateCartCount();
             renderCart();
             showNotification(`✨ ${product.name} added to cart!`);
+            
+            // Close quick view if open
+            closeQuickView();
         };
 
         // Buy now
@@ -1368,15 +1720,16 @@
             cart.forEach((item, index) => {
                 total += item.price * item.quantity;
                 
-                const imgHtml = item.img ? 
-                    `<img class="cart-item-img" src="${item.img}" alt="${item.name}">` : 
-                    `<div class="cart-item-img" style="background: linear-gradient(135deg, #f8f4f0, #e8e0d8); display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-gem" style="color: var(--gold);"></i>
-                    </div>`;
+                const imgSrc = (item.images && item.images.length > 0) ? item.images[0] : '';
 
                 html += `
                     <div class="cart-item">
-                        ${imgHtml}
+                        ${imgSrc ? 
+                            `<img class="cart-item-img" src="${imgSrc}" alt="${item.name}">` : 
+                            `<div class="cart-item-img" style="background: linear-gradient(135deg, #f8f4f0, #e8e0d8); display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-gem" style="color: var(--gold);"></i>
+                            </div>`
+                        }
                         <div class="cart-item-details">
                             <div class="cart-item-name">${item.name}</div>
                             <div class="cart-item-price">₹${item.price}</div>
@@ -1430,6 +1783,7 @@
         window.toggleCart = function() {
             document.getElementById('cartSidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('show');
+            closeQuickView();
         };
 
         // Show notification
@@ -1451,6 +1805,7 @@
             
             document.getElementById('checkoutModal').classList.add('show');
             document.getElementById('overlay').classList.add('show');
+            closeQuickView();
         };
 
         // Close checkout
