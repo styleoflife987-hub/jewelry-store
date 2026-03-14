@@ -195,17 +195,6 @@
             animation: fadeInUp 1.5s ease;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .slide-subtitle {
             font-size: 1.2rem;
             letter-spacing: 5px;
@@ -562,7 +551,7 @@
             cursor: not-allowed;
         }
 
-        .buy-now-btn {
+        .quick-view-btn {
             flex: 1;
             padding: 15px;
             background: transparent;
@@ -574,14 +563,9 @@
             transition: 0.3s;
         }
 
-        .buy-now-btn:hover:not(:disabled) {
+        .quick-view-btn:hover {
             background: var(--gold);
             color: white;
-        }
-
-        .buy-now-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
 
         /* Quick View Modal */
@@ -598,6 +582,8 @@
             z-index: 2002;
             transition: 0.3s;
             box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .quick-view-modal.show {
@@ -612,13 +598,18 @@
 
         .quick-view-images {
             height: 500px;
+            border-radius: 20px;
+            overflow: hidden;
         }
 
         .quick-view-images .swiper {
             width: 100%;
             height: 100%;
-            border-radius: 20px;
-            overflow: hidden;
+        }
+
+        .quick-view-images .swiper-slide {
+            width: 100%;
+            height: 100%;
         }
 
         .quick-view-images .swiper-slide img {
@@ -872,6 +863,8 @@
             z-index: 2002;
             transition: 0.3s;
             box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .checkout-modal.show {
@@ -1053,6 +1046,9 @@
             }
             .quick-view-content {
                 grid-template-columns: 1fr;
+            }
+            .quick-view-images {
+                height: 300px;
             }
         }
     </style>
@@ -1324,7 +1320,9 @@
                 category: 'Headpiece', 
                 price: 990, 
                 stock: 'In Stock', 
-                images: [],
+                images: [
+                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
+                ],
                 description: 'Traditional Kundan maang tikka with pearl drops, perfect for bridal wear.'
             },
             { 
@@ -1338,18 +1336,6 @@
                     'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
                 ],
                 description: 'Elegant gold-plated bracelet with freshwater pearl accents.'
-            },
-            { 
-                id: 'SOL006', 
-                name: 'Traditional Necklace Set', 
-                category: 'Necklace', 
-                price: 3200, 
-                stock: 'In Stock', 
-                images: [
-                    'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-                    'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80'
-                ],
-                description: 'Complete necklace set with matching earrings, featuring traditional temple jewelry design.'
             }
         ];
 
@@ -1514,7 +1500,7 @@
                     <div class="product-card">
                         <div class="product-badge">${p.category}</div>
                         <div class="product-img-wrapper">
-                            <div class="swiper product-swiper-${index}" data-product-id="${p.id}">
+                            <div class="swiper product-swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}" data-product-id="${p.id}">
                                 <div class="swiper-wrapper">
                                     ${imageSlides}
                                 </div>
@@ -1537,7 +1523,7 @@
                                 <button class="add-to-cart-btn" onclick="addToCart('${p.id}')" ${p.stock === 'Out of Stock' ? 'disabled' : ''}>
                                     <i class="fas fa-shopping-cart"></i> Add
                                 </button>
-                                <button class="buy-now-btn" onclick="quickView('${p.id}')">
+                                <button class="quick-view-btn" onclick="quickView('${p.id}')">
                                     <i class="fas fa-eye"></i> Quick View
                                 </button>
                             </div>
@@ -1550,26 +1536,31 @@
 
             // Initialize product swipers after they're added to DOM
             setTimeout(() => {
-                products.forEach((p, index) => {
-                    if (p.images && p.images.length > 0) {
-                        const swiperEl = document.querySelector(`.product-swiper-${index}`);
-                        if (swiperEl) {
-                            productSwipers[p.id] = new Swiper(swiperEl, {
-                                loop: p.images.length > 1,
-                                pagination: {
-                                    el: swiperEl.querySelector('.swiper-pagination'),
-                                    clickable: true,
-                                },
-                                navigation: p.images.length > 1 ? {
-                                    nextEl: swiperEl.querySelector('.swiper-button-next'),
-                                    prevEl: swiperEl.querySelector('.swiper-button-prev'),
-                                } : false,
-                                autoplay: p.images.length > 1 ? {
-                                    delay: 3000,
-                                    disableOnInteraction: false,
-                                } : false,
-                            });
+                filtered.forEach(p => {
+                    const swiperClass = `.product-swiper-${p.id.replace(/[^a-zA-Z0-9]/g, '')}`;
+                    const swiperEl = document.querySelector(swiperClass);
+                    if (swiperEl) {
+                        // Destroy existing swiper if any
+                        if (productSwipers[p.id]) {
+                            productSwipers[p.id].destroy(true, true);
                         }
+                        
+                        // Create new swiper
+                        productSwipers[p.id] = new Swiper(swiperEl, {
+                            loop: p.images && p.images.length > 1,
+                            pagination: {
+                                el: swiperEl.querySelector('.swiper-pagination'),
+                                clickable: true,
+                            },
+                            navigation: p.images && p.images.length > 1 ? {
+                                nextEl: swiperEl.querySelector('.swiper-button-next'),
+                                prevEl: swiperEl.querySelector('.swiper-button-prev'),
+                            } : false,
+                            autoplay: p.images && p.images.length > 1 ? {
+                                delay: 3000,
+                                disableOnInteraction: false,
+                            } : false,
+                        });
                     }
                 });
             }, 100);
@@ -1598,7 +1589,7 @@
 
             const content = `
                 <div class="quick-view-images">
-                    <div class="swiper quick-view-swiper">
+                    <div class="swiper quick-view-swiper-${product.id}">
                         <div class="swiper-wrapper">
                             ${imageSlides}
                         </div>
@@ -1622,9 +1613,6 @@
                         <button class="add-to-cart-btn" onclick="addToCart('${product.id}')" ${product.stock === 'Out of Stock' ? 'disabled' : ''}>
                             <i class="fas fa-shopping-cart"></i> Add to Cart
                         </button>
-                        <button class="buy-now-btn" onclick="buyNow('${product.id}')" ${product.stock === 'Out of Stock' ? 'disabled' : ''}>
-                            <i class="fas fa-bolt"></i> Buy Now
-                        </button>
                     </div>
                 </div>
             `;
@@ -1635,7 +1623,7 @@
 
             // Initialize quick view swiper
             setTimeout(() => {
-                new Swiper('.quick-view-swiper', {
+                new Swiper(`.quick-view-swiper-${product.id}`, {
                     loop: product.images && product.images.length > 1,
                     pagination: {
                         el: '.quick-view-swiper .swiper-pagination',
@@ -1644,6 +1632,10 @@
                     navigation: product.images && product.images.length > 1 ? {
                         nextEl: '.quick-view-swiper .swiper-button-next',
                         prevEl: '.quick-view-swiper .swiper-button-prev',
+                    } : false,
+                    autoplay: product.images && product.images.length > 1 ? {
+                        delay: 3000,
+                        disableOnInteraction: false,
                     } : false,
                 });
             }, 100);
@@ -1687,15 +1679,6 @@
             
             // Close quick view if open
             closeQuickView();
-        };
-
-        // Buy now
-        window.buyNow = function(productId) {
-            addToCart(productId);
-            setTimeout(() => {
-                toggleCart();
-                openCheckout();
-            }, 500);
         };
 
         // Render cart
