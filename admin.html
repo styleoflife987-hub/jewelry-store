@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Style Of Life · Admin Panel v2.0</title>
-    <!-- Font Awesome -->
+    <title>Style Of Life · Admin Panel</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Chart.js for Analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
@@ -21,7 +19,7 @@
             min-height: 100vh;
         }
 
-        /* Admin Header */
+        /* Header */
         .admin-header {
             background: #0f1722;
             padding: 20px 40px;
@@ -71,6 +69,30 @@
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        /* Customer Link */
+        .customer-link {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: #f39c12;
+            color: #0f1722;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .customer-link:hover {
+            background: white;
+            transform: translateY(-3px);
         }
 
         /* Main Container */
@@ -160,7 +182,6 @@
             flex-wrap: wrap;
         }
 
-        /* Buttons */
         .btn {
             padding: 12px 25px;
             border: none;
@@ -171,7 +192,6 @@
             align-items: center;
             gap: 10px;
             transition: 0.3s;
-            font-size: 0.95rem;
         }
 
         .btn-primary {
@@ -210,10 +230,6 @@
         .btn-info {
             background: #3498db;
             color: white;
-        }
-
-        .btn-info:hover {
-            background: #2980b9;
         }
 
         /* Tab Navigation */
@@ -269,7 +285,7 @@
         .excel-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1200px;
+            min-width: 1000px;
         }
 
         .excel-table th {
@@ -294,8 +310,6 @@
             border: 2px solid #2c3e50;
             border-radius: 8px;
             color: white;
-            font-size: 0.95rem;
-            transition: 0.2s;
         }
 
         .excel-table input:focus, .excel-table select:focus {
@@ -303,20 +317,11 @@
             border-color: #f39c12;
         }
 
-        .excel-table input::placeholder {
-            color: #7f8c8d;
-        }
-
         .table-img-preview {
             width: 50px;
             height: 50px;
             border-radius: 8px;
             object-fit: cover;
-        }
-
-        .no-img {
-            color: #7f8c8d;
-            font-style: italic;
         }
 
         .action-btns {
@@ -338,7 +343,6 @@
         .action-btn:hover {
             background: #f39c12;
             color: #0f1722;
-            border-color: #f39c12;
         }
 
         .action-btn.delete:hover {
@@ -379,7 +383,6 @@
         .order-id {
             color: #f39c12;
             font-weight: 700;
-            font-size: 1.1rem;
         }
 
         .order-status {
@@ -467,7 +470,6 @@
             border-radius: 20px;
             padding: 30px;
             border: 2px dashed #f39c12;
-            margin-bottom: 40px;
         }
 
         .upload-panel h2 {
@@ -476,10 +478,6 @@
             display: flex;
             align-items: center;
             gap: 15px;
-        }
-
-        .upload-panel h2 i {
-            color: #f39c12;
         }
 
         .upload-grid {
@@ -512,7 +510,6 @@
             border: 2px solid #2c3e50;
             border-radius: 12px;
             color: white;
-            font-size: 1rem;
         }
 
         .upload-status {
@@ -530,12 +527,11 @@
             border-left: 4px solid #f39c12;
         }
 
-        /* Analytics Section */
+        /* Analytics Grid */
         .analytics-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 25px;
-            margin-bottom: 40px;
         }
 
         .chart-card {
@@ -577,67 +573,7 @@
             color: #f39c12;
         }
 
-        /* Modal */
-        .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: #0f1722;
-            border-radius: 25px;
-            padding: 40px;
-            width: 90%;
-            max-width: 500px;
-            z-index: 2000;
-            transition: 0.3s;
-            border: 2px solid #f39c12;
-        }
-
-        .modal.show {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            color: white;
-        }
-
-        .modal-header h2 {
-            color: #f39c12;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            color: #95a5a6;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1999;
-            display: none;
-        }
-
-        .modal-overlay.show {
-            display: block;
-        }
-
-        /* Responsive */
         @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 20px;
-            }
             .upload-grid {
                 grid-template-columns: 1fr;
             }
@@ -651,19 +587,12 @@
     </style>
 </head>
 <body>
-    <!-- Modal Overlay -->
-    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+    <!-- Customer Link -->
+    <a href="customer.html" class="customer-link" target="_blank">
+        <i class="fas fa-store"></i> View Customer Store
+    </a>
 
-    <!-- Order Details Modal -->
-    <div class="modal" id="orderModal">
-        <div class="modal-header">
-            <h2><i class="fas fa-box"></i> Order Details</h2>
-            <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
-        </div>
-        <div id="orderModalContent" style="color: white;"></div>
-    </div>
-
-    <!-- Admin Header -->
+    <!-- Header -->
     <header class="admin-header">
         <div class="logo">
             <div class="logo-icon">
@@ -671,7 +600,7 @@
             </div>
             <div class="logo-text">
                 <h1>Style Of Life</h1>
-                <p>Administration Panel v2.0</p>
+                <p>Administration Panel</p>
             </div>
         </div>
         <div class="admin-badge">
@@ -715,13 +644,13 @@
                     <i class="fas fa-rupee-sign"></i>
                 </div>
                 <div class="stat-info">
-                    <h3>Total Revenue</h3>
+                    <h3>Revenue</h3>
                     <span id="totalRevenue">₹0</span>
                 </div>
             </div>
         </div>
 
-        <!-- Admin Tabs -->
+        <!-- Tabs -->
         <div class="admin-tabs">
             <button class="tab-btn active" onclick="switchTab('products')">
                 <i class="fas fa-box"></i> Products
@@ -732,14 +661,10 @@
             <button class="tab-btn" onclick="switchTab('analytics')">
                 <i class="fas fa-chart-line"></i> Analytics
             </button>
-            <button class="tab-btn" onclick="switchTab('customers')">
-                <i class="fas fa-users"></i> Customers
-            </button>
         </div>
 
         <!-- Products Tab -->
         <div class="tab-content active" id="productsTab">
-            <!-- Admin Controls -->
             <div class="admin-controls">
                 <div class="save-indicator" id="saveIndicator">
                     <i class="fas fa-check-circle"></i> All Changes Saved
@@ -749,27 +674,21 @@
                         <i class="fas fa-plus"></i> Add Product
                     </button>
                     <button class="btn btn-warning" onclick="resetToDefault()">
-                        <i class="fas fa-redo"></i> Reset
-                    </button>
-                    <button class="btn btn-primary" onclick="exportProducts()">
-                        <i class="fas fa-download"></i> Export
-                    </button>
-                    <button class="btn btn-info" onclick="importProducts()">
-                        <i class="fas fa-upload"></i> Import
+                        <i class="fas fa-redo"></i> Reset to Default
                     </button>
                 </div>
             </div>
 
-            <!-- Excel-like Inventory Table -->
+            <!-- Products Table -->
             <div class="table-wrapper">
-                <table class="excel-table" id="inventoryTable">
+                <table class="excel-table">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Product Name</th>
                             <th>Category</th>
                             <th>Price (₹)</th>
-                            <th>Stock Status</th>
+                            <th>Stock</th>
                             <th>Image</th>
                             <th>Actions</th>
                         </tr>
@@ -777,56 +696,34 @@
                     <tbody id="tableBody">
                         <tr>
                             <td colspan="7" class="loading">
-                                <i class="fas fa-spinner fa-spin"></i> Loading inventory...
+                                <i class="fas fa-spinner fa-spin"></i> Loading...
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <!-- Backend Image Upload Panel -->
+            <!-- Image Upload -->
             <div class="upload-panel">
-                <h2>
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    Product Image Management
-                </h2>
-                
+                <h2><i class="fas fa-cloud-upload-alt"></i> Image Upload</h2>
                 <div class="upload-grid">
                     <div class="upload-form">
                         <div class="form-group">
-                            <label><i class="fas fa-tag"></i> Select Product</label>
-                            <select id="productSelect">
-                                <option value="">Choose a product...</option>
-                            </select>
+                            <label>Select Product</label>
+                            <select id="productSelect"></select>
                         </div>
-                        
                         <div class="form-group">
-                            <label><i class="fas fa-image"></i> Upload Image</label>
+                            <label>Upload Image</label>
                             <input type="file" id="imageUpload" accept="image/*">
                         </div>
-                        
-                        <div style="display: flex; gap: 15px;">
-                            <button class="btn btn-primary" onclick="uploadImage()">
-                                <i class="fas fa-upload"></i> Upload to Backend
-                            </button>
-                            <button class="btn btn-warning" onclick="addPlaceholder()">
-                                <i class="fas fa-image"></i> Add Placeholder
-                            </button>
-                        </div>
+                        <button class="btn btn-primary" onclick="uploadImage()">
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
                     </div>
-                    
                     <div class="upload-status">
-                        <h3 style="color: #f39c12; margin-bottom: 15px;">
-                            <i class="fas fa-server"></i> Backend Status
-                        </h3>
+                        <h3>Status</h3>
                         <div class="status-box" id="backendStatus">
                             <i class="fas fa-check-circle" style="color: #27ae60;"></i> System Ready
-                        </div>
-                        
-                        <div style="margin-top: 20px;">
-                            <p style="color: #95a5a6; margin-bottom: 10px;">Quick Stats:</p>
-                            <p><i class="fas fa-database"></i> <span id="storageSize">0</span> MB used</p>
-                            <p><i class="fas fa-images"></i> <span id="imagesCount">0</span> images stored</p>
                         </div>
                     </div>
                 </div>
@@ -838,18 +735,12 @@
             <div class="admin-controls">
                 <div class="btn-group">
                     <button class="btn btn-primary" onclick="refreshOrders()">
-                        <i class="fas fa-sync-alt"></i> Refresh Orders
-                    </button>
-                    <button class="btn btn-success" onclick="exportOrders()">
-                        <i class="fas fa-download"></i> Export Orders
+                        <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
             </div>
-
             <div class="orders-grid" id="ordersGrid">
-                <div class="loading">
-                    <i class="fas fa-spinner fa-spin"></i> Loading orders...
-                </div>
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>
             </div>
         </div>
 
@@ -874,41 +765,15 @@
                 </div>
             </div>
         </div>
-
-        <!-- Customers Tab -->
-        <div class="tab-content" id="customersTab">
-            <div class="table-wrapper">
-                <table class="excel-table">
-                    <thead>
-                        <tr>
-                            <th>Customer Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Total Orders</th>
-                            <th>Total Spent</th>
-                            <th>Last Order</th>
-                        </tr>
-                    </thead>
-                    <tbody id="customersTableBody">
-                        <tr>
-                            <td colspan="6" class="loading">
-                                <i class="fas fa-spinner fa-spin"></i> Loading customers...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
     <!-- Footer -->
     <footer class="footer">
-        <p>Style Of Life · Admin Panel v2.0</p>
-        <p style="margin-top: 10px; font-size: 0.8rem;">Changes are automatically synced to Customer Store • Real-time updates active</p>
+        <p>Style Of Life · Real-time updates active</p>
     </footer>
 
     <script>
-        // ========== ADMIN DATA ==========
+        // Data
         let products = [];
         let orders = JSON.parse(localStorage.getItem('sol_orders')) || [];
         let charts = {};
@@ -925,31 +790,25 @@
             { id: 'SOL009', name: 'Bridal Bangles Set', category: 'Bangles', price: 3600, stock: 'In Stock', img: '' },
         ];
 
-        // ========== TAB SWITCHING ==========
+        // Tab Switching
         window.switchTab = function(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.closest('.tab-btn').classList.add('active');
 
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.getElementById(tabName + 'Tab').classList.add('active');
-
-            // Load tab-specific data
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            
+            if (tabName === 'products') document.getElementById('productsTab').classList.add('active');
             if (tabName === 'orders') {
+                document.getElementById('ordersTab').classList.add('active');
                 renderOrders();
-            } else if (tabName === 'analytics') {
+            }
+            if (tabName === 'analytics') {
+                document.getElementById('analyticsTab').classList.add('active');
                 renderCharts();
-            } else if (tabName === 'customers') {
-                renderCustomers();
             }
         };
 
-        // ========== PRODUCT MANAGEMENT ==========
+        // Load Products
         function loadProducts() {
             const saved = localStorage.getItem('sol_products');
             products = saved ? JSON.parse(saved) : [...DEFAULT_PRODUCTS];
@@ -963,9 +822,8 @@
             localStorage.setItem('sol_products', JSON.stringify(products));
             showSaveIndicator();
             updateStats();
-            calculateStorage();
             
-            // Notify customer portal of changes
+            // Notify customer portal
             window.dispatchEvent(new StorageEvent('storage', {
                 key: 'sol_products',
                 newValue: JSON.stringify(products)
@@ -974,7 +832,7 @@
 
         function showSaveIndicator() {
             const indicator = document.getElementById('saveIndicator');
-            indicator.innerHTML = '<i class="fas fa-check-circle"></i> Saved ✓';
+            indicator.innerHTML = '<i class="fas fa-check-circle"></i> Saved!';
             indicator.style.background = '#27ae60';
             setTimeout(() => {
                 indicator.innerHTML = '<i class="fas fa-check-circle"></i> All Changes Saved';
@@ -987,55 +845,37 @@
             const categories = new Set(products.map(p => p.category)).size;
             document.getElementById('totalCategories').textContent = categories;
             
-            const totalValue = products.reduce((sum, p) => sum + p.price, 0);
-            document.getElementById('totalValue').textContent = totalValue;
-            
-            const imagesCount = products.filter(p => p.img).length;
-            document.getElementById('imagesCount').textContent = imagesCount;
-
-            // Update order stats
             document.getElementById('totalOrders').textContent = orders.length;
-            const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
-            document.getElementById('totalRevenue').textContent = '₹' + totalRevenue;
-        }
-
-        function calculateStorage() {
-            let totalSize = 0;
-            products.forEach(p => {
-                if (p.img) {
-                    totalSize += p.img.length;
-                }
-            });
-            const sizeInMB = (totalSize * 1.33) / (1024 * 1024);
-            document.getElementById('storageSize').textContent = sizeInMB.toFixed(2);
+            const revenue = orders.reduce((sum, o) => sum + o.total, 0);
+            document.getElementById('totalRevenue').textContent = '₹' + revenue;
         }
 
         function renderTable() {
             const tbody = document.getElementById('tableBody');
-            const categories = ['Necklace', 'Earrings', 'Bangles', 'Headpiece', 'Bracelet', 'Ring', 'Anklet'];
+            const categories = ['Necklace', 'Earrings', 'Bangles', 'Headpiece', 'Bracelet', 'Ring'];
             const stockOptions = ['In Stock', 'Limited', 'Out of Stock'];
 
             let html = '';
             products.forEach((p, index) => {
-                let catOptions = categories.map(cat => 
-                    `<option value="${cat}" ${p.category === cat ? 'selected' : ''}>${cat}</option>`
-                ).join('');
-
-                let stockOpts = stockOptions.map(s => 
-                    `<option value="${s}" ${p.stock === s ? 'selected' : ''}>${s}</option>`
-                ).join('');
-
                 const imgHtml = p.img ? 
-                    `<img class="table-img-preview" src="${p.img}" alt="preview">` : 
-                    '<span class="no-img"><i class="far fa-image"></i> No image</span>';
+                    `<img class="table-img-preview" src="${p.img}">` : 
+                    '<span class="no-img">No image</span>';
 
                 html += `
-                    <tr data-index="${index}">
-                        <td><input type="text" value="${p.id}" class="edit-field" data-field="id" placeholder="ID"></td>
-                        <td><input type="text" value="${p.name.replace(/"/g, '&quot;')}" class="edit-field" data-field="name"></td>
-                        <td><select class="edit-field" data-field="category">${catOptions}</select></td>
-                        <td><input type="number" value="${p.price}" class="edit-field" data-field="price" step="1" min="0"></td>
-                        <td><select class="edit-field" data-field="stock">${stockOpts}</select></td>
+                    <tr>
+                        <td><input type="text" value="${p.id}" onchange="updateProduct(${index}, 'id', this.value)"></td>
+                        <td><input type="text" value="${p.name}" onchange="updateProduct(${index}, 'name', this.value)"></td>
+                        <td>
+                            <select onchange="updateProduct(${index}, 'category', this.value)">
+                                ${categories.map(c => `<option value="${c}" ${p.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+                            </select>
+                        </td>
+                        <td><input type="number" value="${p.price}" onchange="updateProduct(${index}, 'price', this.value)"></td>
+                        <td>
+                            <select onchange="updateProduct(${index}, 'stock', this.value)">
+                                ${stockOptions.map(s => `<option value="${s}" ${p.stock === s ? 'selected' : ''}>${s}</option>`).join('')}
+                            </select>
+                        </td>
                         <td>${imgHtml}</td>
                         <td>
                             <div class="action-btns">
@@ -1053,30 +893,19 @@
                     </tr>
                 `;
             });
-
             tbody.innerHTML = html;
-
-            document.querySelectorAll('.edit-field').forEach(el => {
-                el.addEventListener('change', function(e) {
-                    const row = this.closest('tr');
-                    const index = row.dataset.index;
-                    const field = this.dataset.field;
-                    let value = this.value;
-                    
-                    if (field === 'price') value = parseFloat(value) || 0;
-                    
-                    if (products[index]) {
-                        products[index][field] = value;
-                        saveProducts();
-                        populateSelect();
-                    }
-                });
-            });
         }
+
+        window.updateProduct = function(index, field, value) {
+            if (field === 'price') value = parseFloat(value) || 0;
+            products[index][field] = value;
+            saveProducts();
+            populateSelect();
+        };
 
         window.moveUp = function(index) {
             if (index > 0) {
-                [products[index - 1], products[index]] = [products[index], products[index - 1]];
+                [products[index-1], products[index]] = [products[index], products[index-1]];
                 saveProducts();
                 renderTable();
                 populateSelect();
@@ -1084,8 +913,8 @@
         };
 
         window.moveDown = function(index) {
-            if (index < products.length - 1) {
-                [products[index], products[index + 1]] = [products[index + 1], products[index]];
+            if (index < products.length-1) {
+                [products[index], products[index+1]] = [products[index+1], products[index]];
                 saveProducts();
                 renderTable();
                 populateSelect();
@@ -1117,7 +946,7 @@
         };
 
         window.resetToDefault = function() {
-            if (confirm('Reset to default products? All changes will be lost.')) {
+            if (confirm('Reset to default products?')) {
                 products = [...DEFAULT_PRODUCTS];
                 saveProducts();
                 renderTable();
@@ -1125,46 +954,9 @@
             }
         };
 
-        window.exportProducts = function() {
-            const dataStr = JSON.stringify(products, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            const exportFileDefaultName = `products_${new Date().toISOString().slice(0,10)}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        };
-
-        window.importProducts = function() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(e) {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const imported = JSON.parse(e.target.result);
-                        if (Array.isArray(imported)) {
-                            products = imported;
-                            saveProducts();
-                            renderTable();
-                            populateSelect();
-                            alert('Products imported successfully!');
-                        }
-                    } catch (error) {
-                        alert('Invalid JSON file');
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        };
-
         function populateSelect() {
             const select = document.getElementById('productSelect');
-            let options = '<option value="">Select product for image upload</option>';
+            let options = '<option value="">Select product...</option>';
             products.forEach((p, index) => {
                 options += `<option value="${index}">${p.id} - ${p.name}</option>`;
             });
@@ -1176,15 +968,15 @@
             const fileInput = document.getElementById('imageUpload');
             const index = select.value;
             const file = fileInput.files[0];
-            const statusDiv = document.getElementById('backendStatus');
+            const status = document.getElementById('backendStatus');
 
             if (!index) {
-                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Please select a product';
+                status.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Select a product';
                 return;
             }
             
             if (!file) {
-                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Please select an image';
+                status.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Select an image';
                 return;
             }
 
@@ -1194,45 +986,18 @@
                 saveProducts();
                 renderTable();
                 populateSelect();
-                statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Image uploaded successfully!';
+                status.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Image uploaded!';
                 fileInput.value = '';
-                calculateStorage();
             };
             reader.readAsDataURL(file);
         };
 
-        window.addPlaceholder = function() {
-            const select = document.getElementById('productSelect');
-            const index = select.value;
-            const statusDiv = document.getElementById('backendStatus');
-
-            if (!index) {
-                statusDiv.innerHTML = '<i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Please select a product';
-                return;
-            }
-
-            const colors = ['f39c12', '27ae60', 'e74c3c', '3498db', '9b59b6'];
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            products[index].img = `https://via.placeholder.com/300x300/${color}/ffffff?text=SOL`;
-            saveProducts();
-            renderTable();
-            populateSelect();
-            statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Placeholder added';
-            calculateStorage();
-        };
-
-        // ========== ORDER MANAGEMENT ==========
+        // Orders
         function renderOrders() {
             const grid = document.getElementById('ordersGrid');
             
             if (orders.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 60px; color: #7f8c8d;">
-                        <i class="fas fa-shopping-cart" style="font-size: 4rem; margin-bottom: 20px;"></i>
-                        <h3>No orders yet</h3>
-                        <p>Orders from customers will appear here</p>
-                    </div>
-                `;
+                grid.innerHTML = '<div class="loading">No orders yet</div>';
                 return;
             }
 
@@ -1248,34 +1013,13 @@
                             <span class="order-status ${statusClass}">${order.status.toUpperCase()}</span>
                         </div>
                         <div class="order-details">
-                            <div class="order-detail">
-                                <i class="fas fa-user"></i>
-                                <span>${order.customer.name}</span>
-                            </div>
-                            <div class="order-detail">
-                                <i class="fas fa-phone"></i>
-                                <span>${order.customer.phone}</span>
-                            </div>
-                            <div class="order-detail">
-                                <i class="fas fa-envelope"></i>
-                                <span>${order.customer.email}</span>
-                            </div>
-                            <div class="order-detail">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>${order.customer.address}</span>
-                            </div>
-                            <div class="order-detail">
-                                <i class="fas fa-calendar"></i>
-                                <span>${date}</span>
-                            </div>
-                            <div class="order-detail">
-                                <i class="fas fa-credit-card"></i>
-                                <span>Payment: ${order.payment.toUpperCase()}</span>
-                            </div>
+                            <div class="order-detail"><i class="fas fa-user"></i> ${order.customer.name}</div>
+                            <div class="order-detail"><i class="fas fa-phone"></i> ${order.customer.phone}</div>
+                            <div class="order-detail"><i class="fas fa-envelope"></i> ${order.customer.email}</div>
+                            <div class="order-detail"><i class="fas fa-map-marker-alt"></i> ${order.customer.address}</div>
+                            <div class="order-detail"><i class="fas fa-calendar"></i> ${date}</div>
                         </div>
-                        
                         <div class="order-items">
-                            <h4 style="color: #f39c12; margin-bottom: 10px;">Items:</h4>
                             ${order.items.map(item => `
                                 <div class="order-item">
                                     <span>${item.name} × ${item.quantity}</span>
@@ -1283,14 +1027,12 @@
                                 </div>
                             `).join('')}
                         </div>
-                        
                         <div class="order-total">
-                            <span>Total Amount:</span>
+                            <span>Total:</span>
                             <span>₹${order.total}</span>
                         </div>
-                        
                         <div class="order-actions">
-                            <select class="edit-field" onchange="updateOrderStatus('${order.id}', this.value)" style="flex: 2;">
+                            <select onchange="updateOrderStatus('${order.id}', this.value)" style="flex: 2; padding: 10px; background: #1a2634; color: white; border: 1px solid #2c3e50; border-radius: 8px;">
                                 <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
                                 <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
                                 <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
@@ -1298,7 +1040,7 @@
                                 <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                             </select>
                             <button class="btn btn-danger" onclick="deleteOrder('${order.id}')" style="flex: 1;">
-                                <i class="fas fa-trash"></i> Delete
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
@@ -1315,7 +1057,6 @@
                 localStorage.setItem('sol_orders', JSON.stringify(orders));
                 renderOrders();
                 updateStats();
-                showNotification(`Order ${orderId} status updated to ${status}`);
             }
         };
 
@@ -1325,7 +1066,6 @@
                 localStorage.setItem('sol_orders', JSON.stringify(orders));
                 renderOrders();
                 updateStats();
-                showNotification('Order deleted successfully');
             }
         };
 
@@ -1335,73 +1075,10 @@
             updateStats();
         };
 
-        window.exportOrders = function() {
-            const dataStr = JSON.stringify(orders, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            const exportFileDefaultName = `orders_${new Date().toISOString().slice(0,10)}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        };
-
-        // ========== CUSTOMER MANAGEMENT ==========
-        function renderCustomers() {
-            const customers = {};
-            
-            orders.forEach(order => {
-                const email = order.customer.email;
-                if (!customers[email]) {
-                    customers[email] = {
-                        name: order.customer.name,
-                        email: email,
-                        phone: order.customer.phone,
-                        orders: [],
-                        totalSpent: 0,
-                        lastOrder: order.date
-                    };
-                }
-                customers[email].orders.push(order);
-                customers[email].totalSpent += order.total;
-                if (new Date(order.date) > new Date(customers[email].lastOrder)) {
-                    customers[email].lastOrder = order.date;
-                }
-            });
-
-            const tbody = document.getElementById('customersTableBody');
-            
-            if (Object.keys(customers).length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="loading">No customers yet</td>
-                    </tr>
-                `;
-                return;
-            }
-
-            let html = '';
-            Object.values(customers).forEach(customer => {
-                html += `
-                    <tr>
-                        <td style="color: white;">${customer.name}</td>
-                        <td style="color: white;">${customer.email}</td>
-                        <td style="color: white;">${customer.phone}</td>
-                        <td style="color: white;">${customer.orders.length}</td>
-                        <td style="color: white;">₹${customer.totalSpent}</td>
-                        <td style="color: white;">${new Date(customer.lastOrder).toLocaleDateString()}</td>
-                    </tr>
-                `;
-            });
-
-            tbody.innerHTML = html;
-        }
-
-        // ========== ANALYTICS ==========
+        // Charts
         function renderCharts() {
-            // Destroy existing charts
-            Object.values(charts).forEach(chart => chart.destroy());
-            
+            Object.values(charts).forEach(chart => chart?.destroy());
+
             // Category Chart
             const categoryData = {};
             orders.forEach(order => {
@@ -1423,7 +1100,7 @@
                 }
             });
 
-            // Orders Chart (last 7 days)
+            // Orders Chart
             const last7Days = [];
             const orderCounts = [];
             for (let i = 6; i >= 0; i--) {
@@ -1470,7 +1147,7 @@
                 }
             });
 
-            // Payment Methods Chart
+            // Payment Chart
             const paymentData = {};
             orders.forEach(order => {
                 paymentData[order.payment] = (paymentData[order.payment] || 0) + 1;
@@ -1488,64 +1165,21 @@
             });
         }
 
-        // ========== UTILITIES ==========
-        function updateActiveCarts() {
-            const cart = JSON.parse(localStorage.getItem('sol_cart')) || [];
-            document.getElementById('activeCarts').textContent = cart.length;
-        }
-
-        function showNotification(message) {
-            const statusDiv = document.getElementById('backendStatus');
-            statusDiv.innerHTML = `<i class="fas fa-check-circle" style="color: #27ae60;"></i> ${message}`;
-            setTimeout(() => {
-                statusDiv.innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> System Ready';
-            }, 3000);
-        }
-
-        window.refreshPreview = function() {
-            updateStats();
-            document.getElementById('backendStatus').innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Syncing with store...';
-            setTimeout(() => {
-                document.getElementById('backendStatus').innerHTML = '<i class="fas fa-check-circle" style="color: #27ae60;"></i> Store synchronized';
-            }, 1000);
-        };
-
-        // Modal functions
-        window.openModal = function(order) {
-            document.getElementById('orderModal').classList.add('show');
-            document.getElementById('modalOverlay').classList.add('show');
-            
-            const content = document.getElementById('orderModalContent');
-            content.innerHTML = `<pre>${JSON.stringify(order, null, 2)}</pre>`;
-        };
-
-        window.closeModal = function() {
-            document.getElementById('orderModal').classList.remove('show');
-            document.getElementById('modalOverlay').classList.remove('show');
-        };
-
-        // Listen for storage events (customer orders)
+        // Listen for new orders
         window.addEventListener('storage', function(e) {
             if (e.key === 'sol_orders') {
                 orders = JSON.parse(e.newValue) || [];
                 updateStats();
-                
-                // Update current tab if orders tab is active
                 if (document.getElementById('ordersTab').classList.contains('active')) {
                     renderOrders();
                 }
                 if (document.getElementById('analyticsTab').classList.contains('active')) {
                     renderCharts();
                 }
-                if (document.getElementById('customersTab').classList.contains('active')) {
-                    renderCustomers();
-                }
-                
-                showNotification('New orders received!');
             }
         });
 
-        // Check for updates every 2 seconds
+        // Auto-refresh
         setInterval(() => {
             const newOrders = JSON.parse(localStorage.getItem('sol_orders')) || [];
             if (JSON.stringify(orders) !== JSON.stringify(newOrders)) {
@@ -1555,13 +1189,11 @@
                     renderOrders();
                 }
             }
-            updateActiveCarts();
         }, 2000);
 
         // Initialize
         loadProducts();
-        updateActiveCarts();
-        calculateStorage();
+        updateStats();
     </script>
 </body>
 </html>
