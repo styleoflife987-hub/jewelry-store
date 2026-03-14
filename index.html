@@ -6,6 +6,7 @@
     <title>Style Of Life · Luxury Redefined</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
         * {
             margin: 0;
@@ -23,12 +24,8 @@
             --ivory: #FFFFF0;
             --charcoal: #2C2C2C;
             --champagne: #F7E7CE;
-            --pearl: #FDF5E6;
             --onyx: #353935;
-            --platinum: #E5E4E2;
             --ruby: #E0115F;
-            --sapphire: #0F52BA;
-            --emerald: #50C878;
         }
 
         body {
@@ -149,83 +146,141 @@
             border: 3px solid white;
         }
 
-        /* Hero Section */
-        .hero {
+        /* Hero Slider */
+        .hero-slider {
             height: 100vh;
             position: relative;
             overflow: hidden;
+            margin-top: 110px;
+        }
+
+        .swiper-slide {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
             color: white;
-            margin-top: 110px;
         }
 
-        .hero-bg {
+        .slide-bg {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
             z-index: -2;
+            transition: transform 6s ease;
         }
 
-        .hero-overlay {
+        .swiper-slide-active .slide-bg {
+            transform: scale(1.1);
+        }
+
+        .slide-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(0,0,0,0.5), rgba(197, 160, 40, 0.3));
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(197, 160, 40, 0.3));
             z-index: -1;
         }
 
-        .hero-content {
+        .slide-content {
             max-width: 1000px;
             padding: 0 20px;
+            animation: fadeInUp 1.5s ease;
         }
 
-        .hero-title {
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-subtitle {
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            color: var(--gold-light);
+            text-transform: uppercase;
+        }
+
+        .slide-title {
             font-family: 'Cormorant Garamond', serif;
             font-size: 6rem;
             font-weight: 700;
             margin-bottom: 30px;
+            line-height: 1.1;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .hero-title span {
+        .slide-title span {
             color: var(--gold);
         }
 
-        .hero-description {
+        .slide-description {
             font-size: 1.2rem;
             margin-bottom: 40px;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
+            line-height: 1.8;
         }
 
-        .btn {
-            padding: 18px 45px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.1rem;
-            font-weight: 600;
+        .swiper-button-prev, .swiper-button-next {
+            color: var(--gold) !important;
+            background: rgba(255,255,255,0.2);
+            width: 50px !important;
+            height: 50px !important;
+            border-radius: 50%;
+            backdrop-filter: blur(5px);
+        }
+
+        .swiper-button-prev:after, .swiper-button-next:after {
+            font-size: 20px !important;
+        }
+
+        .swiper-pagination-bullet {
+            background: white !important;
+            opacity: 0.5 !important;
+        }
+
+        .swiper-pagination-bullet-active {
+            background: var(--gold) !important;
+            opacity: 1 !important;
+        }
+
+        .hero-scroll {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
             cursor: pointer;
-            transition: 0.3s;
+            z-index: 10;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--gold), var(--rose));
+        .hero-scroll i {
+            font-size: 2rem;
             color: white;
-            box-shadow: 0 10px 30px rgba(197, 160, 40, 0.4);
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            padding: 15px;
+            border-radius: 50%;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 40px rgba(197, 160, 40, 0.5);
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
         }
 
         /* Products Section */
@@ -844,7 +899,7 @@
         }
 
         @media (max-width: 768px) {
-            .hero-title {
+            .slide-title {
                 font-size: 3rem;
             }
             .cart-sidebar {
@@ -883,24 +938,20 @@
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); background-size: cover; background-position: center;"></div>
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <h1 class="hero-title">
-                <span>Timeless</span> Beauty,<br>
-                <span>Modern</span> Elegance
-            </h1>
-            <p class="hero-description">
-                Discover our exquisite collection of handcrafted luxury imitation jewelry, 
-                where traditional craftsmanship meets contemporary design.
-            </p>
-            <button class="btn btn-primary" onclick="scrollToProducts()">
-                <i class="fas fa-shopping-bag"></i> Shop Now
-            </button>
+    <!-- Hero Slider -->
+    <div class="hero-slider" id="home">
+        <div class="swiper heroSwiper">
+            <div class="swiper-wrapper" id="heroSlides">
+                <!-- Slides will be populated from admin -->
+            </div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
         </div>
-    </section>
+        <div class="hero-scroll" onclick="scrollToProducts()">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </div>
 
     <!-- Products Section -->
     <section class="products-section" id="products">
@@ -1035,6 +1086,7 @@
         </button>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
         // Initialize data
         let products = [];
@@ -1042,6 +1094,95 @@
         let currentFilter = 'all';
         let searchQuery = '';
         let selectedPayment = 'cod';
+        let heroSwiper = null;
+
+        // Default hero slides
+        const DEFAULT_SLIDES = [
+            {
+                id: 'slide1',
+                image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
+                title: 'Timeless Beauty',
+                subtitle: 'Elegance In Every Detail',
+                description: 'Discover our exquisite collection of handcrafted luxury imitation jewelry'
+            },
+            {
+                id: 'slide2',
+                image: 'https://images.unsplash.com/photo-1512152272829-e3139592d56f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
+                title: 'Modern Elegance',
+                subtitle: 'Contemporary Design',
+                description: 'Where traditional craftsmanship meets modern aesthetics'
+            },
+            {
+                id: 'slide3',
+                image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
+                title: 'Luxury Redefined',
+                subtitle: 'Exclusive Collection',
+                description: 'Each piece tells a unique story of elegance and sophistication'
+            }
+        ];
+
+        // Load hero slides
+        function loadHeroSlides() {
+            const saved = localStorage.getItem('sol_hero_slides');
+            let slides = saved ? JSON.parse(saved) : DEFAULT_SLIDES;
+            
+            // Save defaults if not exists
+            if (!saved) {
+                localStorage.setItem('sol_hero_slides', JSON.stringify(DEFAULT_SLIDES));
+            }
+            
+            renderHeroSlides(slides);
+        }
+
+        // Render hero slides
+        function renderHeroSlides(slides) {
+            const container = document.getElementById('heroSlides');
+            
+            let html = '';
+            slides.forEach((slide, index) => {
+                html += `
+                    <div class="swiper-slide">
+                        <div class="slide-bg" style="background-image: url('${slide.image}');"></div>
+                        <div class="slide-overlay"></div>
+                        <div class="slide-content">
+                            <div class="slide-subtitle">${slide.subtitle}</div>
+                            <h1 class="slide-title">${slide.title}</h1>
+                            <p class="slide-description">${slide.description}</p>
+                            <button class="btn btn-primary" onclick="scrollToProducts()">
+                                <i class="fas fa-shopping-bag"></i> Shop Now
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // Initialize or update Swiper
+            if (heroSwiper) {
+                heroSwiper.update();
+            } else {
+                heroSwiper = new Swiper('.heroSwiper', {
+                    loop: true,
+                    autoplay: {
+                        delay: 5000,
+                        disableOnInteraction: false,
+                    },
+                    pagination: {
+                        el: '.swiper-pagination',
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                    effect: 'fade',
+                    fadeEffect: {
+                        crossFade: true
+                    },
+                });
+            }
+        }
 
         // Load products from localStorage or use defaults
         function loadProducts() {
@@ -1049,7 +1190,6 @@
             if (saved) {
                 products = JSON.parse(saved);
             } else {
-                // Default products
                 products = [
                     { id: 'SOL001', name: 'Golden Peacock Choker', category: 'Necklace', price: 1850, stock: 'In Stock', img: '' },
                     { id: 'SOL002', name: 'Oxidized Jhumka Earrings', category: 'Earrings', price: 1299, stock: 'In Stock', img: '' },
@@ -1380,7 +1520,7 @@
             document.getElementById('checkoutAddress').value = '';
         };
 
-        // Listen for product updates from admin
+        // Listen for updates from admin
         window.addEventListener('storage', function(e) {
             if (e.key === 'sol_products') {
                 products = JSON.parse(e.newValue);
@@ -1388,19 +1528,33 @@
                 renderProducts();
                 showNotification('✨ New collection available!');
             }
+            if (e.key === 'sol_hero_slides') {
+                const slides = JSON.parse(e.newValue);
+                renderHeroSlides(slides);
+                showNotification('🎨 Hero slider updated!');
+            }
         });
 
         // Check for updates every 2 seconds
         setInterval(() => {
-            const updated = JSON.parse(localStorage.getItem('sol_products'));
-            if (JSON.stringify(products) !== JSON.stringify(updated)) {
-                products = updated || [];
+            // Check products
+            const updatedProducts = JSON.parse(localStorage.getItem('sol_products'));
+            if (JSON.stringify(products) !== JSON.stringify(updatedProducts)) {
+                products = updatedProducts || [];
                 renderFilterButtons();
                 renderProducts();
+            }
+            
+            // Check hero slides
+            const updatedSlides = JSON.parse(localStorage.getItem('sol_hero_slides'));
+            const currentSlides = JSON.parse(localStorage.getItem('sol_hero_slides')) || DEFAULT_SLIDES;
+            if (updatedSlides && JSON.stringify(currentSlides) !== JSON.stringify(updatedSlides)) {
+                renderHeroSlides(updatedSlides);
             }
         }, 2000);
 
         // Initialize
+        loadHeroSlides();
         loadProducts();
         updateCartCount();
         renderCart();
