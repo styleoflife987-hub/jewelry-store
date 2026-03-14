@@ -322,24 +322,62 @@
     <footer class="footer"><p>Style Of Life · Google Drive Integration</p></footer>
 
     <script>
+        // ==================== CONFIGURATION ====================
+        // REPLACE WITH YOUR ACTUAL GOOGLE APPS SCRIPT URL
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz_A3czd8n_8lJkUXgN1XruA3tnWjYVs4b4wLf5ODk8sUaXy1RsgMldOJwo4IZM3HdNwQ/exec';
+        
         let products = [], orders = [];
 
-        async function apiCall(action, data = {}) {
-            try {
-                const res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action, ...data })
+        // ==================== API CALL WITH JSONP (CORS FIX) ====================
+        function apiCall(action, data = {}) {
+            return new Promise((resolve) => {
+                // Create a unique callback name
+                const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                
+                // Create script element
+                const script = document.createElement('script');
+                
+                // Build URL with parameters
+                const params = new URLSearchParams({
+                    action: action,
+                    data: JSON.stringify(data),
+                    callback: callbackName
                 });
-                return await res.json();
-            } catch (e) {
-                document.getElementById('statusDot').classList.add('disconnected');
-                document.getElementById('statusText').textContent = 'Disconnected';
-                return null;
-            }
+                
+                script.src = SCRIPT_URL + '?' + params.toString();
+                
+                // Define callback function
+                window[callbackName] = function(response) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    
+                    if (response && response.error) {
+                        console.error('API Error:', response.error);
+                        document.getElementById('statusDot').classList.add('disconnected');
+                        document.getElementById('statusText').textContent = 'Disconnected';
+                        resolve(null);
+                    } else {
+                        document.getElementById('statusDot').classList.remove('disconnected');
+                        document.getElementById('statusText').textContent = 'Connected';
+                        resolve(response);
+                    }
+                };
+                
+                // Handle errors
+                script.onerror = function() {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    document.getElementById('statusDot').classList.add('disconnected');
+                    document.getElementById('statusText').textContent = 'Disconnected';
+                    resolve(null);
+                };
+                
+                // Add script to document
+                document.body.appendChild(script);
+            });
         }
 
+        // ==================== LOAD FUNCTIONS ====================
         async function loadStats() {
             const data = await apiCall('getDashboardStats');
             if (data?.stats) {
@@ -373,9 +411,9 @@
                     <td><input value="${p.category}" onchange="updateProduct('${p.id}', 'category', this.value)"></td>
                     <td><input type="number" value="${p.price}" onchange="updateProduct('${p.id}', 'price', this.value)"></td>
                     <td><select onchange="updateProduct('${p.id}', 'stock', this.value)">
-                        <option ${p.stock==='In Stock'?'selected':''}>In Stock</option>
-                        <option ${p.stock==='Limited'?'selected':''}>Limited</option>
-                        <option ${p.stock==='Out of Stock'?'selected':''}>Out of Stock</option>
+                        <option ${p.stock === 'In Stock' ? 'selected' : ''}>In Stock</option>
+                        <option ${p.stock === 'Limited' ? 'selected' : ''}>Limited</option>
+                        <option ${p.stock === 'Out of Stock' ? 'selected' : ''}>Out of Stock</option>
                     </select></td>
                     <td>${imagesHtml}</td>
                     <td><button class="action-btn delete" onclick="deleteProduct('${p.id}')">🗑️</button></td>
@@ -402,11 +440,11 @@
                     <td>${o.items.map(i => `${i.name} x${i.quantity}`).join(', ')}</td>
                     <td>₹${o.total}</td>
                     <td><select onchange="updateOrderStatus('${o.id}', this.value)">
-                        <option ${o.status==='Pending'?'selected':''}>Pending</option>
-                        <option ${o.status==='Processing'?'selected':''}>Processing</option>
-                        <option ${o.status==='Shipped'?'selected':''}>Shipped</option>
-                        <option ${o.status==='Delivered'?'selected':''}>Delivered</option>
-                        <option ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+                        <option ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        <option ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                        <option ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                        <option ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                        <option ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                     </select></td>
                     <td><button class="action-btn delete" onclick="deleteOrder('${o.id}')">🗑️</button></td>
                 </tr>`;
@@ -414,32 +452,53 @@
             tbody.innerHTML = html;
         }
 
+        // ==================== PRODUCT ACTIONS ====================
         async function addProduct() {
             const newId = 'SOL' + Date.now().toString().slice(-6);
-            await apiCall('saveProduct', { data: { id: newId, name: 'New Product', category: 'Necklace', price: 999, stock: 'In Stock', images: [] } });
-            loadProducts(); loadStats();
+            await apiCall('saveProduct', { data: { 
+                id: newId, 
+                name: 'New Product', 
+                category: 'Necklace', 
+                price: 999, 
+                stock: 'In Stock', 
+                images: [] 
+            }});
+            loadProducts(); 
+            loadStats();
         }
 
         async function updateProduct(id, field, value) {
             const p = products.find(x => x.id === id);
-            if (p) { p[field] = field === 'price' ? Number(value) : value;
+            if (p) { 
+                p[field] = field === 'price' ? Number(value) : value;
                 await apiCall('saveProduct', { data: p });
             }
         }
 
         async function deleteProduct(id) {
-            if (confirm('Delete?')) { await apiCall('deleteProduct', { productId: id }); loadProducts(); loadStats(); }
+            if (confirm('Delete this product?')) { 
+                await apiCall('deleteProduct', { productId: id }); 
+                loadProducts(); 
+                loadStats(); 
+            }
         }
 
+        // ==================== ORDER ACTIONS ====================
         async function updateOrderStatus(id, status) {
             await apiCall('updateOrderStatus', { orderId: id, status });
-            loadOrders(); loadStats();
+            loadOrders(); 
+            loadStats();
         }
 
         async function deleteOrder(id) {
-            if (confirm('Delete?')) { await apiCall('deleteOrder', { orderId: id }); loadOrders(); loadStats(); }
+            if (confirm('Delete this order?')) { 
+                await apiCall('deleteOrder', { orderId: id }); 
+                loadOrders(); 
+                loadStats(); 
+            }
         }
 
+        // ==================== IMAGE FUNCTIONS ====================
         function uploadImage(index) {
             const input = document.createElement('input');
             input.type = 'file';
@@ -448,7 +507,10 @@
                 const file = e.target.files[0];
                 const reader = new FileReader();
                 reader.onload = async (e) => {
-                    const result = await apiCall('uploadImage', { base64Data: e.target.result, fileName: file.name });
+                    const result = await apiCall('uploadImage', { 
+                        base64Data: e.target.result, 
+                        fileName: file.name 
+                    });
                     if (result?.success) {
                         const p = products[index];
                         if (!p.images) p.images = [];
@@ -467,11 +529,13 @@
             document.getElementById('imageModal').classList.add('show');
             document.getElementById('modalOverlay').classList.add('show');
         }
+        
         function closeImageModal() {
             document.getElementById('imageModal').classList.remove('show');
             document.getElementById('modalOverlay').classList.remove('show');
         }
 
+        // ==================== TAB SWITCHING ====================
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -484,7 +548,17 @@
             }
         }
 
-        window.onload = () => { loadStats(); loadProducts(); loadOrders(); setInterval(() => { loadStats(); loadProducts(); loadOrders(); }, 30000); };
+        // ==================== INITIALIZATION ====================
+        window.onload = () => { 
+            loadStats(); 
+            loadProducts(); 
+            loadOrders(); 
+            setInterval(() => { 
+                loadStats(); 
+                loadProducts(); 
+                loadOrders(); 
+            }, 30000); 
+        };
     </script>
 </body>
 </html>
