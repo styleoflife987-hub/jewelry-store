@@ -8,13 +8,13 @@
         .connected { background: #27ae60; }
         .disconnected { background: #e74c3c; }
         button { padding: 10px 20px; margin: 5px; cursor: pointer; }
-        pre { background: #0f1722; padding: 10px; border-radius: 5px; overflow: auto; }
+        pre { background: #0f1722; padding: 10px; border-radius: 5px; overflow: auto; color: #0f0; }
     </style>
 </head>
 <body>
     <h1>Style Of Life - Admin Panel</h1>
     
-    <div class="status connected" id="status">Checking connection...</div>
+    <div class="status disconnected" id="status">Checking connection...</div>
     
     <button onclick="runSetup()">1. Run Setup First</button>
     <button onclick="checkConnection()">2. Check Connection</button>
@@ -24,46 +24,57 @@
     <pre id="result">Click a button to see result...</pre>
 
     <script>
-        // YOUR CORRECT URL - DON'T CHANGE THIS
+        // YOUR CORRECT URL
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6_of-vLu6MN4QDTH2EDJWCLfDjT7kls04iyo7XvF6kn3sVyo2SXN2zdQfhT-xCbIJaA/exec';
         
-        async function callApi(action, data = {}) {
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action, ...data })
-                });
-                
-                const text = await response.text();
+        function jsonpCall(action, data, callback) {
+            const callbackName = 'callback_' + Date.now();
+            window[callbackName] = function(response) {
                 document.getElementById('status').className = 'status connected';
                 document.getElementById('status').innerHTML = '✅ Connected';
-                return JSON.parse(text);
-            } catch (error) {
+                delete window[callbackName];
+                document.body.removeChild(document.getElementById('jsonpScript'));
+                callback(response);
+            };
+            
+            const script = document.createElement('script');
+            script.id = 'jsonpScript';
+            const url = SCRIPT_URL + '?action=' + action + '&data=' + encodeURIComponent(JSON.stringify(data)) + '&callback=' + callbackName;
+            script.src = url;
+            
+            script.onerror = function() {
                 document.getElementById('status').className = 'status disconnected';
-                document.getElementById('status').innerHTML = '❌ Disconnected: ' + error.message;
-                return null;
-            }
+                document.getElementById('status').innerHTML = '❌ Disconnected - Check URL';
+                delete window[callbackName];
+                document.body.removeChild(script);
+                callback(null);
+            };
+            
+            document.body.appendChild(script);
         }
         
-        async function runSetup() {
+        function runSetup() {
             document.getElementById('result').innerHTML = 'Running setup...';
-            const result = await callApi('setup');
-            document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+            jsonpCall('setup', {}, function(result) {
+                document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+            });
         }
         
-        async function checkConnection() {
-            const result = await callApi('getDashboardStats');
-            document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+        function checkConnection() {
+            document.getElementById('result').innerHTML = 'Checking...';
+            jsonpCall('getDashboardStats', {}, function(result) {
+                document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+            });
         }
         
-        async function getProducts() {
-            const result = await callApi('getProducts');
-            document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+        function getProducts() {
+            document.getElementById('result').innerHTML = 'Loading...';
+            jsonpCall('getProducts', {}, function(result) {
+                document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+            });
         }
         
-        // Check connection when page loads
+        // Auto-check connection
         checkConnection();
     </script>
 </body>
