@@ -1,25 +1,62 @@
 <!DOCTYPE html>
-
 <html>
-
+<head>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/config.js"></script>
+</head>
 <body onload="showCart()">
+    <header>
+        <div class="logo">STYLE OF LIFE</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="cart.html">Cart</a>
+        </nav>
+    </header>
 
-<h2>Checkout</h2>
+    <div style="padding:40px; max-width:600px; margin:auto">
+        <h2>Checkout</h2>
+        
+        <div id="cartItems" style="margin-bottom:20px"></div>
+        <h3>Total ₹<span id="total"></span></h3>
+        
+        <div style="background:#1a1a1a; padding:20px; border-radius:8px">
+            <h3>Shipping Details</h3>
+            <input id="name" placeholder="Full Name" style="width:100%; padding:10px; margin:5px 0"><br>
+            <input id="phone" placeholder="Phone Number" style="width:100%; padding:10px; margin:5px 0"><br>
+            <textarea id="address" placeholder="Shipping Address" style="width:100%; padding:10px; margin:5px 0" rows="3"></textarea><br>
+            
+            <button onclick="placeOrder()" style="margin-top:15px">Place Order</button>
+        </div>
+    </div>
 
-<div id="cartItems"></div>
-
-<h3>Total ₹<span id="total"></span></h3>
-
-<button onclick="payNow(document.getElementById('total').innerText)">
-Pay Now
-</button>
-
-<script src="js/cart.js"></script>
-
-<script src="js/payment.js"></script>
-
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
+    <script src="js/cart.js"></script>
+    <script>
+        async function placeOrder() {
+            const cart = getCart();
+            if (cart.length === 0) {
+                alert("Cart is empty");
+                return;
+            }
+            
+            const total = document.getElementById("total").innerText;
+            
+            // Save order to Google Sheets
+            const response = await fetch(CONFIG.API_URL + "?action=placeOrder" + 
+                "&name=" + encodeURIComponent(document.getElementById("name").value) +
+                "&phone=" + encodeURIComponent(document.getElementById("phone").value) +
+                "&address=" + encodeURIComponent(document.getElementById("address").value) +
+                "&items=" + encodeURIComponent(JSON.stringify(cart)) +
+                "&total=" + total);
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Proceed to payment
+                payNow(total);
+            }
+        }
+    </script>
+    <script src="js/payment.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </body>
-
 </html>
