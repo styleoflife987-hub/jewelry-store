@@ -1,43 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Admin Panel</title>
+<title>Jewelry Store</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f5f5f5;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+}
+
+.card{
+
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px #ccc;
+
+}
+
+</style>
+
 </head>
 
 <body>
 
-<h2>Jewelry Admin</h2>
+<h1>Jewelry Store</h1>
 
-<button onclick="setup()">Run Setup</button>
-<button onclick="stats()">Check Stats</button>
-
-<pre id="output"></pre>
+<div class="products" id="products"></div>
 
 <script>
 
 const API="PASTE_SCRIPT_URL_HERE";
 
-function setup(){
-
-fetch(API+"?action=setup")
+fetch(API+"?action=getProducts")
 .then(r=>r.json())
-.then(d=>{
-document.getElementById("output").innerText=
-JSON.stringify(d,null,2);
+.then(data=>{
+
+let html="";
+
+data.forEach(p=>{
+
+html+=`
+
+<div class="card">
+
+<h3>${p.name}</h3>
+
+<p>Category : ${p.category}</p>
+
+<h2>₹${p.price}</h2>
+
+<p>${p.stock}</p>
+
+</div>
+
+`;
+
 });
 
-}
+document.getElementById("products").innerHTML=html;
 
-function stats(){
-
-fetch(API+"?action=stats")
-.then(r=>r.json())
-.then(d=>{
-document.getElementById("output").innerText=
-JSON.stringify(d,null,2);
 });
-
-}
 
 </script>
 
