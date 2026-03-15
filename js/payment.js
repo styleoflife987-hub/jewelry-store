@@ -10,11 +10,11 @@ currency: "INR",
 
 name: "Style Of Life Jewelry",
 
-description: "Order Payment",
+description: "Jewelry Purchase",
 
 handler: function (response){
 
-alert("Payment Success: " + response.razorpay_payment_id);
+alert("Payment Successful");
 
 }
 
