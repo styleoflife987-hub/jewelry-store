@@ -1,35 +1,51 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
 <title>Style Of Life Jewelry</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 
 body{
 font-family:Arial;
-background:#fafafa;
-padding:20px;
+margin:0;
+background:#f8f8f8;
 }
 
-h1{
-text-align:center;
+header{
+background:black;
+color:white;
+padding:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+color:#d4af37;
+}
+
+.search{
+padding:8px;
+width:200px;
 }
 
 .products{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
 gap:20px;
+padding:20px;
 }
 
 .card{
-
 background:white;
-padding:15px;
 border-radius:10px;
 box-shadow:0 2px 10px #ddd;
-
+overflow:hidden;
 }
 
 .card img{
@@ -38,15 +54,35 @@ height:200px;
 object-fit:cover;
 }
 
-button{
+.card h3{
+padding:10px;
+margin:0;
+}
 
+.price{
+padding:0 10px;
+color:#c9a227;
+font-weight:bold;
+}
+
+button{
 background:#c9a227;
 border:none;
 padding:10px;
 color:white;
 width:100%;
 cursor:pointer;
+}
 
+.cart{
+position:fixed;
+right:20px;
+bottom:20px;
+background:black;
+color:white;
+padding:12px;
+border-radius:50px;
+cursor:pointer;
 }
 
 </style>
@@ -55,21 +91,39 @@ cursor:pointer;
 
 <body>
 
-<h1>Luxury Jewelry</h1>
+<header>
+
+<div class="logo">Style Of Life</div>
+
+<input class="search" placeholder="Search..." onkeyup="searchProduct(this.value)">
+
+</header>
 
 <div class="products" id="products"></div>
 
+<div class="cart" onclick="openCart()">
+Cart (<span id="cartCount">0</span>)
+</div>
+
 <script>
 
-const API="https://script.googleusercontent.com/macros/echo?user_content_key=AY5xjrQX1Q4GbBXYIRtBhVHKzGwlfeGhf1CKM2Z83H3jBqMcjolcINV-8FF8BcNi0_fRhuNDWCgyFetcUkllVqBRDXCi671e_dSbrrZkzR6V5MU3Ox_6nb0j-YHRB_smz1Wi2EkJ8w0D2LAHh4sDiA9nEu7rJwumwRVCUJrhevntS_PoeBmWa72bMYDHtsnYIvDBGgXRjA0QpXsd7U6IMNxdDrvd46iYF0EulgE4l8GyILDjp83-x3-t3N5xwm8NCXUW9bJxkIdf7KBj-bV5qBdTJnxB9OrMhrAF35ufl0ZD3LHFqiH9QYU&lib=MN3tYjDpl1oXXRX2ZRyiqpxzWsyxVtduw";
+const API="PASTE_YOUR_SCRIPT_URL";
+
+let products=[];
+let cart=[];
 
 fetch(API+"?action=products")
 .then(r=>r.json())
 .then(data=>{
+products=data;
+showProducts(products);
+});
+
+function showProducts(list){
 
 let html="";
 
-data.forEach(p=>{
+list.forEach(p=>{
 
 html+=`
 
@@ -79,9 +133,11 @@ html+=`
 
 <h3>${p.name}</h3>
 
-<p>₹${p.price}</p>
+<div class="price">₹${p.price}</div>
 
-<button onclick="order('${p.name}',${p.price})">Buy Now</button>
+<button onclick="addCart('${p.name}',${p.price})">
+Add To Cart
+</button>
 
 </div>
 
@@ -91,30 +147,62 @@ html+=`
 
 document.getElementById("products").innerHTML=html;
 
-});
+}
 
-function order(name,price){
+function searchProduct(q){
+
+let filtered=products.filter(p=>
+p.name.toLowerCase().includes(q.toLowerCase())
+);
+
+showProducts(filtered);
+
+}
+
+function addCart(name,price){
+
+cart.push({name,price});
+
+document.getElementById("cartCount").innerText=cart.length;
+
+alert("Added to cart");
+
+}
+
+function openCart(){
+
+let total=0;
+
+let items="";
+
+cart.forEach(i=>{
+total+=i.price;
+items+=i.name+" ₹"+i.price+"\n";
+});
 
 let customer=prompt("Name");
 let phone=prompt("Phone");
 let address=prompt("Address");
 
-let data={
-
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
 action:"placeOrder",
 customer:customer,
 phone:phone,
 address:address,
-items:[{name:name,price:price}],
-total:price
-
-};
-
-fetch(API,{
-method:"POST",
-body:JSON.stringify(data)
+items:cart,
+total:total
 })
-.then(()=>alert("Order placed successfully"));
+})
+.then(()=>{
+
+alert("Order Placed");
+
+cart=[];
+document.getElementById("cartCount").innerText=0;
+
+});
 
 }
 
