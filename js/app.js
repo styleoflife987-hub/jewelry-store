@@ -1,36 +1,32 @@
-// js/app.js - Simplified Version
+// js/app.js - Auto Image Detection
 let products = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchProducts();
+    updateCartCount();
+});
 
 async function fetchProducts() {
     try {
-        console.log("Fetching from:", CONFIG.API_URL + "?action=products");
+        showLoading();
         
-        const response = await fetch(CONFIG.API_URL + "?action=products");
+        const response = await fetch(`${CONFIG.API_URL}?action=products`);
         const data = await response.json();
         
-        console.log("Received:", data);
+        console.log("Products with images:", data);
         
         if (data.error) {
             throw new Error(data.error);
         }
         
-        products = data;
+        products = Array.isArray(data) ? data : (data.products || []);
         displayProducts(products);
         
     } catch (error) {
         console.error("Error:", error);
-        document.getElementById("products").innerHTML = `
-            <div style="text-align:center; padding:50px; grid-column:1/-1">
-                <p style="color:#f44336; font-size:18px">Failed to load products</p>
-                <p style="color:#888; margin:10px 0">${error.message}</p>
-                <button onclick="location.reload()" style="width:auto; padding:10px 30px; margin-top:20px">
-                    Refresh Page
-                </button>
-                <p style="margin-top:20px; font-size:12px; color:#555">
-                    API URL: ${CONFIG.API_URL}
-                </p>
-            </div>
-        `;
+        showError("Failed to load products");
+    } finally {
+        hideLoading();
     }
 }
 
@@ -38,42 +34,152 @@ function displayProducts(products) {
     const container = document.getElementById("products");
     if (!container) return;
     
-    if (!products || products.length === 0) {
-        container.innerHTML = "<p style='text-align:center; padding:40px'>No products found</p>";
+    if (products.length === 0) {
+        container.innerHTML = '<p class="no-products">No products found</p>';
         return;
     }
     
-    let html = "";
-    products.forEach(p => {
-        html += `
-            <div class="card">
-                <img src="${p.image || 'https://via.placeholder.com/300'}" 
-                     alt="${p.name}"
-                     style="width:100%; height:220px; object-fit:cover"
-                     onerror="this.src='https://via.placeholder.com/300'">
-                <div style="padding:15px">
-                    <h3>${p.name}</h3>
-                    <p style="color:#d4af37">Category: ${p.category || 'Jewelry'}</p>
-                    <div class="price" style="font-size:24px; margin:10px 0">₹${p.price}</div>
-                    <p style="color:#4CAF50">Stock: ${p.stock || 'In Stock'}</p>
-                    <button onclick="addToCart('${p.name}', ${p.price})" 
-                            style="width:100%; padding:12px; margin-top:10px">
-                        Add To Cart
-                    </button>
-                </div>
+    container.innerHTML = "";
+    
+    products.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "card";
+        
+        // Get images (auto-detected from Drive)
+        const images = product.images || [];
+        const mainImage = product.mainImage || product.image || CONFIG.PLACEHOLDER_IMAGE;
+        const imageCount = product.imageCount || (product.image ? 1 : 0);
+        
+        // Create thumbnails
+        let thumbnails = '';
+        if (images.length > 0) {
+            thumbnails = images.slice(0, 4).map((img, idx) => `
+                <img src="${img.thumbnail || img.url}" 
+                     class="thumbnail ${idx === 0 ? 'active' : ''}"
+                     onclick="changeImage('${product.sku}', '${img.url}', this)">
+            `).join('');
+        }
+        
+        card.innerHTML = `
+            <div class="product-images">
+                <img src="${mainImage}" 
+                     id="img-${product.sku}"
+                     class="main-image"
+                     onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+                
+                ${imageCount > 1 ? `
+                    <div class="thumbnail-strip">
+                        ${thumbnails}
+                        ${imageCount > 4 ? `
+                            <span class="more-images" onclick="showAllImages('${product.sku}')">
+                                +${imageCount - 4}
+                            </span>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                
+                <span class="image-badge">📷 ${imageCount}</span>
+            </div>
+            
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p class="sku">SKU: ${product.sku}</p>
+                <p class="price">₹${product.price}</p>
+                <button onclick="addToCart('${product.sku}')">
+                    Add to Cart
+                </button>
             </div>
         `;
+        
+        container.appendChild(card);
     });
+}
+
+// Change main image when thumbnail clicked
+window.changeImage = function(sku, url, element) {
+    document.getElementById(`img-${sku}`).src = url;
     
-    container.innerHTML = html;
-}
+    // Update active thumbnail
+    document.querySelectorAll(`[onclick*="${sku}"]`).forEach(el => {
+        el.classList.remove('active');
+    });
+    element.classList.add('active');
+};
 
-function addToCart(name, price) {
+// Show all images in modal
+window.showAllImages = function(sku) {
+    const product = products.find(p => p.sku === sku);
+    if (!product || !product.images) return;
+    
+    const modal = document.createElement('div');
+    modal.className = 'image-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+            <h3>${product.name}</h3>
+            <div class="image-grid">
+                ${product.images.map(img => `
+                    <img src="${img.url}" onclick="selectImage('${sku}', '${img.url}')">
+                `).join('')}
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+};
+
+// Select image from modal
+window.selectImage = function(sku, url) {
+    document.getElementById(`img-${sku}`).src = url;
+    document.querySelector('.image-modal').remove();
+};
+
+// Add to cart
+window.addToCart = function(sku) {
+    const product = products.find(p => p.sku === sku);
+    if (!product) return;
+    
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    cart.push({ name, price, quantity: 1 });
+    
+    const existing = cart.find(item => item.sku === sku);
+    if (existing) {
+        existing.quantity = (existing.quantity || 1) + 1;
+    } else {
+        cart.push({
+            sku: sku,
+            name: product.name,
+            price: product.price,
+            image: product.mainImage,
+            quantity: 1
+        });
+    }
+    
     localStorage.setItem("cart", JSON.stringify(cart));
-    alert(`${name} added to cart!`);
+    updateCartCount();
+    alert(`${product.name} added to cart!`);
+};
+
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    
+    document.querySelectorAll('.cart-count').forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? 'inline' : 'none';
+    });
 }
 
-// Load products when page loads
-document.addEventListener('DOMContentLoaded', fetchProducts);
+function showLoading() {
+    const container = document.getElementById("products");
+    if (container) {
+        container.innerHTML = '<div class="loading">Loading products...</div>';
+    }
+}
+
+function hideLoading() {}
+
+function showError(msg) {
+    const container = document.getElementById("products");
+    if (container) {
+        container.innerHTML = `<div class="error">${msg}</div>`;
+    }
+}
