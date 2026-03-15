@@ -1,109 +1,66 @@
-body{
-margin:0;
-font-family:Poppins,Arial;
-background:#0f0f0f;
-color:white;
+/* Add these styles for multiple images */
+.image-container {
+    position: relative;
 }
 
-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px 40px;
-background:black;
-border-bottom:1px solid #d4af37;
+.sku-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #d4af37;
+    color: black;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
 }
 
-.logo{
-font-size:26px;
-font-weight:bold;
-color:#d4af37;
-letter-spacing:2px;
+.thumbnail-gallery {
+    display: flex;
+    gap: 5px;
+    padding: 10px;
+    justify-content: center;
 }
 
-nav a{
-color:white;
-margin:0 15px;
-text-decoration:none;
+.thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: 0.3s;
 }
 
-nav a:hover{
-color:#d4af37;
+.thumbnail:hover {
+    border-color: #d4af37;
+    transform: scale(1.1);
 }
 
-.hero{
-height:420px;
-background:url("https://images.unsplash.com/photo-1515562141207-7a88fb7ce338");
-background-size:cover;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-text-align:center;
+.main-image {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    transition: 0.3s;
 }
 
-.hero h1{
-font-size:48px;
-color:#d4af37;
+/* Product view page for multiple angles */
+.product-gallery {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 10px;
+    padding: 20px;
 }
 
-.hero p{
-font-size:18px;
+.thumbnail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
-.products{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-gap:25px;
-padding:40px;
-}
-
-.card{
-background:#1a1a1a;
-border-radius:12px;
-overflow:hidden;
-transition:0.4s;
-box-shadow:0 5px 20px rgba(0,0,0,0.5);
-}
-
-.card:hover{
-transform:translateY(-10px) scale(1.02);
-}
-
-.card img{
-width:100%;
-height:220px;
-object-fit:cover;
-}
-
-.card h3{
-padding:10px;
-}
-
-.price{
-color:#d4af37;
-padding:0 10px;
-font-weight:bold;
-}
-
-button{
-background:#d4af37;
-border:none;
-padding:10px;
-margin:10px;
-width:calc(100% - 20px);
-cursor:pointer;
-font-weight:bold;
-}
-
-button:hover{
-background:#b8962e;
-}
-
-footer{
-background:black;
-text-align:center;
-padding:20px;
-margin-top:40px;
-color:#888;
+.thumbnail-list img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    cursor: pointer;
 }
