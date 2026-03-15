@@ -11,7 +11,7 @@ fetch(API+"?action=track&id="+id)
 .then(data=>{
 
 document.getElementById("result").innerText=
-JSON.stringify(data,null,2);
+"Order Status: "+data.status;
 
 });
 
