@@ -2,56 +2,69 @@
 <html>
 <head>
     <title>Style Of Life - Admin</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #1a2634; color: white; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .connected { background: #27ae60; }
+        .disconnected { background: #e74c3c; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #0f1722; padding: 10px; border-radius: 5px; overflow: auto; }
+    </style>
 </head>
 <body>
-    <h1>Simple Admin Test</h1>
-    <div id="status">Testing connection...</div>
-    <button onclick="testConnection()">Test Connection</button>
-    <button onclick="runSetup()">Run Setup</button>
-    <pre id="result"></pre>
+    <h1>Style Of Life - Admin Panel</h1>
+    
+    <div class="status connected" id="status">Checking connection...</div>
+    
+    <button onclick="runSetup()">1. Run Setup First</button>
+    <button onclick="checkConnection()">2. Check Connection</button>
+    <button onclick="getProducts()">3. Get Products</button>
+    
+    <h3>Result:</h3>
+    <pre id="result">Click a button to see result...</pre>
 
     <script>
-        // REPLACE WITH YOUR CORRECT URL
+        // YOUR CORRECT URL - DON'T CHANGE THIS
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6_of-vLu6MN4QDTH2EDJWCLfDjT7kls04iyo7XvF6kn3sVyo2SXN2zdQfhT-xCbIJaA/exec';
         
-        async function testConnection() {
-            document.getElementById('status').innerHTML = 'Testing...';
-            document.getElementById('result').innerHTML = '';
-            
-            try {
-                const response = await fetch(SCRIPT_URL + '?action=getDashboardStats', {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                const text = await response.text();
-                document.getElementById('result').innerHTML = text;
-                document.getElementById('status').innerHTML = '✅ Response received! Check below.';
-            } catch (error) {
-                document.getElementById('status').innerHTML = '❌ Error: ' + error.message;
-                document.getElementById('result').innerHTML = error.toString();
-            }
-        }
-        
-        async function runSetup() {
-            document.getElementById('status').innerHTML = 'Running setup...';
-            
+        async function callApi(action, data = {}) {
             try {
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'cors',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({action: 'setup'})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, ...data })
                 });
                 
                 const text = await response.text();
-                document.getElementById('result').innerHTML = text;
-                document.getElementById('status').innerHTML = '✅ Setup complete!';
+                document.getElementById('status').className = 'status connected';
+                document.getElementById('status').innerHTML = '✅ Connected';
+                return JSON.parse(text);
             } catch (error) {
-                document.getElementById('status').innerHTML = '❌ Error: ' + error.message;
-                document.getElementById('result').innerHTML = error.toString();
+                document.getElementById('status').className = 'status disconnected';
+                document.getElementById('status').innerHTML = '❌ Disconnected: ' + error.message;
+                return null;
             }
         }
+        
+        async function runSetup() {
+            document.getElementById('result').innerHTML = 'Running setup...';
+            const result = await callApi('setup');
+            document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+        }
+        
+        async function checkConnection() {
+            const result = await callApi('getDashboardStats');
+            document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+        }
+        
+        async function getProducts() {
+            const result = await callApi('getProducts');
+            document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+        }
+        
+        // Check connection when page loads
+        checkConnection();
     </script>
 </body>
 </html>
