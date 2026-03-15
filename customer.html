@@ -3,65 +3,23 @@
 
 <head>
 
-<title>Jewelry Store</title>
+<title>Style Of Life Jewelry</title>
 
-<style>
-
-body{
-font-family:Arial;
-background:#f4f4f4;
-}
-
-.products{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-gap:20px;
-padding:20px;
-}
-
-.card{
-
-background:white;
-padding:15px;
-border-radius:10px;
-box-shadow:0 0 10px #ddd;
-
-}
-
-.card img{
-width:100%;
-height:200px;
-object-fit:cover;
-}
-
-button{
-background:#c9a227;
-color:white;
-border:none;
-padding:10px;
-width:100%;
-cursor:pointer;
-}
-
-</style>
+<link rel="stylesheet" href="css/style.css">
 
 </head>
 
 <body>
 
-<h1 style="text-align:center;">Luxury Jewelry</h1>
+<h1>Luxury Jewelry</h1>
 
-<div class="products" id="products"></div>
+<div id="products"></div>
+
+<script src="js/api.js"></script>
 
 <script>
 
-const API="PASTE_SCRIPT_URL";
-
-let cart=[];
-
-fetch(API+"?action=products")
-.then(r=>r.json())
-.then(data=>{
+getProducts().then(data=>{
 
 let html="";
 
@@ -69,7 +27,7 @@ data.forEach(p=>{
 
 html+=`
 
-<div class="card">
+<div class="product">
 
 <img src="${p.image}">
 
@@ -77,7 +35,7 @@ html+=`
 
 <p>₹${p.price}</p>
 
-<button onclick="add('${p.id}','${p.name}',${p.price})">Add To Cart</button>
+<button>Add To Cart</button>
 
 </div>
 
@@ -88,14 +46,6 @@ html+=`
 document.getElementById("products").innerHTML=html;
 
 });
-
-function add(id,name,price){
-
-cart.push({id,name,price});
-
-alert(name+" added to cart");
-
-}
 
 </script>
 
