@@ -2,7 +2,7 @@
 // Deploy as Web App with access: Anyone
 
 // Configuration
-const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID'; // Replace with your Google Sheet ID
+const SPREADSHEET_ID = '1TgqHOPDmFtgjmNIW3J4G_vCx9LAmVmbwipURRJxXD8'; // Replace with your Google Sheet ID
 const SHEET_NAMES = {
   PRODUCTS: 'Products',
   ORDERS: 'Orders',
