@@ -1,129 +1,11 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <title>Style Of Life Jewelry</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<style>
-
-body{
-margin:0;
-font-family:Poppins,Arial;
-background:#fafafa;
-}
-
-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px 40px;
-background:black;
-color:white;
-}
-
-.logo{
-font-size:24px;
-font-weight:700;
-color:#d4af37;
-}
-
-nav a{
-margin:0 10px;
-color:white;
-text-decoration:none;
-}
-
-.hero{
-height:400px;
-background:url("https://images.unsplash.com/photo-1515562141207-7a88fb7ce338");
-background-size:cover;
-display:flex;
-align-items:center;
-justify-content:center;
-color:white;
-font-size:40px;
-font-weight:bold;
-}
-
-.searchbar{
-text-align:center;
-padding:20px;
-}
-
-.searchbar input{
-padding:10px;
-width:300px;
-border-radius:5px;
-border:1px solid #ccc;
-}
-
-.products{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-gap:25px;
-padding:30px;
-}
-
-.card{
-background:white;
-border-radius:12px;
-overflow:hidden;
-box-shadow:0 3px 12px rgba(0,0,0,0.1);
-transition:0.3s;
-}
-
-.card:hover{
-transform:translateY(-6px);
-}
-
-.card img{
-width:100%;
-height:230px;
-object-fit:cover;
-}
-
-.card h3{
-padding:10px;
-margin:0;
-}
-
-.price{
-padding:0 10px;
-color:#c9a227;
-font-weight:bold;
-}
-
-.card button{
-margin:10px;
-padding:10px;
-background:#c9a227;
-border:none;
-color:white;
-width:calc(100% - 20px);
-cursor:pointer;
-}
-
-.cartbtn{
-position:fixed;
-bottom:20px;
-right:20px;
-background:black;
-color:white;
-padding:15px;
-border-radius:50px;
-cursor:pointer;
-}
-
-footer{
-background:black;
-color:white;
-padding:30px;
-text-align:center;
-}
-
-</style>
+<link rel="stylesheet" href="css/style.css">
 
 </head>
 
@@ -133,11 +15,7 @@ text-align:center;
 
 <div class="logo">Style Of Life</div>
 
-<nav>
-<a href="#">Home</a>
-<a href="#">Collection</a>
-<a href="#">Contact</a>
-</nav>
+<input placeholder="Search jewelry..." onkeyup="searchProduct(this.value)">
 
 </header>
 
@@ -145,111 +23,14 @@ text-align:center;
 Luxury Jewelry Collection
 </div>
 
-<div class="searchbar">
-<input placeholder="Search jewelry..." onkeyup="search(this.value)">
-</div>
-
 <div class="products" id="products"></div>
 
-<div class="cartbtn" onclick="checkout()">
+<div class="cart-btn">
 Cart (<span id="cartCount">0</span>)
 </div>
 
-<footer>
-© Style Of Life Jewelry
-</footer>
-
-<script>
-
-const API="https://script.google.com/macros/s/AKfycby3wzak-aaQ66x5UKbC2_htO6H-qt9dp0eEsyUblO2_5X5t5b1Nd0FtZY4HCiaV6QBf_g/exec";
-
-let products=[];
-let cart=[];
-
-fetch(API+"?action=products")
-.then(r=>r.json())
-.then(data=>{
-products=data;
-display(products);
-});
-
-function display(list){
-
-let html="";
-
-list.forEach(p=>{
-
-html+=`
-
-<div class="card">
-
-<img src="${p.image}">
-
-<h3>${p.name}</h3>
-
-<div class="price">₹${p.price}</div>
-
-<button onclick="addCart('${p.name}',${p.price})">
-Add To Cart
-</button>
-
-</div>
-
-`;
-
-});
-
-document.getElementById("products").innerHTML=html;
-
-}
-
-function search(q){
-
-let f=products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));
-display(f);
-
-}
-
-function addCart(name,price){
-
-cart.push({name,price});
-
-document.getElementById("cartCount").innerText=cart.length;
-
-}
-
-function checkout(){
-
-let total=0;
-
-cart.forEach(i=>total+=i.price);
-
-let name=prompt("Customer Name");
-let phone=prompt("Phone");
-let address=prompt("Address");
-
-fetch(API,{
-method:"POST",
-body:JSON.stringify({
-action:"placeOrder",
-customer:name,
-phone:phone,
-address:address,
-items:cart,
-total:total
-})
-}).then(()=>{
-
-alert("Order placed successfully");
-
-cart=[];
-document.getElementById("cartCount").innerText=0;
-
-});
-
-}
-
-</script>
+<script src="js/script.js"></script>
 
 </body>
+
 </html>
