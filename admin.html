@@ -3,79 +3,268 @@
 <head>
     <title>Style Of Life - Admin</title>
     <style>
-        body { font-family: Arial; padding: 20px; background: #1a2634; color: white; }
-        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
-        .connected { background: #27ae60; }
-        .disconnected { background: #e74c3c; }
-        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
-        pre { background: #0f1722; padding: 10px; border-radius: 5px; overflow: auto; color: #0f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+        body { background: #1a2634; color: white; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #f39c12; margin-bottom: 20px; }
+        .status-bar { 
+            background: #0f1722; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .status-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            background: #e74c3c;
+        }
+        .status-dot.connected { background: #27ae60; }
+        .status-text { color: #95a5a6; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #0f1722;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #2c3e50;
+        }
+        .stat-card h3 { color: #95a5a6; font-size: 0.9rem; margin-bottom: 5px; }
+        .stat-card span { font-size: 1.8rem; font-weight: bold; color: #f39c12; }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-primary { background: #f39c12; color: #0f1722; }
+        .btn-success { background: #27ae60; color: white; }
+        .btn-info { background: #3498db; color: white; }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .table-container {
+            background: #0f1722;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            color: #f39c12;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #f39c12;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #2c3e50;
+            color: white;
+        }
+        pre {
+            background: #0f1722;
+            padding: 15px;
+            border-radius: 8px;
+            color: #0f0;
+            overflow: auto;
+            max-height: 300px;
+        }
     </style>
 </head>
 <body>
-    <h1>Style Of Life - Admin Panel</h1>
-    
-    <div class="status disconnected" id="status">Checking connection...</div>
-    
-    <button onclick="runSetup()">1. Run Setup First</button>
-    <button onclick="checkConnection()">2. Check Connection</button>
-    <button onclick="getProducts()">3. Get Products</button>
-    
-    <h3>Result:</h3>
-    <pre id="result">Click a button to see result...</pre>
+    <div class="container">
+        <h1>✨ Style Of Life - Admin Panel</h1>
+        
+        <div class="status-bar">
+            <div class="status-dot" id="statusDot"></div>
+            <span class="status-text" id="statusText">Initializing...</span>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <h3>Products</h3>
+                <span id="totalProducts">0</span>
+            </div>
+            <div class="stat-card">
+                <h3>Categories</h3>
+                <span id="totalCategories">0</span>
+            </div>
+            <div class="stat-card">
+                <h3>Orders</h3>
+                <span id="totalOrders">0</span>
+            </div>
+            <div class="stat-card">
+                <h3>Revenue</h3>
+                <span id="totalRevenue">₹0</span>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="runSetup()">🚀 Run Setup</button>
+            <button class="btn btn-success" onclick="checkConnection()">🔌 Check Connection</button>
+            <button class="btn btn-info" onclick="loadProducts()">📦 Load Products</button>
+        </div>
+
+        <div class="table-container">
+            <h3 style="color: #f39c12; margin-bottom: 15px;">Products</h3>
+            <table id="productsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody id="productsBody">
+                    <tr><td colspan="5" style="text-align:center;">No products loaded</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="background: #0f1722; padding: 15px; border-radius: 8px;">
+            <h3 style="color: #f39c12; margin-bottom: 10px;">Debug Output</h3>
+            <pre id="debugOutput">Ready...</pre>
+        </div>
+    </div>
 
     <script>
-        // YOUR CORRECT URL
+        // YOUR APPS SCRIPT URL - REPLACE THIS
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzEdtAUNjl_FpMNqPWrj-qriMNl7eV_jM8Uw_ryWTs7Q_ikTETdD-6FoXMR4d3OjaDIg/exec';
         
-        function jsonpCall(action, data, callback) {
-            const callbackName = 'callback_' + Date.now();
+        function updateStatus(connected, message) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            
+            if (connected) {
+                dot.className = 'status-dot connected';
+                text.textContent = message || 'Connected';
+                text.style.color = '#27ae60';
+            } else {
+                dot.className = 'status-dot';
+                text.textContent = message || 'Disconnected';
+                text.style.color = '#e74c3c';
+            }
+        }
+
+        function jsonpRequest(action, data, callback) {
+            const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
             window[callbackName] = function(response) {
-                document.getElementById('status').className = 'status connected';
-                document.getElementById('status').innerHTML = '✅ Connected';
                 delete window[callbackName];
-                document.body.removeChild(document.getElementById('jsonpScript'));
+                const script = document.getElementById('jsonpScript');
+                if (script) script.remove();
                 callback(response);
             };
             
             const script = document.createElement('script');
             script.id = 'jsonpScript';
-            const url = SCRIPT_URL + '?action=' + action + '&data=' + encodeURIComponent(JSON.stringify(data)) + '&callback=' + callbackName;
-            script.src = url;
+            
+            const url = new URL(SCRIPT_URL);
+            url.searchParams.append('action', action);
+            url.searchParams.append('data', JSON.stringify(data));
+            url.searchParams.append('callback', callbackName);
+            
+            script.src = url.toString();
             
             script.onerror = function() {
-                document.getElementById('status').className = 'status disconnected';
-                document.getElementById('status').innerHTML = '❌ Disconnected - Check URL';
                 delete window[callbackName];
-                document.body.removeChild(script);
+                script.remove();
+                updateStatus(false, 'Connection failed');
                 callback(null);
             };
             
             document.body.appendChild(script);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    delete window[callbackName];
+                    script.remove();
+                    updateStatus(false, 'Timeout - Check URL');
+                    callback(null);
+                }
+            }, 10000);
         }
-        
+
         function runSetup() {
-            document.getElementById('result').innerHTML = 'Running setup...';
-            jsonpCall('setup', {}, function(result) {
-                document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+            document.getElementById('debugOutput').textContent = 'Running setup...';
+            jsonpRequest('setup', {}, function(response) {
+                document.getElementById('debugOutput').textContent = JSON.stringify(response, null, 2);
+                if (response && response.status === 'success') {
+                    updateStatus(true, 'Setup complete!');
+                    checkConnection();
+                } else {
+                    updateStatus(false, 'Setup failed');
+                }
             });
         }
-        
+
         function checkConnection() {
-            document.getElementById('result').innerHTML = 'Checking...';
-            jsonpCall('getDashboardStats', {}, function(result) {
-                document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+            document.getElementById('debugOutput').textContent = 'Checking connection...';
+            jsonpRequest('getDashboardStats', {}, function(response) {
+                document.getElementById('debugOutput').textContent = JSON.stringify(response, null, 2);
+                
+                if (response && response.stats) {
+                    updateStatus(true, 'Connected');
+                    document.getElementById('totalProducts').textContent = response.stats.totalProducts || 0;
+                    document.getElementById('totalCategories').textContent = response.stats.totalCategories || 0;
+                    document.getElementById('totalOrders').textContent = response.stats.totalOrders || 0;
+                    document.getElementById('totalRevenue').textContent = '₹' + (response.stats.totalRevenue || 0);
+                } else {
+                    updateStatus(false, 'Invalid response');
+                }
             });
         }
-        
-        function getProducts() {
-            document.getElementById('result').innerHTML = 'Loading...';
-            jsonpCall('getProducts', {}, function(result) {
-                document.getElementById('result').innerHTML = JSON.stringify(result, null, 2);
+
+        function loadProducts() {
+            document.getElementById('debugOutput').textContent = 'Loading products...';
+            jsonpRequest('getProducts', {}, function(products) {
+                document.getElementById('debugOutput').textContent = JSON.stringify(products, null, 2);
+                
+                const tbody = document.getElementById('productsBody');
+                
+                if (!products || products.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No products found</td></tr>';
+                    return;
+                }
+                
+                let html = '';
+                products.forEach(p => {
+                    html += `
+                        <tr>
+                            <td>${p.id || 'N/A'}</td>
+                            <td>${p.name || 'Unnamed'}</td>
+                            <td>${p.category || 'General'}</td>
+                            <td>₹${p.price || 0}</td>
+                            <td>${p.stock || 'Unknown'}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
             });
         }
-        
-        // Auto-check connection
-        checkConnection();
+
+        // Auto-run on load
+        window.onload = function() {
+            checkConnection();
+        };
     </script>
 </body>
 </html>
