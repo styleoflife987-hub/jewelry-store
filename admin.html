@@ -1,102 +1,32 @@
-const SHEET_ID = "1TgaHOPDmFtjgnmIWU3j4G_vCx9LAmvMbwipURRJxXD8";
+<!DOCTYPE html>
+<html>
 
-function doGet(e){
+<body>
 
-let action = e.parameter.action;
+<h2>Orders</h2>
 
-if(action=="products") return getProducts();
-if(action=="orders") return getOrders();
+<button onclick="load()">Load Orders</button>
 
-return ContentService
-.createTextOutput(JSON.stringify({error:"invalid"}))
-.setMimeType(ContentService.MimeType.JSON);
+<pre id="orders"></pre>
 
-}
+<script>
 
-function doPost(e){
+const API="PASTE_SCRIPT_URL";
 
-let data = JSON.parse(e.postData.contents);
+function load(){
 
-if(data.action=="order") return saveOrder(data);
+fetch(API+"?action=orders")
+.then(r=>r.json())
+.then(data=>{
 
-}
-
-function getProducts(){
-
-const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Products");
-
-let data = sheet.getDataRange().getValues();
-
-let products=[];
-
-for(let i=1;i<data.length;i++){
-
-products.push({
-
-id:data[i][0],
-name:data[i][1],
-category:data[i][2],
-price:data[i][3],
-stock:data[i][4],
-image:data[i][5]
+document.getElementById("orders").innerText=
+JSON.stringify(data,null,2);
 
 });
 
 }
 
-return ContentService
-.createTextOutput(JSON.stringify(products))
-.setMimeType(ContentService.MimeType.JSON);
+</script>
 
-}
-
-function saveOrder(order){
-
-const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Orders");
-
-sheet.appendRow([
-
-"ORD"+Date.now(),
-order.customer,
-order.phone,
-order.address,
-JSON.stringify(order.items),
-order.total,
-new Date()
-
-]);
-
-return ContentService
-.createTextOutput(JSON.stringify({success:true}))
-.setMimeType(ContentService.MimeType.JSON);
-
-}
-
-function getOrders(){
-
-const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Orders");
-
-let data = sheet.getDataRange().getValues();
-
-let orders=[];
-
-for(let i=1;i<data.length;i++){
-
-orders.push({
-
-id:data[i][0],
-customer:data[i][1],
-phone:data[i][2],
-address:data[i][3],
-items:data[i][4],
-total:data[i][5]
-
-});
-
-}
-
-return ContentService
-.createTextOutput(JSON.stringify(orders))
-.setMimeType(ContentService.MimeType.JSON);
-
-}
+</body>
+</html>
