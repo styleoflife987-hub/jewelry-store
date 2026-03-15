@@ -1,26 +1,84 @@
 <!DOCTYPE html>
 <html>
+<head>
+
+<title>Admin Dashboard</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#fafafa;
+padding:20px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+}
+
+th{
+background:black;
+color:white;
+}
+
+button{
+padding:10px;
+margin-bottom:10px;
+}
+
+</style>
+
+</head>
 
 <body>
 
 <h2>Orders Dashboard</h2>
 
-<button onclick="load()">Load Orders</button>
+<button onclick="loadOrders()">Load Orders</button>
 
-<pre id="orders"></pre>
+<table id="orders">
+
+<tr>
+<th>ID</th>
+<th>Customer</th>
+<th>Total</th>
+<th>Status</th>
+</tr>
+
+</table>
 
 <script>
 
 const API="https://script.google.com/macros/s/AKfycby3wzak-aaQ66x5UKbC2_htO6H-qt9dp0eEsyUblO2_5X5t5b1Nd0FtZY4HCiaV6QBf_g/exec";
 
-function load(){
+function loadOrders(){
 
 fetch(API+"?action=orders")
 .then(r=>r.json())
 .then(data=>{
 
-document.getElementById("orders").innerText=
-JSON.stringify(data,null,2);
+let table=document.getElementById("orders");
+
+data.forEach(o=>{
+
+let row=`
+<tr>
+<td>${o.id}</td>
+<td>${o.customer}</td>
+<td>₹${o.total}</td>
+<td>${o.status}</td>
+</tr>
+`;
+
+table.innerHTML+=row;
+
+});
 
 });
 
