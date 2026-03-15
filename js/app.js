@@ -177,4 +177,178 @@ window.quickView = function(sku) {
                 ${imagesHtml}
             </div>
             <div style="display:flex; gap:10px; margin-top:20px">
-                <button onclick="add
+                <button onclick="addToCart('${sku}')" style="flex:2">Add to Cart - ₹${product.price}</button>
+                <button onclick="this.closest('.quick-view-modal').remove()" style="flex:1; background:#333">Close</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+};
+
+// Select image from modal
+window.selectImage = function(sku, imageUrl) {
+    const mainImage = document.getElementById(`main-${sku}`);
+    if (mainImage) {
+        mainImage.src = imageUrl;
+    }
+    document.querySelector('.quick-view-modal')?.remove();
+};
+
+// Add to cart
+window.addToCart = function(sku) {
+    const product = products.find(p => p.sku === sku);
+    if (!product) return;
+    
+    if (product.stock <= 0) {
+        alert("Sorry, this product is out of stock.");
+        return;
+    }
+    
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    
+    // Check if already in cart
+    const existingItem = cart.find(item => item.sku === sku);
+    if (existingItem) {
+        existingItem.quantity = (existingItem.quantity || 1) + 1;
+    } else {
+        cart.push({
+            sku: product.sku,
+            name: product.name,
+            price: product.price,
+            image: product.mainImage,
+            quantity: 1
+        });
+    }
+    
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartCount();
+    
+    // Show success message
+    showNotification(`${product.name} added to cart!`);
+};
+
+// Update cart count in header
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    
+    // Update cart count display if exists
+    const cartCountElements = document.querySelectorAll('.cart-count');
+    cartCountElements.forEach(el => {
+        el.textContent = count;
+        el.style.display = count > 0 ? 'inline' : 'none';
+    });
+}
+
+// Show notification
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #d4af37;
+        color: black;
+        padding: 15px 25px;
+        border-radius: 8px;
+        font-weight: bold;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Search products
+window.searchProducts = function(query) {
+    if (!query) {
+        showProducts(products);
+        return;
+    }
+    
+    const filtered = products.filter(p => 
+        p.name.toLowerCase().includes(query.toLowerCase()) ||
+        p.sku.toLowerCase().includes(query.toLowerCase()) ||
+        p.category?.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    showProducts(filtered);
+};
+
+// Show loading spinner
+function showLoading() {
+    const container = document.getElementById("products");
+    if (container) {
+        container.innerHTML = `
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p style="margin-top:20px">Loading beautiful jewelry...</p>
+            </div>
+        `;
+    }
+}
+
+// Hide loading
+function hideLoading() {
+    // Loading will be replaced by products
+}
+
+// Show error
+function showError(message) {
+    const container = document.getElementById("products");
+    if (container) {
+        container.innerHTML = `
+            <div style="text-align:center; padding:50px; grid-column:1/-1">
+                <p style="color:#f44336; font-size:18px">${message}</p>
+                <button onclick="location.reload()" style="width:auto; padding:10px 30px; margin-top:20px">
+                    Refresh Page
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+    
+    .no-products {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 50px;
+        color: #888;
+        font-size: 18px;
+    }
+    
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    button:disabled:hover {
+        transform: none;
+        box-shadow: none;
+    }
+`;
+document.head.appendChild(style);
