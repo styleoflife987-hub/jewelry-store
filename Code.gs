@@ -1,303 +1,100 @@
-// Google Apps Script Backend - COMPLETE WORKING VERSION
-const SPREADSHEET_ID = '1TgaHOPDmFtjgnmIWU3j4G_vCx9LAmvMbwipURRJxXD8';
+const SHEET_ID="1TgaHOPDmFtjgnmIWU3j4G_vCx9LAmvMbwipURRJxXD8";
 
-// Main handler for both GET and POST
-function doGet(e) {
-  return handleRequest(e);
+function doGet(e){
+
+let action=e.parameter.action;
+
+if(action=="products") return getProducts();
+
+if(action=="orders") return getOrders();
+
+return ContentService
+.createTextOutput(JSON.stringify({error:"Invalid action"}))
+.setMimeType(ContentService.MimeType.JSON);
+
 }
 
-function doPost(e) {
-  return handleRequest(e);
+function doPost(e){
+
+let data=JSON.parse(e.postData.contents);
+
+if(data.action=="placeOrder")
+return placeOrder(data);
+
 }
 
-function handleRequest(e) {
-  try {
-    // Get parameters
-    const params = e.parameter || {};
-    const action = params.action || (e.postData ? JSON.parse(e.postData.contents).action : null);
-    const callback = params.callback;
-    
-    let result;
-    
-    // Handle different actions
-    if (action === 'setup') {
-      result = setupSheets();
-    } else if (action === 'getProducts') {
-      result = getProducts();
-    } else if (action === 'getDashboardStats') {
-      result = getDashboardStats();
-    } else if (action === 'saveOrder') {
-      const data = e.postData ? JSON.parse(e.postData.contents).data : JSON.parse(params.data);
-      result = saveOrder(data);
-    } else if (action === 'getOrders') {
-      result = getOrders();
-    } else {
-      result = { status: 'error', message: 'Unknown action: ' + action };
-    }
-    
-    // Convert to JSON
-    const jsonResult = JSON.stringify(result);
-    
-    // If callback exists (JSONP request), return with callback
-    if (callback) {
-      return ContentService
-        .createTextOutput(callback + '(' + jsonResult + ')')
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    }
-    
-    // Regular JSON response
-    return ContentService
-      .createTextOutput(jsonResult)
-      .setMimeType(ContentService.MimeType.JSON);
-      
-  } catch (error) {
-    const errorResult = JSON.stringify({ status: 'error', message: error.toString() });
-    
-    if (e.parameter && e.parameter.callback) {
-      return ContentService
-        .createTextOutput(e.parameter.callback + '(' + errorResult + ')')
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    }
-    
-    return ContentService
-      .createTextOutput(errorResult)
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+function getProducts(){
+
+let sheet=SpreadsheetApp.openById(SHEET_ID)
+.getSheetByName("Products");
+
+let rows=sheet.getDataRange().getValues();
+
+let products=[];
+
+for(let i=1;i<rows.length;i++){
+
+products.push({
+id:rows[i][0],
+name:rows[i][1],
+category:rows[i][2],
+price:rows[i][3],
+stock:rows[i][4],
+image:rows[i][5]
+});
+
 }
 
-// ==================== SETUP FUNCTION ====================
-function setupSheets() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    
-    // Create Products sheet
-    let sheet = ss.getSheetByName('Products');
-    if (!sheet) {
-      sheet = ss.insertSheet('Products');
-      sheet.getRange('A1:G1').setValues([[
-        'ID', 'Name', 'Category', 'Price', 'Stock', 'ImageIDs', 'CreatedAt'
-      ]]);
-      sheet.getRange('A1:G1').setFontWeight('bold').setBackground('#f39c12');
-    }
-    
-    // Create Orders sheet
-    sheet = ss.getSheetByName('Orders');
-    if (!sheet) {
-      sheet = ss.insertSheet('Orders');
-      sheet.getRange('A1:L1').setValues([[
-        'OrderID', 'Customer', 'Email', 'Phone', 'Address', 'Items', 'Total', 
-        'Status', 'Date', 'PaymentMethod', 'Notes', 'UpdatedAt'
-      ]]);
-      sheet.getRange('A1:L1').setFontWeight('bold').setBackground('#f39c12');
-    }
-    
-    // Create Categories sheet with default data
-    sheet = ss.getSheetByName('Categories');
-    if (!sheet) {
-      sheet = ss.insertSheet('Categories');
-      sheet.getRange('A1:B1').setValues([['Category', 'Description']]);
-      sheet.getRange('A1:B1').setFontWeight('bold').setBackground('#f39c12');
-      
-      const categories = [
-        ['Necklace', 'Beautiful necklaces and pendants'],
-        ['Earrings', 'Elegant earrings for all occasions'],
-        ['Bangles', 'Traditional and modern bangles'],
-        ['Rings', 'Stylish rings for every finger'],
-        ['Bracelet', 'Charming bracelets'],
-        ['Anklet', 'Traditional anklets'],
-        ['Headpiece', 'Beautiful head accessories']
-      ];
-      sheet.getRange(2, 1, categories.length, 2).setValues(categories);
-    }
-    
-    // Add a sample product
-    const productsSheet = ss.getSheetByName('Products');
-    const productsData = productsSheet.getDataRange().getValues();
-    
-    if (productsData.length <= 1) {
-      productsSheet.appendRow([
-        'SOL001',
-        'Golden Peacock Choker',
-        'Necklace',
-        1850,
-        'In Stock',
-        '',
-        new Date().toISOString()
-      ]);
-    }
-    
-    return { 
-      status: 'success', 
-      message: 'Setup completed successfully',
-      sheets: ['Products', 'Orders', 'Categories']
-    };
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
+return ContentService
+.createTextOutput(JSON.stringify(products))
+.setMimeType(ContentService.MimeType.JSON);
+
 }
 
-// ==================== PRODUCTS FUNCTIONS ====================
-function getProducts() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = ss.getSheetByName('Products');
-    
-    if (!sheet) {
-      return { status: 'error', message: 'Products sheet not found. Run setup first.' };
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    
-    if (data.length <= 1) {
-      return [];
-    }
-    
-    const products = [];
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (!row[0]) continue;
-      
-      let images = [];
-      if (row[5]) {
-        const imageIds = row[5].split(',');
-        images = imageIds.map(id => ({
-          id: id.trim(),
-          url: `https://drive.google.com/uc?export=view&id=${id.trim()}`
-        }));
-      }
-      
-      products.push({
-        id: row[0],
-        name: row[1] || 'Unnamed Product',
-        category: row[2] || 'General',
-        price: Number(row[3]) || 0,
-        stock: row[4] || 'In Stock',
-        images: images,
-        createdAt: row[6] || new Date().toISOString()
-      });
-    }
-    
-    return products;
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
+function getOrders(){
+
+let sheet=SpreadsheetApp.openById(SHEET_ID)
+.getSheetByName("Orders");
+
+let rows=sheet.getDataRange().getValues();
+
+let orders=[];
+
+for(let i=1;i<rows.length;i++){
+
+orders.push({
+id:rows[i][0],
+customer:rows[i][1],
+total:rows[i][5],
+status:rows[i][7]
+});
+
 }
 
-// ==================== ORDERS FUNCTIONS ====================
-function saveOrder(order) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = ss.getSheetByName('Orders');
-    
-    if (!sheet) {
-      return { status: 'error', message: 'Orders sheet not found. Run setup first.' };
-    }
-    
-    sheet.appendRow([
-      order.id || 'ORD' + Date.now(),
-      order.customer || '',
-      order.email || '',
-      order.phone || '',
-      order.address || '',
-      JSON.stringify(order.items || []),
-      order.total || 0,
-      order.status || 'Pending',
-      order.date || new Date().toISOString(),
-      order.paymentMethod || '',
-      order.notes || '',
-      new Date().toISOString()
-    ]);
-    
-    return { status: 'success', message: 'Order saved successfully', orderId: order.id };
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
+return ContentService
+.createTextOutput(JSON.stringify(orders))
+.setMimeType(ContentService.MimeType.JSON);
+
 }
 
-function getOrders() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = ss.getSheetByName('Orders');
-    
-    if (!sheet) {
-      return [];
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    
-    if (data.length <= 1) {
-      return [];
-    }
-    
-    const orders = [];
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (!row[0]) continue;
-      
-      orders.push({
-        id: row[0],
-        customer: row[1],
-        email: row[2],
-        phone: row[3],
-        address: row[4],
-        items: JSON.parse(row[5] || '[]'),
-        total: row[6],
-        status: row[7],
-        date: row[8],
-        paymentMethod: row[9],
-        notes: row[10],
-        updatedAt: row[11]
-      });
-    }
-    
-    return orders;
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
-}
+function placeOrder(o){
 
-// ==================== DASHBOARD STATS ====================
-function getDashboardStats() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    
-    // Products count
-    const productsSheet = ss.getSheetByName('Products');
-    const productsData = productsSheet ? productsSheet.getDataRange().getValues() : [[]];
-    const totalProducts = productsData.length > 1 ? productsData.length - 1 : 0;
-    
-    // Categories count
-    const categoriesSheet = ss.getSheetByName('Categories');
-    const categoriesData = categoriesSheet ? categoriesSheet.getDataRange().getValues() : [[]];
-    const totalCategories = categoriesData.length > 1 ? categoriesData.length - 1 : 0;
-    
-    // Orders stats
-    const ordersSheet = ss.getSheetByName('Orders');
-    const ordersData = ordersSheet ? ordersSheet.getDataRange().getValues() : [[]];
-    const totalOrders = ordersData.length > 1 ? ordersData.length - 1 : 0;
-    
-    let totalRevenue = 0;
-    for (let i = 1; i < ordersData.length; i++) {
-      if (ordersData[i][0]) {
-        totalRevenue += Number(ordersData[i][6]) || 0;
-      }
-    }
-    
-    return {
-      stats: {
-        totalProducts: totalProducts,
-        totalCategories: totalCategories,
-        totalOrders: totalOrders,
-        totalRevenue: totalRevenue,
-        avgOrderValue: totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0
-      }
-    };
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
+let sheet=SpreadsheetApp.openById(SHEET_ID)
+.getSheetByName("Orders");
+
+sheet.appendRow([
+"ORD"+Date.now(),
+o.customer,
+o.phone,
+o.address,
+JSON.stringify(o.items),
+o.total,
+new Date(),
+"Pending"
+]);
+
+return ContentService
+.createTextOutput(JSON.stringify({success:true}))
+.setMimeType(ContentService.MimeType.JSON);
+
 }
