@@ -1,56 +1,9 @@
-const API="https://script.google.com/macros/s/AKfycby3wzak-aaQ66x5UKbC2_htO6H-qt9dp0eEsyUblO2_5X5t5b1Nd0FtZY4HCiaV6QBf_g/exec";
+function addReview(product){
 
-let products=[];
+let review=prompt("Write your review");
 
-fetch(API+"?action=products")
-.then(r=>r.json())
-.then(data=>{
-products=data;
-showProducts(products);
-});
+fetch(API+"?action=review&product="+product+"&text="+review);
 
-function showProducts(list){
-
-let html="";
-
-list.forEach(p=>{
-
-html+=`
-
-<div class="card">
-
-<img src="${p.image}">
-
-<h3>${p.name}</h3>
-
-<div class="price">₹${p.price}</div>
-
-<button onclick="addCart('${p.name}',${p.price})">
-Add To Cart
-</button>
-
-</div>
-
-`;
-
-});
-
-document.getElementById("products").innerHTML=html;
-
-}
-
-function searchProduct(q){
-
-let filtered=products.filter(p=>
-p.name.toLowerCase().includes(q.toLowerCase())
-);
-
-showProducts(filtered);
-
-}
-
-function addCart(name,price){
-
-alert(name+" added to cart");
+alert("Review submitted");
 
 }
