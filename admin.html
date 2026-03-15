@@ -1,75 +1,102 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Jewelry Store</title>
+const SHEET_ID = "1TgaHOPDmFtjgnmIWU3j4G_vCx9LAmvMbwipURRJxXD8";
 
-<style>
+function doGet(e){
 
-body{
-font-family:Arial;
-background:#f5f5f5;
-}
+let action = e.parameter.action;
 
-.products{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:20px;
-}
+if(action=="products") return getProducts();
+if(action=="orders") return getOrders();
 
-.card{
-
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px #ccc;
+return ContentService
+.createTextOutput(JSON.stringify({error:"invalid"}))
+.setMimeType(ContentService.MimeType.JSON);
 
 }
 
-</style>
+function doPost(e){
 
-</head>
+let data = JSON.parse(e.postData.contents);
 
-<body>
+if(data.action=="order") return saveOrder(data);
 
-<h1>Jewelry Store</h1>
+}
 
-<div class="products" id="products"></div>
+function getProducts(){
 
-<script>
+const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Products");
 
-const API="PASTE_SCRIPT_URL_HERE";
+let data = sheet.getDataRange().getValues();
 
-fetch(API+"?action=getProducts")
-.then(r=>r.json())
-.then(data=>{
+let products=[];
 
-let html="";
+for(let i=1;i<data.length;i++){
 
-data.forEach(p=>{
+products.push({
 
-html+=`
-
-<div class="card">
-
-<h3>${p.name}</h3>
-
-<p>Category : ${p.category}</p>
-
-<h2>₹${p.price}</h2>
-
-<p>${p.stock}</p>
-
-</div>
-
-`;
+id:data[i][0],
+name:data[i][1],
+category:data[i][2],
+price:data[i][3],
+stock:data[i][4],
+image:data[i][5]
 
 });
 
-document.getElementById("products").innerHTML=html;
+}
+
+return ContentService
+.createTextOutput(JSON.stringify(products))
+.setMimeType(ContentService.MimeType.JSON);
+
+}
+
+function saveOrder(order){
+
+const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Orders");
+
+sheet.appendRow([
+
+"ORD"+Date.now(),
+order.customer,
+order.phone,
+order.address,
+JSON.stringify(order.items),
+order.total,
+new Date()
+
+]);
+
+return ContentService
+.createTextOutput(JSON.stringify({success:true}))
+.setMimeType(ContentService.MimeType.JSON);
+
+}
+
+function getOrders(){
+
+const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Orders");
+
+let data = sheet.getDataRange().getValues();
+
+let orders=[];
+
+for(let i=1;i<data.length;i++){
+
+orders.push({
+
+id:data[i][0],
+customer:data[i][1],
+phone:data[i][2],
+address:data[i][3],
+items:data[i][4],
+total:data[i][5]
 
 });
 
-</script>
+}
 
-</body>
-</html>
+return ContentService
+.createTextOutput(JSON.stringify(orders))
+.setMimeType(ContentService.MimeType.JSON);
+
+}
