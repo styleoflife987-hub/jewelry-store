@@ -1,22 +1,260 @@
-function checkConnection() {
-    const url = SCRIPT_URL + '?action=getDashboardStats';
-    fetch(url)
-        .then(response => response.text())
-        .then(text => {
-            document.getElementById('debugOutput').textContent = text;
-            try {
-                const data = JSON.parse(text);
-                if (data.stats) {
-                    updateStatus(true, 'Connected');
-                } else {
-                    updateStatus(false, 'Invalid response');
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Style Of Life - Luxury Jewelry</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f5f5f5; }
+        .header {
+            background: linear-gradient(135deg, #C5A028, #D4A5A5);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: 3rem; margin-bottom: 10px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .status-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: #C5A028;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover { background: #8B6F2C; }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(197, 160, 40, 0.3);
+        }
+        .product-image {
+            height: 200px;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #C5A028;
+            font-size: 3rem;
+        }
+        .product-info { padding: 15px; }
+        .product-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .product-price { color: #C5A028; font-size: 1.5rem; font-weight: bold; margin: 10px 0; }
+        .product-stock {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .in-stock { background: #d4edda; color: #155724; }
+        .limited { background: #fff3cd; color: #856404; }
+        .out-of-stock { background: #f8d7da; color: #721c24; }
+        .add-to-cart {
+            width: 100%;
+            padding: 10px;
+            background: #C5A028;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .add-to-cart:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        pre {
+            background: #333;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow: auto;
+            margin-top: 20px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #C5A028;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Style Of Life</h1>
+        <p>Timeless Beauty, Modern Elegance</p>
+    </div>
+
+    <div class="container">
+        <div class="status-bar">
+            <span id="statusText">Loading products...</span>
+            <button class="btn" onclick="loadProducts()">🔄 Refresh</button>
+        </div>
+
+        <div id="productsContainer" class="products-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                <div class="loader"></div>
+                <p>Loading beautiful jewelry...</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3>Debug Information:</h3>
+            <pre id="debugOutput">Waiting for response...</pre>
+        </div>
+    </div>
+
+    <script>
+        // ========== CONFIGURATION ==========
+        // REPLACE WITH YOUR ACTUAL DEPLOYED URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6_of-vLu6MN4QDTH2EDJWCLfDjT7kls04iyo7XvF6kn3sVyo2SXN2zdQfhT-xCbIJaA/exec';
+
+        function jsonpRequest(action, data, callback) {
+            const callbackName = 'cb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            window[callbackName] = function(response) {
+                delete window[callbackName];
+                const script = document.getElementById('jsonp_script');
+                if (script) script.remove();
+                callback(response);
+            };
+            
+            const script = document.createElement('script');
+            script.id = 'jsonp_script';
+            
+            const url = new URL(SCRIPT_URL);
+            url.searchParams.append('action', action);
+            url.searchParams.append('data', JSON.stringify(data));
+            url.searchParams.append('callback', callbackName);
+            
+            script.src = url.toString();
+            
+            script.onerror = function() {
+                delete window[callbackName];
+                script.remove();
+                document.getElementById('debugOutput').textContent = '❌ Connection failed - Check URL';
+                document.getElementById('statusText').textContent = 'Connection failed';
+                callback({ error: 'Connection failed' });
+            };
+            
+            document.body.appendChild(script);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    delete window[callbackName];
+                    script.remove();
+                    document.getElementById('debugOutput').textContent = '❌ Timeout - No response';
+                    document.getElementById('statusText').textContent = 'Timeout';
+                    callback({ error: 'Timeout' });
                 }
-            } catch (e) {
-                updateStatus(false, 'Not JSON');
-            }
-        })
-        .catch(error => {
-            document.getElementById('debugOutput').textContent = 'Fetch error: ' + error;
-            updateStatus(false, 'Fetch failed');
-        });
-}
+            }, 10000);
+        }
+
+        function loadProducts() {
+            document.getElementById('statusText').textContent = 'Loading...';
+            document.getElementById('debugOutput').textContent = 'Fetching products...';
+            document.getElementById('productsContainer').innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                    <div class="loader"></div>
+                    <p>Loading...</p>
+                </div>
+            `;
+            
+            jsonpRequest('getProducts', {}, function(products) {
+                document.getElementById('debugOutput').textContent = JSON.stringify(products, null, 2);
+                
+                if (!products || products.length === 0) {
+                    document.getElementById('productsContainer').innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                            <p>No products found. Please run setup in admin panel first.</p>
+                        </div>
+                    `;
+                    document.getElementById('statusText').textContent = 'No products';
+                    return;
+                }
+                
+                // If products is an object with an error property
+                if (products.error) {
+                    document.getElementById('productsContainer').innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                            <p>Error: ${products.error}</p>
+                        </div>
+                    `;
+                    document.getElementById('statusText').textContent = 'Error';
+                    return;
+                }
+                
+                let html = '';
+                products.forEach(product => {
+                    let stockClass = 'in-stock';
+                    if (product.stock === 'Limited') stockClass = 'limited';
+                    if (product.stock === 'Out of Stock') stockClass = 'out-of-stock';
+                    
+                    html += `
+                        <div class="product-card">
+                            <div class="product-image">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            <div class="product-info">
+                                <div class="product-name">${product.name || 'Unnamed Product'}</div>
+                                <div class="product-price">₹${product.price || 0}</div>
+                                <div class="product-stock ${stockClass}">${product.stock || 'In Stock'}</div>
+                                <button class="add-to-cart" onclick="addToCart('${product.id}')" ${product.stock === 'Out of Stock' ? 'disabled' : ''}>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('productsContainer').innerHTML = html;
+                document.getElementById('statusText').textContent = `✅ Loaded ${products.length} products`;
+            });
+        }
+
+        function addToCart(productId) {
+            alert('Product added to cart! (Cart functionality coming soon)');
+        }
+
+        // Load products when page opens
+        window.onload = function() {
+            loadProducts();
+        };
+    </script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</body>
+</html>
