@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 
 <body>
@@ -12,7 +11,28 @@
 
 <div id="result"></div>
 
-<script src="js/track.js"></script>
+<script>
+
+const API="PASTE_API_URL";
+
+function track(){
+
+let id=document.getElementById("orderId").value;
+
+fetch(API+"?action=track&id="+id)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+document.getElementById("result").innerText=
+JSON.stringify(data,null,2);
+
+});
+
+}
+
+</script>
 
 </body>
 
