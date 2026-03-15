@@ -1,0 +1,21 @@
+1. Create folder in Google Drive: "Jewelry Products"
+2. Name images with SKU: 
+   - SKU001_front.jpg
+   - SKU001_side.jpg
+   - SKU001_back.jpg
+   - SKU002_front.jpg
+   - SKU002_side.jpg
+   
+3. Get file IDs and update image-map.js:
+   
+   const skuToGallery = {
+       "SKU001": [
+           "fileId_for_front",  // main
+           "fileId_for_side",   // gallery
+           "fileId_for_back",   // gallery
+       ],
+       "SKU002": [
+           "fileId_for_front",
+           "fileId_for_side",
+       ]
+   }
