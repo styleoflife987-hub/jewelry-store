@@ -3,7 +3,7 @@
 
 <body>
 
-<h2>Admin Orders</h2>
+<h2>Orders Dashboard</h2>
 
 <button onclick="load()">Load Orders</button>
 
@@ -11,14 +11,12 @@
 
 <script>
 
-const API="PASTE_SCRIPT_URL";
+const API="https://script.google.com/macros/s/AKfycby3wzak-aaQ66x5UKbC2_htO6H-qt9dp0eEsyUblO2_5X5t5b1Nd0FtZY4HCiaV6QBf_g/exec";
 
 function load(){
 
 fetch(API+"?action=orders")
-
-.then(res=>res.json())
-
+.then(r=>r.json())
 .then(data=>{
 
 document.getElementById("orders").innerText=
