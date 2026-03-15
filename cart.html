@@ -2,36 +2,48 @@
 <html>
 
 <head>
-<title>Cart</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<h2>Your Cart</h2>
+<header>
+<div class="logo">STYLE OF LIFE</div>
+</header>
+
+<h2 style="text-align:center">Your Cart</h2>
+
+<div style="padding:40px">
 
 <div id="cartItems"></div>
 
 <h3>Total ₹<span id="total"></span></h3>
 
+<a href="checkout.html">
+<button>Checkout</button>
+</a>
+
+</div>
+
 <script>
 
-let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+let cart=JSON.parse(localStorage.getItem("cart")||"[]");
 
-let total = 0;
+let total=0;
 
-let html = "";
+let html="";
 
-cart.forEach(p => {
+cart.forEach(p=>{
 
-html += p.name + " - ₹" + p.price + "<br>";
+html+=p.name+" - ₹"+p.price+"<br>";
 
-total += Number(p.price);
+total+=Number(p.price);
 
 });
 
-document.getElementById("cartItems").innerHTML = html;
+document.getElementById("cartItems").innerHTML=html;
 
-document.getElementById("total").innerText = total;
+document.getElementById("total").innerText=total;
 
 </script>
 
