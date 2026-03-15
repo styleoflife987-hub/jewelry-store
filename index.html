@@ -8,19 +8,19 @@
 <style>
 
 body{
-
 font-family:Arial;
-background:#f4f4f4;
+background:#fafafa;
 padding:20px;
+}
 
+h1{
+text-align:center;
 }
 
 .products{
-
 display:grid;
 grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
 gap:20px;
-
 }
 
 .card{
@@ -28,24 +28,22 @@ gap:20px;
 background:white;
 padding:15px;
 border-radius:10px;
-box-shadow:0 0 10px #ddd;
+box-shadow:0 2px 10px #ddd;
 
 }
 
 .card img{
-
 width:100%;
 height:200px;
 object-fit:cover;
-
 }
 
 button{
 
 background:#c9a227;
-color:white;
 border:none;
 padding:10px;
+color:white;
 width:100%;
 cursor:pointer;
 
@@ -66,9 +64,7 @@ cursor:pointer;
 const API="PASTE_SCRIPT_URL";
 
 fetch(API+"?action=products")
-
-.then(res=>res.json())
-
+.then(r=>r.json())
 .then(data=>{
 
 let html="";
@@ -85,7 +81,7 @@ html+=`
 
 <p>₹${p.price}</p>
 
-<button onclick="add('${p.name}',${p.price})">Order</button>
+<button onclick="order('${p.name}',${p.price})">Buy Now</button>
 
 </div>
 
@@ -97,39 +93,28 @@ document.getElementById("products").innerHTML=html;
 
 });
 
-function add(name,price){
+function order(name,price){
 
-let customer=prompt("Customer Name");
-
+let customer=prompt("Name");
 let phone=prompt("Phone");
-
 let address=prompt("Address");
 
-let order={
+let data={
 
 action:"placeOrder",
-
 customer:customer,
-
 phone:phone,
-
 address:address,
-
 items:[{name:name,price:price}],
-
 total:price
 
 };
 
 fetch(API,{
-
 method:"POST",
-
-body:JSON.stringify(order)
-
+body:JSON.stringify(data)
 })
-
-.then(()=>alert("Order placed"));
+.then(()=>alert("Order placed successfully"));
 
 }
 
