@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Tool</title>
+</head>
+<body>
+    <h1>🔍 Debug Tool - Let's Find the Problem</h1>
+    
+    <div style="padding: 20px; background: #f0f0f0; margin: 10px 0;">
+        <p><strong>Your URL:</strong> <span id="urlDisplay"></span></p>
+        <button onclick="testDirectURL()">Test 1: Open URL in new tab</button>
+        <button onclick="testJSONP()">Test 2: Test JSONP</button>
+        <button onclick="testSimpleFetch()">Test 3: Test Fetch</button>
+    </div>
+    
+    <div style="padding: 20px; background: #e0e0e0; margin: 10px 0;">
+        <h3>Results:</h3>
+        <pre id="result" style="background: #333; color: #0f0; padding: 10px;">Click a test button...</pre>
+    </div>
+
+    <script>
+        // YOUR URL - MAKE SURE THIS IS CORRECT
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzEdtAUNjl_FpMNqPWrj-qriMNl7eV_jM8Uw_ryWTs7Q_ikTETdD-6FoXMR4d3OjaDIg/exec';
+        
+        document.getElementById('urlDisplay').innerText = SCRIPT_URL;
+        
+        // Test 1: Open URL directly
+        function testDirectURL() {
+            window.open(SCRIPT_URL + '?action=getDashboardStats', '_blank');
+            document.getElementById('result').innerText = 'Check the new tab that opened. What do you see?';
+        }
+        
+        // Test 2: JSONP Test
+        function testJSONP() {
+            document.getElementById('result').innerText = 'Testing JSONP...';
+            
+            const callbackName = 'jsonpTest_' + Date.now();
+            
+            window[callbackName] = function(data) {
+                document.getElementById('result').innerText = '✅ JSONP SUCCESS!\n\n' + JSON.stringify(data, null, 2);
+                delete window[callbackName];
+                document.body.removeChild(document.getElementById('testScript'));
+            };
+            
+            const script = document.createElement('script');
+            script.id = 'testScript';
+            script.src = SCRIPT_URL + '?action=getDashboardStats&callback=' + callbackName;
+            
+            script.onerror = function() {
+                document.getElementById('result').innerText = '❌ JSONP Failed - Script error';
+                delete window[callbackName];
+                document.body.removeChild(script);
+            };
+            
+            document.body.appendChild(script);
+            
+            // Timeout after 5 seconds
+            setTimeout(function() {
+                if (window[callbackName]) {
+                    document.getElementById('result').innerText = '❌ JSONP Timeout - No response after 5 seconds';
+                    delete window[callbackName];
+                    document.body.removeChild(document.getElementById('testScript'));
+                }
+            }, 5000);
+        }
+        
+        // Test 3: Fetch Test
+        function testSimpleFetch() {
+            document.getElementById('result').innerText = 'Testing Fetch...';
+            
+            fetch(SCRIPT_URL + '?action=getDashboardStats')
+                .then(response => response.text())
+                .then(text => {
+                    document.getElementById('result').innerText = '✅ Fetch Response:\n\n' + text;
+                })
+                .catch(error => {
+                    document.getElementById('result').innerText = '❌ Fetch Error:\n\n' + error.toString();
+                });
+        }
+    </script>
+</body>
+</html>
