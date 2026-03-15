@@ -8,8 +8,12 @@
 
 body{
 font-family:Arial;
-background:#fafafa;
 padding:20px;
+background:#fafafa;
+}
+
+h2{
+margin-bottom:20px;
 }
 
 table{
@@ -67,16 +71,16 @@ let table=document.getElementById("orders");
 
 data.forEach(o=>{
 
-let row=`
+table.innerHTML+=`
+
 <tr>
 <td>${o.id}</td>
 <td>${o.customer}</td>
 <td>₹${o.total}</td>
 <td>${o.status}</td>
 </tr>
-`;
 
-table.innerHTML+=row;
+`;
 
 });
 
