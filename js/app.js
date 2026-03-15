@@ -1,75 +1,74 @@
 // js/app.js
 let products = [];
 
-// Fetch all products from GAS
 async function fetchProducts() {
     try {
-        console.log("Fetching from:", CONFIG.API_URL + "?action=products"); // Debug log
-        
         const res = await fetch(CONFIG.API_URL + "?action=products");
-        const data = await res.json();
-        
-        console.log("Received data:", data); // Debug log
-        
-        products = data;
+        products = await res.json();
         showProducts(products);
     } catch (err) {
-        console.error("Error fetching products:", err);
-        document.getElementById("products").innerHTML = "<p>Failed to load products. Check console for details.</p>";
+        console.error("Error:", err);
     }
 }
 
-// Render products on page
 function showProducts(list) {
     const container = document.getElementById("products");
-    if (!container) return;
-    
     container.innerHTML = "";
 
-    if (!list || list.length === 0) {
-        container.innerHTML = "<p>No products found. Add some products in admin panel.</p>";
-        return;
-    }
-
     list.forEach(p => {
+        // Get image URL using SKU
+        const imageUrl = getImageUrlBySku(p.sku) || p.image || 'https://via.placeholder.com/300';
+        
+        // Get all gallery images
+        const gallery = getGalleryBySku(p.sku);
+        
         const div = document.createElement("div");
         div.className = "card";
         div.innerHTML = `
-            <img src="${p.image || 'https://via.placeholder.com/300'}" alt="${p.name}" 
-                 onerror="this.src='https://via.placeholder.com/300'">
+            <div class="image-container">
+                <img src="${imageUrl}" 
+                     alt="${p.name}"
+                     class="main-image"
+                     onerror="this.src='https://via.placeholder.com/300'">
+                <div class="sku-badge">SKU: ${p.sku}</div>
+            </div>
             <h3>${p.name}</h3>
-            <p class="category">Category: ${p.category || 'Jewelry'}</p>
+            <p class="category">${p.category}</p>
             <div class="price">₹${p.price}</div>
-            <p class="stock">Stock: ${p.stock || 'In Stock'}</p>
-            <button onclick="addToCart('${p.name}', ${p.price}, '${p.image || ''}')">Add To Cart</button>
+            <p class="stock">Stock: ${p.stock}</p>
+            
+            <!-- Show thumbnail gallery if multiple images exist -->
+            ${gallery.length > 1 ? `
+                <div class="thumbnail-gallery">
+                    ${gallery.slice(0, 3).map(img => `
+                        <img src="${img}" class="thumbnail" onclick="changeMainImage(this, '${imageUrl}')">
+                    `).join('')}
+                </div>
+            ` : ''}
+            
+            <button onclick="addToCart('${p.name}', ${p.price}, '${p.sku}')">
+                Add To Cart
+            </button>
         `;
         container.appendChild(div);
     });
 }
 
-// Add to cart function
-function addToCart(name, price, image) {
+// Function to change main image when thumbnail clicked
+function changeMainImage(thumbnail, mainImageUrl) {
+    const mainImg = thumbnail.closest('.card').querySelector('.main-image');
+    mainImg.src = thumbnail.src;
+}
+
+// Add to cart with SKU
+function addToCart(name, price, sku) {
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    cart.push({ name, price, image });
+    cart.push({ 
+        name, 
+        price, 
+        sku,
+        image: getImageUrlBySku(sku)
+    });
     localStorage.setItem("cart", JSON.stringify(cart));
-    alert(`${name} added to cart!`);
-    
-    // Update cart count if element exists
-    const cartCount = document.getElementById("cartCount");
-    if (cartCount) cartCount.innerText = cart.length;
+    alert(`${name} (SKU: ${sku}) added to cart!`);
 }
-
-// Search function
-function searchProduct(query) {
-    if (!query) {
-        showProducts(products);
-        return;
-    }
-    const filtered = products.filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase())
-    );
-    showProducts(filtered);
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', fetchProducts);
