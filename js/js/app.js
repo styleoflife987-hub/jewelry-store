@@ -2,56 +2,56 @@ const API = "https://script.google.com/macros/s/AKfycby3wzak-aaQ66x5UKbC2_htO6H-
 
 let products = [];
 
-// Fetch products from GAS API
+// Fetch all products from GAS
 async function fetchProducts() {
   try {
     const res = await fetch(`${API}?action=products`);
     products = await res.json();
     showProducts(products);
   } catch (err) {
-    console.error("Failed to fetch products:", err);
+    console.error("Error fetching products:", err);
     document.getElementById("products").innerHTML = "<p>Failed to load products.</p>";
   }
 }
 
-// Display products
+// Render products on page
 function showProducts(list) {
   const container = document.getElementById("products");
-  container.innerHTML = ""; // Clear container
+  container.innerHTML = "";
 
-  if(list.length === 0){
+  if (list.length === 0) {
     container.innerHTML = "<p>No products found.</p>";
     return;
   }
 
   list.forEach(p => {
     const div = document.createElement("div");
-    div.className = "card";
+    div.className = "card"; // Ensure your CSS has .card styling
     div.innerHTML = `
-      <img src="${p.image}" alt="${p.name}">
-      <h3>${p.name}</h3>
+      <img src="${p.image}" alt="${p.name}" class="product-image">
+      <h3 class="product-name">${p.name}</h3>
+      <p class="product-category">Category: ${p.category}</p>
       <div class="price">₹${p.price}</div>
+      <p class="product-stock">Stock: ${p.stock}</p>
       <button onclick="addCart('${p.name}',${p.price})">Add To Cart</button>
     `;
     container.appendChild(div);
   });
 }
 
-// Search products
-function searchProduct(q) {
-  const filtered = products.filter(p => 
-    p.name.toLowerCase().includes(q.toLowerCase())
-  );
+// Simple search function (optional)
+function searchProduct(query) {
+  const filtered = products.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
   showProducts(filtered);
 }
 
-// Add to cart
+// Add product to localStorage cart
 function addCart(name, price) {
   let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  cart.push({name, price});
+  cart.push({ name, price });
   localStorage.setItem("cart", JSON.stringify(cart));
   alert(`${name} added to cart`);
 }
 
-// Initial fetch
+// Initial fetch on page load
 fetchProducts();
