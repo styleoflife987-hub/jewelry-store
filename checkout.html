@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+
+<html>
+
+<body onload="showCart()">
+
+<h2>Checkout</h2>
+
+<div id="cartItems"></div>
+
+<h3>Total ₹<span id="total"></span></h3>
+
+<button onclick="payNow(document.getElementById('total').innerText)">
+Pay Now
+</button>
+
+<script src="js/cart.js"></script>
+
+<script src="js/payment.js"></script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+</body>
+
+</html>
