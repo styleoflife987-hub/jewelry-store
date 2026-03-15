@@ -1,9 +1,31 @@
+<!DOCTYPE html>
+
+<html>
+
+<body>
+
+<h2>Admin Dashboard</h2>
+
 <h3>Add Product</h3>
 
-<input id="name" placeholder="Product Name">
+<input id="name" placeholder="Name">
+
+<input id="category" placeholder="Category">
 
 <input id="price" placeholder="Price">
 
 <input id="image" placeholder="Image URL">
 
 <button onclick="addProduct()">Add Product</button>
+
+<h3>Orders</h3>
+
+<button onclick="loadOrders()">Load Orders</button>
+
+<pre id="orders"></pre>
+
+<script src="js/admin.js"></script>
+
+</body>
+
+</html>
