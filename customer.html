@@ -1,303 +1,244 @@
-// Google Apps Script Backend - COMPLETE WORKING VERSION
-const SPREADSHEET_ID = '1TgqHOPDmFtgjmNIW3J4G_vCx9LAmVmbwipURRJxXD8';
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Style Of Life - Luxury Jewelry</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial; }
+        body { background: #f5f5f5; }
+        .header {
+            background: linear-gradient(135deg, #C5A028, #D4A5A5);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .header h1 { font-size: 3rem; margin-bottom: 10px; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .status-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: #C5A028;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover { background: #8B6F2C; }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(197, 160, 40, 0.3);
+        }
+        .product-image {
+            height: 200px;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #C5A028;
+            font-size: 3rem;
+        }
+        .product-info { padding: 15px; }
+        .product-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .product-price { color: #C5A028; font-size: 1.5rem; font-weight: bold; margin: 10px 0; }
+        .product-stock {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .in-stock { background: #d4edda; color: #155724; }
+        .limited { background: #fff3cd; color: #856404; }
+        .out-of-stock { background: #f8d7da; color: #721c24; }
+        .add-to-cart {
+            width: 100%;
+            padding: 10px;
+            background: #C5A028;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .add-to-cart:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        pre {
+            background: #333;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow: auto;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Style Of Life</h1>
+        <p>Timeless Beauty, Modern Elegance</p>
+    </div>
 
-// Main handler for both GET and POST
-function doGet(e) {
-  return handleRequest(e);
-}
+    <div class="container">
+        <div class="status-bar">
+            <span id="statusText">Loading products...</span>
+            <button class="btn" onclick="loadProducts()">🔄 Refresh</button>
+        </div>
 
-function doPost(e) {
-  return handleRequest(e);
-}
+        <div id="productsContainer" class="products-grid">
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                <div class="loader" style="border: 4px solid #f3f3f3; border-top: 4px solid #C5A028; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                <p>Loading beautiful jewelry...</p>
+            </div>
+        </div>
 
-function handleRequest(e) {
-  try {
-    // Get parameters
-    const params = e.parameter || {};
-    const action = params.action || (e.postData ? JSON.parse(e.postData.contents).action : null);
-    const callback = params.callback;
-    
-    let result;
-    
-    // Handle different actions
-    if (action === 'setup') {
-      result = setupSheets();
-    } else if (action === 'getProducts') {
-      result = getProducts();
-    } else if (action === 'getDashboardStats') {
-      result = getDashboardStats();
-    } else if (action === 'saveOrder') {
-      const data = e.postData ? JSON.parse(e.postData.contents).data : JSON.parse(params.data);
-      result = saveOrder(data);
-    } else if (action === 'getOrders') {
-      result = getOrders();
-    } else {
-      result = { status: 'error', message: 'Unknown action: ' + action };
-    }
-    
-    // Convert to JSON
-    const jsonResult = JSON.stringify(result);
-    
-    // If callback exists (JSONP request), return with callback
-    if (callback) {
-      return ContentService
-        .createTextOutput(callback + '(' + jsonResult + ')')
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    }
-    
-    // Regular JSON response
-    return ContentService
-      .createTextOutput(jsonResult)
-      .setMimeType(ContentService.MimeType.JSON);
-      
-  } catch (error) {
-    const errorResult = JSON.stringify({ status: 'error', message: error.toString() });
-    
-    if (e.parameter && e.parameter.callback) {
-      return ContentService
-        .createTextOutput(e.parameter.callback + '(' + errorResult + ')')
-        .setMimeType(ContentService.MimeType.JAVASCRIPT);
-    }
-    
-    return ContentService
-      .createTextOutput(errorResult)
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
+        <div style="margin-top: 30px;">
+            <h3>Debug Information:</h3>
+            <pre id="debugOutput">Waiting for response...</pre>
+        </div>
+    </div>
 
-// ==================== SETUP FUNCTION ====================
-function setupSheets() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    
-    // Create Products sheet
-    let sheet = ss.getSheetByName('Products');
-    if (!sheet) {
-      sheet = ss.insertSheet('Products');
-      sheet.getRange('A1:G1').setValues([[
-        'ID', 'Name', 'Category', 'Price', 'Stock', 'ImageIDs', 'CreatedAt'
-      ]]);
-      sheet.getRange('A1:G1').setFontWeight('bold').setBackground('#f39c12');
-    }
-    
-    // Create Orders sheet
-    sheet = ss.getSheetByName('Orders');
-    if (!sheet) {
-      sheet = ss.insertSheet('Orders');
-      sheet.getRange('A1:L1').setValues([[
-        'OrderID', 'Customer', 'Email', 'Phone', 'Address', 'Items', 'Total', 
-        'Status', 'Date', 'PaymentMethod', 'Notes', 'UpdatedAt'
-      ]]);
-      sheet.getRange('A1:L1').setFontWeight('bold').setBackground('#f39c12');
-    }
-    
-    // Create Categories sheet with default data
-    sheet = ss.getSheetByName('Categories');
-    if (!sheet) {
-      sheet = ss.insertSheet('Categories');
-      sheet.getRange('A1:B1').setValues([['Category', 'Description']]);
-      sheet.getRange('A1:B1').setFontWeight('bold').setBackground('#f39c12');
-      
-      const categories = [
-        ['Necklace', 'Beautiful necklaces and pendants'],
-        ['Earrings', 'Elegant earrings for all occasions'],
-        ['Bangles', 'Traditional and modern bangles'],
-        ['Rings', 'Stylish rings for every finger'],
-        ['Bracelet', 'Charming bracelets'],
-        ['Anklet', 'Traditional anklets'],
-        ['Headpiece', 'Beautiful head accessories']
-      ];
-      sheet.getRange(2, 1, categories.length, 2).setValues(categories);
-    }
-    
-    // Add a sample product
-    const productsSheet = ss.getSheetByName('Products');
-    const productsData = productsSheet.getDataRange().getValues();
-    
-    if (productsData.length <= 1) {
-      productsSheet.appendRow([
-        'SOL001',
-        'Golden Peacock Choker',
-        'Necklace',
-        1850,
-        'In Stock',
-        '',
-        new Date().toISOString()
-      ]);
-    }
-    
-    return { 
-      status: 'success', 
-      message: 'Setup completed successfully',
-      sheets: ['Products', 'Orders', 'Categories']
-    };
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
-}
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 
-// ==================== PRODUCTS FUNCTIONS ====================
-function getProducts() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = ss.getSheetByName('Products');
-    
-    if (!sheet) {
-      return { status: 'error', message: 'Products sheet not found. Run setup first.' };
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    
-    if (data.length <= 1) {
-      return [];
-    }
-    
-    const products = [];
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (!row[0]) continue;
-      
-      let images = [];
-      if (row[5]) {
-        const imageIds = row[5].split(',');
-        images = imageIds.map(id => ({
-          id: id.trim(),
-          url: `https://drive.google.com/uc?export=view&id=${id.trim()}`
-        }));
-      }
-      
-      products.push({
-        id: row[0],
-        name: row[1] || 'Unnamed Product',
-        category: row[2] || 'General',
-        price: Number(row[3]) || 0,
-        stock: row[4] || 'In Stock',
-        images: images,
-        createdAt: row[6] || new Date().toISOString()
-      });
-    }
-    
-    return products;
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
-}
+    <script>
+        // YOUR APPS SCRIPT URL - REPLACE THIS
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6_of-vLu6MN4QDTH2EDJWCLfDjT7kls04iyo7XvF6kn3sVyo2SXN2zdQfhT-xCbIJaA/exec';
+        
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-// ==================== ORDERS FUNCTIONS ====================
-function saveOrder(order) {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = ss.getSheetByName('Orders');
-    
-    if (!sheet) {
-      return { status: 'error', message: 'Orders sheet not found. Run setup first.' };
-    }
-    
-    sheet.appendRow([
-      order.id || 'ORD' + Date.now(),
-      order.customer || '',
-      order.email || '',
-      order.phone || '',
-      order.address || '',
-      JSON.stringify(order.items || []),
-      order.total || 0,
-      order.status || 'Pending',
-      order.date || new Date().toISOString(),
-      order.paymentMethod || '',
-      order.notes || '',
-      new Date().toISOString()
-    ]);
-    
-    return { status: 'success', message: 'Order saved successfully', orderId: order.id };
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
-}
+        function jsonpRequest(action, data, callback) {
+            const callbackName = 'callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            window[callbackName] = function(response) {
+                delete window[callbackName];
+                const script = document.getElementById('jsonpScript');
+                if (script) script.remove();
+                callback(response);
+            };
+            
+            const script = document.createElement('script');
+            script.id = 'jsonpScript';
+            
+            const url = new URL(SCRIPT_URL);
+            url.searchParams.append('action', action);
+            url.searchParams.append('data', JSON.stringify(data));
+            url.searchParams.append('callback', callbackName);
+            
+            script.src = url.toString();
+            
+            script.onerror = function() {
+                delete window[callbackName];
+                script.remove();
+                document.getElementById('debugOutput').textContent = '❌ Connection failed - Check URL';
+                document.getElementById('statusText').textContent = 'Connection failed';
+                callback(null);
+            };
+            
+            document.body.appendChild(script);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                if (window[callbackName]) {
+                    delete window[callbackName];
+                    script.remove();
+                    document.getElementById('debugOutput').textContent = '❌ Timeout - No response';
+                    document.getElementById('statusText').textContent = 'Timeout';
+                    callback(null);
+                }
+            }, 10000);
+        }
 
-function getOrders() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    const sheet = ss.getSheetByName('Orders');
-    
-    if (!sheet) {
-      return [];
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    
-    if (data.length <= 1) {
-      return [];
-    }
-    
-    const orders = [];
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (!row[0]) continue;
-      
-      orders.push({
-        id: row[0],
-        customer: row[1],
-        email: row[2],
-        phone: row[3],
-        address: row[4],
-        items: JSON.parse(row[5] || '[]'),
-        total: row[6],
-        status: row[7],
-        date: row[8],
-        paymentMethod: row[9],
-        notes: row[10],
-        updatedAt: row[11]
-      });
-    }
-    
-    return orders;
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
-}
+        function loadProducts() {
+            document.getElementById('statusText').textContent = 'Loading...';
+            document.getElementById('debugOutput').textContent = 'Fetching products...';
+            document.getElementById('productsContainer').innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                    <div style="border: 4px solid #f3f3f3; border-top: 4px solid #C5A028; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                    <p>Loading...</p>
+                </div>
+            `;
+            
+            jsonpRequest('getProducts', {}, function(products) {
+                document.getElementById('debugOutput').textContent = JSON.stringify(products, null, 2);
+                
+                if (!products || products.length === 0) {
+                    document.getElementById('productsContainer').innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                            <p>No products found. Please run setup in admin panel first.</p>
+                        </div>
+                    `;
+                    document.getElementById('statusText').textContent = 'No products';
+                    return;
+                }
+                
+                let html = '';
+                products.forEach(product => {
+                    let stockClass = 'in-stock';
+                    if (product.stock === 'Limited') stockClass = 'limited';
+                    if (product.stock === 'Out of Stock') stockClass = 'out-of-stock';
+                    
+                    html += `
+                        <div class="product-card">
+                            <div class="product-image">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            <div class="product-info">
+                                <div class="product-name">${product.name || 'Unnamed Product'}</div>
+                                <div class="product-price">₹${product.price || 0}</div>
+                                <div class="product-stock ${stockClass}">${product.stock || 'In Stock'}</div>
+                                <button class="add-to-cart" onclick="addToCart('${product.id}')" ${product.stock === 'Out of Stock' ? 'disabled' : ''}>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                document.getElementById('productsContainer').innerHTML = html;
+                document.getElementById('statusText').textContent = `✅ Loaded ${products.length} products`;
+            });
+        }
 
-// ==================== DASHBOARD STATS ====================
-function getDashboardStats() {
-  try {
-    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+        function addToCart(productId) {
+            alert('Product added to cart! (Cart functionality coming soon)');
+        }
+
+        // Load products when page opens
+        window.onload = function() {
+            loadProducts();
+        };
+    </script>
     
-    // Products count
-    const productsSheet = ss.getSheetByName('Products');
-    const productsData = productsSheet ? productsSheet.getDataRange().getValues() : [[]];
-    const totalProducts = productsData.length > 1 ? productsData.length - 1 : 0;
-    
-    // Categories count
-    const categoriesSheet = ss.getSheetByName('Categories');
-    const categoriesData = categoriesSheet ? categoriesSheet.getDataRange().getValues() : [[]];
-    const totalCategories = categoriesData.length > 1 ? categoriesData.length - 1 : 0;
-    
-    // Orders stats
-    const ordersSheet = ss.getSheetByName('Orders');
-    const ordersData = ordersSheet ? ordersSheet.getDataRange().getValues() : [[]];
-    const totalOrders = ordersData.length > 1 ? ordersData.length - 1 : 0;
-    
-    let totalRevenue = 0;
-    for (let i = 1; i < ordersData.length; i++) {
-      if (ordersData[i][0]) {
-        totalRevenue += Number(ordersData[i][6]) || 0;
-      }
-    }
-    
-    return {
-      stats: {
-        totalProducts: totalProducts,
-        totalCategories: totalCategories,
-        totalOrders: totalOrders,
-        totalRevenue: totalRevenue,
-        avgOrderValue: totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0
-      }
-    };
-    
-  } catch (error) {
-    return { status: 'error', message: error.toString() };
-  }
-}
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</body>
+</html>
