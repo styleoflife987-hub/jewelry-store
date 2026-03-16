@@ -6,9 +6,8 @@
     <title>Manage Products - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
-    <script src="js/admin.js"></script>
 </head>
-<body onload="checkAdminAuth(); loadProducts()">
+<body onload="checkAuth(); loadProducts()">
     <header>
         <div class="logo">STYLE OF LIFE - PRODUCTS</div>
         <nav>
@@ -29,39 +28,33 @@
             <h3 style="color:#d4af37; margin-bottom:20px">Add New Product</h3>
             
             <div style="margin-bottom:15px">
-                <label style="color:#d4af37">SKU</label>
-                <input type="text" id="sku" placeholder="e.g., SKU001" 
-                       style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white">
+                <label>SKU</label>
+                <input type="text" id="sku" placeholder="e.g., SKU001">
             </div>
             
             <div style="margin-bottom:15px">
-                <label style="color:#d4af37">Product Name *</label>
-                <input type="text" id="name" placeholder="e.g., Gold Necklace" 
-                       style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white">
+                <label>Product Name *</label>
+                <input type="text" id="name" placeholder="e.g., Gold Necklace">
             </div>
             
             <div style="margin-bottom:15px">
-                <label style="color:#d4af37">Category</label>
-                <input type="text" id="category" placeholder="e.g., Necklaces" 
-                       style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white">
+                <label>Category</label>
+                <input type="text" id="category" placeholder="e.g., Necklaces">
             </div>
             
             <div style="margin-bottom:15px">
-                <label style="color:#d4af37">Price *</label>
-                <input type="number" id="price" placeholder="e.g., 25000" 
-                       style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white">
+                <label>Price *</label>
+                <input type="number" id="price" placeholder="e.g., 25000">
             </div>
             
             <div style="margin-bottom:15px">
-                <label style="color:#d4af37">Stock</label>
-                <input type="number" id="stock" value="10" 
-                       style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white">
+                <label>Stock</label>
+                <input type="number" id="stock" value="10">
             </div>
             
             <div style="margin-bottom:15px">
-                <label style="color:#d4af37">Description</label>
-                <textarea id="description" rows="3" placeholder="Product description" 
-                          style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white"></textarea>
+                <label>Description</label>
+                <textarea id="description" rows="3" placeholder="Product description"></textarea>
             </div>
             
             <button onclick="addProduct()">Add Product</button>
@@ -73,5 +66,115 @@
             <div id="productsList"></div>
         </div>
     </div>
+
+    <script>
+        function checkAuth() {
+            if (!sessionStorage.getItem('adminLoggedIn')) {
+                window.location.href = 'login.html';
+            }
+        }
+        
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=products`);
+                const products = await response.json();
+                
+                const container = document.getElementById('productsList');
+                
+                if (!products || products.length === 0) {
+                    container.innerHTML = '<p>No products found</p>';
+                    return;
+                }
+                
+                let html = '';
+                products.forEach(product => {
+                    html += `
+                        <div class="product-card-admin" style="background:#222; padding:15px; border-radius:8px; margin-bottom:10px; border:1px solid #333">
+                            <div style="display:flex; gap:15px; align-items:center">
+                                <img src="${product.mainImage || CONFIG.PLACEHOLDER_IMAGE}" 
+                                     style="width:60px; height:60px; object-fit:cover; border-radius:4px;">
+                                <div style="flex:1">
+                                    <h4>${product.name}</h4>
+                                    <p>SKU: ${product.sku} | Price: ₹${product.price} | Stock: ${product.stock}</p>
+                                </div>
+                                <button onclick="deleteProduct('${product.id}')" 
+                                        style="width:auto; padding:5px 15px; background:#f44336;">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+        
+        async function addProduct() {
+            const sku = document.getElementById('sku').value;
+            const name = document.getElementById('name').value;
+            const category = document.getElementById('category').value;
+            const price = document.getElementById('price').value;
+            const stock = document.getElementById('stock').value;
+            const description = document.getElementById('description').value;
+            
+            if (!name || !price) {
+                alert('Please fill required fields');
+                return;
+            }
+            
+            try {
+                const params = new URLSearchParams({
+                    action: 'addProduct',
+                    sku: sku || `SKU${Date.now()}`,
+                    name: name,
+                    category: category || 'Jewelry',
+                    price: price,
+                    stock: stock || 10,
+                    description: description || ''
+                });
+                
+                const response = await fetch(`${CONFIG.API_URL}?${params}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Product added successfully!');
+                    document.getElementById('sku').value = '';
+                    document.getElementById('name').value = '';
+                    document.getElementById('category').value = '';
+                    document.getElementById('price').value = '';
+                    document.getElementById('description').value = '';
+                    loadProducts();
+                } else {
+                    alert('Error adding product: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error adding product');
+            }
+        }
+        
+        async function deleteProduct(id) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=deleteProduct&id=${id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Product deleted successfully');
+                    loadProducts();
+                } else {
+                    alert('Error deleting product');
+                }
+            } catch (error) {
+                alert('Error deleting product');
+            }
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'login.html';
+        }
+    </script>
 </body>
 </html>
