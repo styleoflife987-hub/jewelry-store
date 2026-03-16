@@ -1,4 +1,4 @@
-// js/app.js - Customer Portal with Auto Image Detection
+// js/app.js - Main Customer Portal
 let products = [];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -51,12 +51,10 @@ function createProductCard(product) {
     const card = document.createElement("div");
     card.className = "card";
     
-    // Get images from Drive (auto-detected)
     const images = product.images || [];
     const mainImage = product.mainImage || product.image || CONFIG.PLACEHOLDER_IMAGE;
     const imageCount = product.imageCount || (product.image ? 1 : 0);
     
-    // Create thumbnail HTML
     let thumbnails = '';
     if (images.length > 0) {
         thumbnails = images.slice(0, 4).map((img, index) => `
@@ -118,7 +116,6 @@ window.changeMainImage = function(sku, imageUrl, element) {
     if (mainImage) {
         mainImage.src = imageUrl;
         
-        // Update active thumbnail
         document.querySelectorAll(`[onclick*="${sku}"]`).forEach(el => {
             el.classList.remove('active');
         });
@@ -161,9 +158,7 @@ window.selectImage = function(sku, imageUrl) {
     }
 };
 
-// Add this function to your app.js if not already present
-
-// Add to cart from product page
+// Add to cart
 window.addToCart = function(sku) {
     const product = products.find(p => p.sku === sku);
     if (!product) return;
@@ -173,13 +168,30 @@ window.addToCart = function(sku) {
         return;
     }
     
-    // Use the cart.js function
-    addToCart(
-        product.sku, 
-        product.name, 
-        product.price, 
-        product.mainImage
-    );
+    // Use cart.js function
+    if (typeof addToCartFunction === 'function') {
+        addToCartFunction(product.sku, product.name, product.price, product.mainImage);
+    } else {
+        // Fallback
+        let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        const existing = cart.find(item => item.sku === sku);
+        
+        if (existing) {
+            existing.quantity = (existing.quantity || 1) + 1;
+        } else {
+            cart.push({
+                sku: sku,
+                name: product.name,
+                price: product.price,
+                image: product.mainImage,
+                quantity: 1
+            });
+        }
+        
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
+        showNotification(`${product.name} added to cart!`);
+    }
 };
 
 // Update cart count
@@ -189,7 +201,7 @@ function updateCartCount() {
     
     document.querySelectorAll('.cart-count').forEach(el => {
         el.textContent = count;
-        el.style.display = count > 0 ? 'inline' : 'none';
+        el.style.display = count > 0 ? 'inline-block' : 'none';
     });
 }
 
