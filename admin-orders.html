@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Orders - Style Of Life</title>
+    <title>Live Orders - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
-    <script src="js/admin.js"></script>
 </head>
-<body onload="checkAdminAuth(); loadOrders()">
+<body onload="checkAuth(); loadOrders()">
     <header>
-        <div class="logo">STYLE OF LIFE - ORDERS</div>
+        <div class="logo">STYLE OF LIFE - LIVE ORDERS</div>
         <nav>
             <a href="index.html">Home</a>
             <a href="admin.html">Dashboard</a>
@@ -22,15 +21,113 @@
     </header>
 
     <div style="max-width:1200px; margin:40px auto; padding:20px">
-        <h1 style="color:#d4af37; margin-bottom:30px">Manage Orders</h1>
+        <h1 style="color:#d4af37; margin-bottom:30px">Live Order Management</h1>
         
+        <!-- Status Bar -->
+        <div style="background:#1a1a1a; padding:15px; border-radius:8px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center">
+            <span style="color:#4CAF50">🟢 Live - Orders sync with Excel</span>
+            <button onclick="loadOrders()" style="width:auto; padding:8px 20px">🔄 Refresh Now</button>
+        </div>
+        
+        <!-- Orders List -->
         <div style="background:#1a1a1a; padding:30px; border-radius:15px">
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-                <h3 style="color:#d4af37">All Orders</h3>
-                <button onclick="loadOrders()" style="width:auto; padding:8px 20px">Refresh</button>
-            </div>
+            <h3 style="color:#d4af37; margin-bottom:20px">Orders from Excel</h3>
             <div id="ordersList"></div>
         </div>
     </div>
+
+    <script>
+        function checkAuth() {
+            if (!sessionStorage.getItem('adminLoggedIn')) {
+                window.location.href = 'login.html';
+            }
+        }
+        
+        async function loadOrders() {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=orders`);
+                const orders = await response.json();
+                
+                const container = document.getElementById('ordersList');
+                
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = '<p>No orders found in Excel</p>';
+                    return;
+                }
+                
+                let html = '<div style="overflow-x:auto"><table style="width:100%"><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr>';
+                
+                orders.forEach(order => {
+                    const itemsList = order.items.map(item => `${item.name} x${item.quantity}`).join('<br>');
+                    
+                    html += `
+                        <tr>
+                            <td>${order.orderId}</td>
+                            <td>${order.name}<br><small>${order.phone}</small></td>
+                            <td><small>${itemsList}</small></td>
+                            <td>₹${order.total}</td>
+                            <td>
+                                <select onchange="updateOrderStatus('${order.orderId}', this.value)" style="background:#333; color:white; padding:5px;">
+                                    <option ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                    <option ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                    <option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                            </td>
+                            <td>${new Date(order.date).toLocaleDateString()}</td>
+                            <td>
+                                <button onclick="deleteOrder('${order.orderId}')" style="width:auto; padding:5px 10px; background:#f44336;">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</table></div>';
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                document.getElementById('ordersList').innerHTML = '<p style="color:#f44336">Error loading orders</p>';
+            }
+        }
+        
+        async function updateOrderStatus(orderId, status) {
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=updateOrderStatus&orderId=${orderId}&status=${status}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ Order ${orderId} updated to ${status} in Excel`);
+                    loadOrders(); // Live refresh
+                }
+            } catch (error) {
+                alert('Error updating order');
+            }
+        }
+        
+        async function deleteOrder(orderId) {
+            if (!confirm('Delete this order from Excel?')) return;
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=deleteOrder&orderId=${orderId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ Order deleted from Excel');
+                    loadOrders();
+                }
+            } catch (error) {
+                alert('Error deleting order');
+            }
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'login.html';
+        }
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadOrders, 30000);
+    </script>
 </body>
 </html>
