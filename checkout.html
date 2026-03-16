@@ -12,37 +12,54 @@
         <div class="logo">STYLE OF LIFE</div>
         <nav>
             <a href="index.html">Home</a>
-            <a href="cart.html">Cart</a>
+            <a href="cart.html">Cart <span class="cart-count">0</span></a>
         </nav>
     </header>
 
-    <div style="max-width:600px; margin:40px auto; padding:30px; background:#1a1a1a; border-radius:15px">
-        <h2 style="color:#d4af37; margin-bottom:30px">Checkout</h2>
+    <div style="max-width:800px; margin:40px auto; padding:20px">
+        <h1 style="color:#d4af37; margin-bottom:30px">Checkout</h1>
         
-        <div id="cartSummary" style="margin-bottom:30px"></div>
-        
-        <div style="margin-bottom:15px">
-            <label style="color:#d4af37">Full Name</label>
-            <input type="text" id="name" style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white; margin-top:5px">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+            <!-- Customer Details -->
+            <div style="background:#1a1a1a; padding:30px; border-radius:15px;">
+                <h3 style="color:#d4af37; margin-bottom:20px">Shipping Information</h3>
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#d4af37; display:block; margin-bottom:5px">Full Name *</label>
+                    <input type="text" id="name" placeholder="Enter your full name" 
+                           style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white;">
+                </div>
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#d4af37; display:block; margin-bottom:5px">Phone Number *</label>
+                    <input type="tel" id="phone" placeholder="10 digit mobile number" 
+                           style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white;">
+                </div>
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#d4af37; display:block; margin-bottom:5px">Email (optional)</label>
+                    <input type="email" id="email" placeholder="your@email.com" 
+                           style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white;">
+                </div>
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#d4af37; display:block; margin-bottom:5px">Shipping Address *</label>
+                    <textarea id="address" rows="3" placeholder="Complete address with pincode" 
+                              style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white;"></textarea>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div style="background:#1a1a1a; padding:30px; border-radius:15px;">
+                <h3 style="color:#d4af37; margin-bottom:20px">Order Summary</h3>
+                
+                <div id="cartSummary"></div>
+                
+                <button onclick="processOrder()" style="margin-top:20px; padding:15px;">
+                    Place Order & Pay
+                </button>
+            </div>
         </div>
-        
-        <div style="margin-bottom:15px">
-            <label style="color:#d4af37">Phone Number</label>
-            <input type="tel" id="phone" style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white; margin-top:5px">
-        </div>
-        
-        <div style="margin-bottom:15px">
-            <label style="color:#d4af37">Address</label>
-            <textarea id="address" rows="3" style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white; margin-top:5px"></textarea>
-        </div>
-        
-        <div style="margin:30px 0">
-            <h3 style="color:#d4af37">Order Summary</h3>
-            <div id="orderItems" style="margin:15px 0"></div>
-            <h3>Total: ₹<span id="orderTotal">0</span></h3>
-        </div>
-        
-        <button onclick="processCheckout()" style="padding:15px">Proceed to Payment</button>
     </div>
 
     <footer>
@@ -54,45 +71,64 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-            const orderItems = document.getElementById('orderItems');
-            const orderTotal = document.getElementById('orderTotal');
+        async function processOrder() {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const address = document.getElementById('address').value.trim();
             
+            if (!name || name.length < 3) {
+                alert('Please enter your full name');
+                return;
+            }
+            
+            if (!phone || phone.length < 10) {
+                alert('Please enter valid phone number');
+                return;
+            }
+            
+            if (!address || address.length < 10) {
+                alert('Please enter complete address');
+                return;
+            }
+            
+            const cart = getCart();
             if (cart.length === 0) {
+                alert('Your cart is empty');
                 window.location.href = 'index.html';
                 return;
             }
             
-            let itemsHtml = '';
-            let total = 0;
+            const total = getCartTotal();
             
-            cart.forEach(item => {
-                itemsHtml += `
-                    <div style="display:flex; justify-content:space-between; margin:10px 0">
-                        <span>${item.name} x${item.quantity || 1}</span>
-                        <span>₹${item.price * (item.quantity || 1)}</span>
-                    </div>
-                `;
-                total += item.price * (item.quantity || 1);
-            });
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
             
-            orderItems.innerHTML = itemsHtml;
-            orderTotal.textContent = total;
-        });
-        
-        function processCheckout() {
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const address = document.getElementById('address').value;
-            const total = document.getElementById('orderTotal').textContent;
-            
-            if (!name || !phone || !address) {
-                alert('Please fill all fields');
-                return;
+            try {
+                const orderResult = await placeOrder({
+                    name: name,
+                    phone: phone,
+                    address: address,
+                    email: document.getElementById('email').value
+                });
+                
+                if (orderResult.success) {
+                    payNow(total, {
+                        name: name,
+                        phone: phone,
+                        email: document.getElementById('email').value,
+                        orderId: orderResult.orderId
+                    });
+                } else {
+                    alert('Failed to place order: ' + orderResult.error);
+                }
+            } catch (error) {
+                alert('Something went wrong. Please try again.');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
             }
-            
-            payNow(total, { name, phone, address });
         }
     </script>
 </body>
