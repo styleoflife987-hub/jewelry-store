@@ -20,6 +20,7 @@
         <h1 style="color:#d4af37; margin-bottom:30px">Checkout</h1>
         
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+            <!-- Customer Details -->
             <div style="background:#1a1a1a; padding:30px; border-radius:15px;">
                 <h3 style="color:#d4af37; margin-bottom:20px">Shipping Information</h3>
                 
@@ -36,12 +37,19 @@
                 </div>
                 
                 <div style="margin-bottom:15px">
-                    <label style="color:#d4af37; display:block; margin-bottom:5px">Address *</label>
+                    <label style="color:#d4af37; display:block; margin-bottom:5px">Email (optional)</label>
+                    <input type="email" id="email" placeholder="your@email.com" 
+                           style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white;">
+                </div>
+                
+                <div style="margin-bottom:15px">
+                    <label style="color:#d4af37; display:block; margin-bottom:5px">Shipping Address *</label>
                     <textarea id="address" rows="3" placeholder="Complete address with pincode" 
                               style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white;"></textarea>
                 </div>
             </div>
             
+            <!-- Order Summary -->
             <div style="background:#1a1a1a; padding:30px; border-radius:15px;">
                 <h3 style="color:#d4af37; margin-bottom:20px">Order Summary</h3>
                 <div id="cartSummary"></div>
@@ -58,6 +66,9 @@
     </footer>
 
     <script src="js/cart.js"></script>
+    <script src="js/payment.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
     <script>
         async function processOrder() {
             const name = document.getElementById('name').value.trim();
@@ -70,6 +81,7 @@
             }
             
             const btn = event.target;
+            const originalText = btn.textContent;
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
@@ -81,7 +93,7 @@
             } else {
                 alert('Failed to place order: ' + (result.error || 'Unknown error'));
                 btn.disabled = false;
-                btn.textContent = 'Place Order';
+                btn.textContent = originalText;
             }
         }
     </script>
