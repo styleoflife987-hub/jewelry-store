@@ -1,36 +1,72 @@
-// js/cart.js - FIXED VERSION
-window.getCart = function() {
+// js/cart.js - WITH EXCEL STORAGE
+let sessionId = generateSessionId();
+
+// Generate unique session ID
+function generateSessionId() {
+    let session = localStorage.getItem('sessionId');
+    if (!session) {
+        session = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('sessionId', session);
+    }
+    return session;
+}
+
+// ===== CART FUNCTIONS WITH EXCEL SYNC =====
+
+// Get cart from Excel
+async function getCartFromExcel() {
     try {
-        const cart = localStorage.getItem("cart");
-        return cart ? JSON.parse(cart) : [];
-    } catch (e) {
-        console.error("Error parsing cart:", e);
-        return [];
+        const response = await fetch(`${CONFIG.API_URL}?action=getCart&sessionId=${sessionId}`);
+        const data = await response.json();
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching cart from Excel:", error);
+        // Fallback to localStorage
+        return JSON.parse(localStorage.getItem("cart") || "[]");
     }
-};
+}
 
-window.saveCart = function(cart) {
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.updateCartCount();
-    return cart;
-};
-
-window.addToCart = function(sku, name, price, image) {
-    console.log("addToCart called with:", { sku, name, price });
-    
-    if (!sku || !name || !price) {
-        console.error("Missing required parameters:", { sku, name, price });
-        alert("Error: Missing product information");
-        return;
+// Save cart to Excel
+async function saveCartToExcel(cart) {
+    try {
+        const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+        
+        const params = new URLSearchParams({
+            action: 'saveCart',
+            sessionId: sessionId,
+            items: JSON.stringify(cart),
+            total: total
+        });
+        
+        const response = await fetch(`${CONFIG.API_URL}?${params}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log("Cart saved to Excel:", data.cartId);
+            // Also save to localStorage as backup
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+        
+        return data;
+    } catch (error) {
+        console.error("Error saving cart to Excel:", error);
+        // Fallback to localStorage
+        localStorage.setItem("cart", JSON.stringify(cart));
+        return { success: true, fallback: true };
     }
+}
+
+// Add to cart (saves to Excel)
+window.addToCart = async function(sku, name, price, image) {
+    console.log("Adding to cart:", { sku, name, price });
     
-    let cart = window.getCart();
+    // Get current cart from Excel
+    let cart = await getCartFromExcel();
     
     const existingItem = cart.find(item => item.sku === sku);
     
     if (existingItem) {
         existingItem.quantity = (existingItem.quantity || 1) + 1;
-        console.log("Increased quantity for existing item:", existingItem);
     } else {
         cart.push({
             sku: sku,
@@ -39,29 +75,36 @@ window.addToCart = function(sku, name, price, image) {
             image: image || CONFIG.PLACEHOLDER_IMAGE,
             quantity: 1
         });
-        console.log("Added new item to cart:", cart[cart.length-1]);
     }
     
-    window.saveCart(cart);
-    window.showNotification(`${name} added to cart!`);
+    // Save to Excel
+    await saveCartToExcel(cart);
+    
+    // Update UI
+    updateCartCount();
+    showNotification(`${name} added to cart!`);
+    
     return cart;
 };
 
-window.removeFromCart = function(sku) {
-    let cart = window.getCart();
+// Remove from cart
+window.removeFromCart = async function(sku) {
+    let cart = await getCartFromExcel();
     cart = cart.filter(item => item.sku !== sku);
-    window.saveCart(cart);
+    
+    await saveCartToExcel(cart);
     
     if (window.location.pathname.includes('cart.html')) {
-        window.displayCartPage();
+        displayCartPage();
     }
     
-    window.showNotification('Item removed from cart');
+    showNotification('Item removed from cart');
     return cart;
 };
 
-window.updateQuantity = function(sku, newQuantity) {
-    let cart = window.getCart();
+// Update quantity
+window.updateQuantity = async function(sku, newQuantity) {
+    let cart = await getCartFromExcel();
     const itemIndex = cart.findIndex(item => item.sku === sku);
     
     if (itemIndex >= 0) {
@@ -71,41 +114,61 @@ window.updateQuantity = function(sku, newQuantity) {
         } else {
             cart[itemIndex].quantity = newQuantity;
         }
-        window.saveCart(cart);
+        
+        await saveCartToExcel(cart);
         
         if (window.location.pathname.includes('cart.html')) {
-            window.displayCartPage();
+            displayCartPage();
         }
     }
     return cart;
 };
 
-window.getCartTotal = function() {
-    const cart = window.getCart();
+// Clear cart
+window.clearCart = async function() {
+    await saveCartToExcel([]);
+    
+    try {
+        await fetch(`${CONFIG.API_URL}?action=clearCart&sessionId=${sessionId}`);
+    } catch (error) {
+        console.error("Error clearing cart in Excel:", error);
+    }
+    
+    localStorage.removeItem("cart");
+    updateCartCount();
+    return [];
+};
+
+// Get cart total
+window.getCartTotal = async function() {
+    const cart = await getCartFromExcel();
     return cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
 };
 
-window.getCartCount = function() {
-    const cart = window.getCart();
+// Get cart count
+window.getCartCount = async function() {
+    const cart = await getCartFromExcel();
     return cart.reduce((count, item) => count + (item.quantity || 1), 0);
 };
 
-window.updateCartCount = function() {
-    const count = window.getCartCount();
+// Update cart count display
+window.updateCartCount = async function() {
+    const count = await window.getCartCount();
     document.querySelectorAll('.cart-count').forEach(el => {
         el.textContent = count;
         el.style.display = count > 0 ? 'inline-block' : 'none';
     });
 };
 
-window.displayCartPage = function() {
+// Display cart page
+window.displayCartPage = async function() {
     const cartContainer = document.getElementById('cartItems');
     const totalContainer = document.getElementById('cartTotal');
     
     if (!cartContainer) return;
     
-    const cart = window.getCart();
-    console.log("Displaying cart page. Cart items:", cart);
+    const cart = await getCartFromExcel();
+    console.log("Displaying cart from Excel:", cart);
     
     if (!cart || cart.length === 0) {
         cartContainer.innerHTML = `
@@ -158,7 +221,7 @@ window.displayCartPage = function() {
                            value="${item.quantity || 1}" 
                            min="1" 
                            max="10"
-                           onchange="window.updateCartItem('${item.sku}', this.value)"
+                           onchange="updateCartItem('${item.sku}', this.value)"
                            style="
                                width: 70px;
                                padding: 8px;
@@ -174,7 +237,7 @@ window.displayCartPage = function() {
                     <div style="font-weight: bold; color: #d4af37; margin-bottom: 5px;">
                         ₹${itemTotal.toLocaleString()}
                     </div>
-                    <button onclick="window.removeCartItem('${item.sku}')"
+                    <button onclick="removeCartItem('${item.sku}')"
                             style="
                                 background: transparent;
                                 color: #f44336;
@@ -195,11 +258,12 @@ window.displayCartPage = function() {
     if (totalContainer) totalContainer.textContent = total;
 };
 
-window.displayCheckoutSummary = function() {
+// Display checkout summary
+window.displayCheckoutSummary = async function() {
     const summaryContainer = document.getElementById('cartSummary');
     if (!summaryContainer) return;
     
-    const cart = window.getCart();
+    const cart = await getCartFromExcel();
     
     if (!cart || cart.length === 0) {
         summaryContainer.innerHTML = '<p style="color:#f44336; text-align:center">Your cart is empty. <a href="index.html">Shop now</a></p>';
@@ -229,18 +293,63 @@ window.displayCheckoutSummary = function() {
             <strong style="color: #d4af37;">₹${total.toLocaleString()}</strong>
         </div>
     `;
+    
+    return total;
 };
 
-window.updateCartItem = function(sku, quantity) {
-    window.updateQuantity(sku, quantity);
-};
-
-window.removeCartItem = function(sku) {
-    if (confirm('Remove this item from cart?')) {
-        window.removeFromCart(sku);
+// Place order
+window.placeOrder = async function(customerDetails) {
+    const cart = await getCartFromExcel();
+    
+    if (!cart || cart.length === 0) {
+        alert('Your cart is empty');
+        return { success: false };
+    }
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    
+    try {
+        const params = new URLSearchParams({
+            action: 'placeOrder',
+            name: customerDetails.name || 'Guest',
+            phone: customerDetails.phone || '',
+            email: customerDetails.email || '',
+            address: customerDetails.address || '',
+            items: JSON.stringify(cart),
+            total: total,
+            sessionId: sessionId
+        });
+        
+        const response = await fetch(`${CONFIG.API_URL}?${params}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            // Clear local cart
+            localStorage.removeItem("cart");
+            await updateCartCount();
+            return { success: true, orderId: result.orderId };
+        } else {
+            return { success: false, error: result.error };
+        }
+        
+    } catch (error) {
+        console.error('Error placing order:', error);
+        return { success: false, error: error.message };
     }
 };
 
+// Helper functions
+window.updateCartItem = async function(sku, quantity) {
+    await window.updateQuantity(sku, quantity);
+};
+
+window.removeCartItem = async function(sku) {
+    if (confirm('Remove this item from cart?')) {
+        await window.removeFromCart(sku);
+    }
+};
+
+// Show notification
 window.showNotification = function(message) {
     const existing = document.querySelector('.notification');
     if (existing) existing.remove();
@@ -269,15 +378,15 @@ window.showNotification = function(message) {
     }, 3000);
 };
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log("Cart.js loaded");
-    window.updateCartCount();
+// Initialize
+document.addEventListener('DOMContentLoaded', async function() {
+    console.log("Cart.js loaded with Excel sync");
+    await window.updateCartCount();
     
     if (window.location.pathname.includes('cart.html')) {
-        window.displayCartPage();
+        await window.displayCartPage();
     } else if (window.location.pathname.includes('checkout.html')) {
-        window.displayCheckoutSummary();
+        await window.displayCheckoutSummary();
     }
 });
 
