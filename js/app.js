@@ -1,11 +1,30 @@
-// js/app.js - Works with Excel cart
+// js/app.js - With Product Sync
 let products = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("App.js loaded");
+    
+    // Load products from localStorage first (fast)
+    loadLocalProducts();
+    
+    // Then fetch from server
     fetchProducts();
-    updateCartCount(); // This will now use async function
+    
+    // Listen for product updates from sync
+    window.addEventListener('productsUpdated', (e) => {
+        console.log("Products updated from sync:", e.detail);
+        products = e.detail;
+        displayProducts(products);
+    });
 });
+
+function loadLocalProducts() {
+    const localProducts = localStorage.getItem('products');
+    if (localProducts) {
+        products = JSON.parse(localProducts);
+        displayProducts(products);
+    }
+}
 
 async function fetchProducts() {
     try {
@@ -20,16 +39,17 @@ async function fetchProducts() {
         
         products = Array.isArray(data) ? data : [];
         
-        if (products.length === 0) {
-            products = getSampleProducts();
-        }
+        // Save to localStorage
+        localStorage.setItem('products', JSON.stringify(products));
         
         displayProducts(products);
         
     } catch (error) {
         console.error("Error:", error);
-        products = getSampleProducts();
-        displayProducts(products);
+        if (products.length === 0) {
+            products = getSampleProducts();
+            displayProducts(products);
+        }
     } finally {
         hideLoading();
     }
@@ -52,14 +72,6 @@ function getSampleProducts() {
             price: 45000, 
             stock: 5, 
             mainImage: "https://images.unsplash.com/photo-1605100804763-247f67b3557e"
-        },
-        { 
-            sku: "SKU003", 
-            name: "Silver Earrings", 
-            category: "Earrings", 
-            price: 8000, 
-            stock: 20, 
-            mainImage: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908"
         }
     ];
 }
@@ -124,7 +136,7 @@ window.addToCartHandler = async function(sku) {
         return;
     }
     
-    // Call cart.js function (now async)
+    // Call cart.js function
     if (typeof window.addToCart === 'function') {
         await window.addToCart(
             product.sku, 
@@ -134,17 +146,6 @@ window.addToCartHandler = async function(sku) {
         );
     }
 };
-
-// Update cart count (async)
-async function updateCartCount() {
-    if (typeof window.getCartCount === 'function') {
-        const count = await window.getCartCount();
-        document.querySelectorAll('.cart-count').forEach(el => {
-            el.textContent = count;
-            el.style.display = count > 0 ? 'inline-block' : 'none';
-        });
-    }
-}
 
 function showLoading() {
     const container = document.getElementById("products");
