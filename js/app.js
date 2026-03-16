@@ -1,8 +1,8 @@
-// js/app.js - Main Customer Portal with FIXED product fetching
+// js/app.js - FIXED Add to Cart
 let products = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("App.js loaded - fetching products...");
+    console.log("App.js loaded");
     fetchProducts();
     updateCartCount();
 });
@@ -11,16 +11,9 @@ async function fetchProducts() {
     try {
         showLoading();
         
-        const apiUrl = `${CONFIG.API_URL}?action=products`;
-        console.log("Fetching from:", apiUrl);
-        
-        const response = await fetch(apiUrl);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
+        const response = await fetch(`${CONFIG.API_URL}?action=products`);
         const data = await response.json();
+        
         console.log("Products loaded:", data);
         
         if (data.error) {
@@ -30,37 +23,18 @@ async function fetchProducts() {
         products = Array.isArray(data) ? data : (data.products || []);
         
         if (products.length === 0) {
-            console.warn("No products found in response");
-            // Add sample products for testing
+            // Sample products for testing
             products = [
-                {
-                    sku: "SKU001",
-                    name: "Gold Necklace",
-                    category: "Necklaces",
-                    price: 25000,
-                    stock: 10,
-                    mainImage: "https://via.placeholder.com/300?text=Gold+Necklace",
-                    images: [],
-                    imageCount: 0
-                },
-                {
-                    sku: "SKU002",
-                    name: "Diamond Ring",
-                    category: "Rings",
-                    price: 45000,
-                    stock: 5,
-                    mainImage: "https://via.placeholder.com/300?text=Diamond+Ring",
-                    images: [],
-                    imageCount: 0
-                }
+                { sku: "SKU001", name: "Gold Necklace", category: "Necklaces", price: 25000, stock: 10, mainImage: "https://via.placeholder.com/300?text=Gold+Necklace" },
+                { sku: "SKU002", name: "Diamond Ring", category: "Rings", price: 45000, stock: 5, mainImage: "https://via.placeholder.com/300?text=Diamond+Ring" }
             ];
         }
         
         displayProducts(products);
         
     } catch (error) {
-        console.error("Error fetching products:", error);
-        showError("Failed to load products. Please refresh the page. Error: " + error.message);
+        console.error("Error:", error);
+        showError("Failed to load products");
     } finally {
         hideLoading();
     }
@@ -68,15 +42,7 @@ async function fetchProducts() {
 
 function displayProducts(products) {
     const container = document.getElementById("products");
-    if (!container) {
-        console.error("Products container not found!");
-        return;
-    }
-    
-    if (products.length === 0) {
-        container.innerHTML = '<p class="no-products">No products found</p>';
-        return;
-    }
+    if (!container) return;
     
     container.innerHTML = "";
     
@@ -90,48 +56,13 @@ function createProductCard(product) {
     const card = document.createElement("div");
     card.className = "card";
     
-    const images = product.images || [];
     const mainImage = product.mainImage || product.image || CONFIG.PLACEHOLDER_IMAGE;
-    const imageCount = product.imageCount || (product.image ? 1 : 0);
-    
-    let thumbnails = '';
-    if (images.length > 0) {
-        thumbnails = images.slice(0, 4).map((img, index) => {
-            const imgUrl = img.thumbnail || img.url || CONFIG.PLACEHOLDER_IMAGE;
-            return `
-                <img src="${imgUrl}" 
-                     class="thumbnail ${index === 0 ? 'active' : ''}"
-                     onclick="changeMainImage('${product.sku}', '${img.url || imgUrl}', this)"
-                     title="${img.type || 'view'}"
-                     onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
-            `;
-        }).join('');
-    }
     
     card.innerHTML = `
         <div class="product-images">
-            <div class="main-image-container">
-                <img src="${mainImage}" 
-                     id="main-${product.sku}"
-                     class="main-image"
-                     onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
-                ${imageCount > 0 ? `
-                    <span class="image-badge">
-                        📷 ${imageCount}
-                    </span>
-                ` : ''}
-            </div>
-            
-            ${images.length > 1 ? `
-                <div class="thumbnail-strip">
-                    ${thumbnails}
-                    ${images.length > 4 ? `
-                        <span class="more-images" onclick="showAllImages('${product.sku}')">
-                            +${images.length - 4}
-                        </span>
-                    ` : ''}
-                </div>
-            ` : ''}
+            <img src="${mainImage}" 
+                 class="main-image"
+                 onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
         </div>
         
         <div class="product-info">
@@ -140,9 +71,10 @@ function createProductCard(product) {
             <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
             <div class="price">${CONFIG.CURRENCY}${product.price}</div>
             <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
-                ${product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
+                ${product.stock > 0 ? 'In Stock' : 'Out of Stock'}
             </p>
             <button onclick="addToCart('${product.sku}')" 
+                    class="add-to-cart-btn"
                     ${product.stock <= 0 ? 'disabled' : ''}>
                 Add to Cart
             </button>
@@ -152,97 +84,71 @@ function createProductCard(product) {
     return card;
 }
 
-// Change main image when thumbnail clicked
-window.changeMainImage = function(sku, imageUrl, element) {
-    const mainImage = document.getElementById(`main-${sku}`);
-    if (mainImage) {
-        mainImage.src = imageUrl;
-        
-        document.querySelectorAll(`[onclick*="${sku}"]`).forEach(el => {
-            el.classList.remove('active');
-        });
-        if (element) element.classList.add('active');
-    }
-};
-
-// Show all images in modal
-window.showAllImages = function(sku) {
+// ===== FIXED ADD TO CART FUNCTION =====
+window.addToCart = function(sku) {
+    console.log("Add to cart clicked for SKU:", sku);
+    
     const product = products.find(p => p.sku === sku);
-    if (!product || !product.images || product.images.length === 0) {
-        alert("No additional images available");
+    if (!product) {
+        console.error("Product not found for SKU:", sku);
+        alert("Product not found");
         return;
     }
-    
-    const modal = document.createElement('div');
-    modal.className = 'image-modal';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <span class="close" onclick="this.closest('.image-modal').remove()">&times;</span>
-            <h2>${product.name}</h2>
-            <p class="sku">SKU: ${product.sku} • ${product.images.length} photos</p>
-            <div class="image-grid">
-                ${product.images.map(img => `
-                    <img src="${img.url}" 
-                         onclick="selectImage('${product.sku}', '${img.url}'); this.closest('.image-modal').remove()"
-                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
-                `).join('')}
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-};
-
-// Select image from modal
-window.selectImage = function(sku, imageUrl) {
-    const mainImage = document.getElementById(`main-${sku}`);
-    if (mainImage) {
-        mainImage.src = imageUrl;
-    }
-};
-
-// Add to cart
-window.addToCart = function(sku) {
-    const product = products.find(p => p.sku === sku);
-    if (!product) return;
     
     if (product.stock <= 0) {
         alert("Sorry, this product is out of stock.");
         return;
     }
     
-    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    // Get existing cart
+    let cart = [];
+    try {
+        cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    } catch (e) {
+        cart = [];
+    }
     
-    const existingItemIndex = cart.findIndex(item => item.sku === sku);
+    // Check if product already in cart
+    const existingItem = cart.find(item => item.sku === sku);
     
-    if (existingItemIndex >= 0) {
-        cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
+    if (existingItem) {
+        existingItem.quantity = (existingItem.quantity || 1) + 1;
     } else {
         cart.push({
             sku: sku,
             name: product.name,
             price: product.price,
-            image: product.mainImage,
+            image: product.mainImage || product.image,
             quantity: 1
         });
     }
     
+    // Save to localStorage
     localStorage.setItem("cart", JSON.stringify(cart));
+    
+    // Update cart count
     updateCartCount();
+    
+    // Show notification
     showNotification(`${product.name} added to cart!`);
+    
+    console.log("Cart updated:", cart);
 };
 
-// Update cart count
 function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-    
-    document.querySelectorAll('.cart-count').forEach(el => {
-        el.textContent = count;
-        el.style.display = count > 0 ? 'inline-block' : 'none';
-    });
+    try {
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        
+        document.querySelectorAll('.cart-count').forEach(el => {
+            el.textContent = count;
+            el.style.display = count > 0 ? 'inline-block' : 'none';
+        });
+    } catch (e) {
+        console.error("Error updating cart count:", e);
+    }
 }
 
-// Show notification
 function showNotification(message) {
     const notification = document.createElement('div');
     notification.className = 'notification';
@@ -254,7 +160,6 @@ function showNotification(message) {
     }, 3000);
 }
 
-// Loading and error functions
 function showLoading() {
     const container = document.getElementById("products");
     if (container) {
@@ -270,8 +175,7 @@ function showError(message) {
         container.innerHTML = `
             <div class="error-message">
                 <p style="color: #f44336;">${message}</p>
-                <button onclick="location.reload()" style="margin-top: 20px; width: auto; padding: 10px 30px;">Refresh Page</button>
-                <p style="margin-top: 20px; color: #888; font-size: 12px;">API URL: ${CONFIG.API_URL}</p>
+                <button onclick="location.reload()">Refresh Page</button>
             </div>
         `;
     }
