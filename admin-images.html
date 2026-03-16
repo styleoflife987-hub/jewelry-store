@@ -1,76 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Images - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
-    <script src="js/image-map.js"></script>
+    <script src="js/admin.js"></script>
 </head>
-<body>
+<body onload="checkAdminAuth(); scanFolders()">
     <header>
-        <div class="logo">STYLE OF LIFE - IMAGE MANAGER</div>
+        <div class="logo">STYLE OF LIFE - IMAGES</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="admin.html">Dashboard</a>
+            <a href="admin-products.html">Products</a>
+            <a href="admin-orders.html">Orders</a>
+            <a href="admin-images.html">Images</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </nav>
     </header>
-    
-    <div style="padding: 40px">
-        <h2>Manage Product Images by SKU</h2>
+
+    <div style="max-width:1200px; margin:40px auto; padding:20px">
+        <h1 style="color:#d4af37; margin-bottom:20px">Google Drive Images</h1>
         
-        <div class="sku-manager">
-            <h3>Add Image to SKU</h3>
-            <input id="skuInput" placeholder="Enter SKU (e.g., SKU001)">
-            <input id="fileIdInput" placeholder="Google Drive File ID">
-            <select id="imageType">
-                <option value="main">Main Image</option>
-                <option value="gallery">Gallery Image</option>
-            </select>
-            <button onclick="addImageToSku()">Add Image</button>
+        <div style="background:#1a1a1a; padding:20px; border-radius:10px; margin-bottom:30px">
+            <h3 style="color:#d4af37; margin-bottom:15px">📁 Folder Structure Guide</h3>
+            <p style="color:#888">Create folders in Google Drive with SKU names:</p>
+            <pre style="background:#333; padding:15px; border-radius:8px; color:#d4af37; margin-top:10px">
+Jewelry Store Images/
+├── SKU001_Gold_Necklace/
+│   ├── main.jpg
+│   ├── angle1.jpg
+│   └── model.jpg
+├── SKU002_Diamond_Ring/
+│   ├── front.jpg
+│   └── side.jpg
+            </pre>
         </div>
         
-        <div id="skuList" class="sku-list">
-            <!-- SKU list will appear here -->
+        <button onclick="scanFolders()" style="width:auto; padding:12px 30px; margin-bottom:30px">
+            🔄 Scan Google Drive
+        </button>
+        
+        <div id="folderGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:20px">
+            <!-- Folders will appear here -->
         </div>
     </div>
-    
-    <script>
-        function addImageToSku() {
-            const sku = document.getElementById('skuInput').value;
-            const fileId = document.getElementById('fileIdInput').value;
-            const type = document.getElementById('imageType').value;
-            
-            // In real implementation, save to Google Sheets
-            alert(`Added image to ${sku}`);
-            
-            // Update display
-            displaySkuImages();
-        }
-        
-        function displaySkuImages() {
-            const container = document.getElementById('skuList');
-            let html = '<h3>Current SKU Images</h3>';
-            
-            for(let sku in IMAGE_CONFIG.skuToGallery) {
-                html += `
-                    <div class="sku-item">
-                        <h4>${sku}</h4>
-                        <div class="sku-images">
-                            ${IMAGE_CONFIG.skuToGallery[sku].map(fileId => `
-                                <img src="${IMAGE_CONFIG.BASE_URL + fileId}" 
-                                     class="thumbnail"
-                                     onclick="copyFileId('${fileId}')">
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            container.innerHTML = html;
-        }
-        
-        function copyFileId(fileId) {
-            navigator.clipboard.writeText(fileId);
-            alert('File ID copied: ' + fileId);
-        }
-        
-        // Display on load
-        displaySkuImages();
-    </script>
 </body>
 </html>
