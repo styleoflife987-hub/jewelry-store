@@ -1,10 +1,9 @@
-// js/app.js - UPDATED with correct add to cart
+// js/app.js - COMPLETE with product display and add to cart
 let products = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("App.js loaded");
     fetchProducts();
-    updateCartCount();
 });
 
 async function fetchProducts() {
@@ -22,8 +21,9 @@ async function fetchProducts() {
         
         products = Array.isArray(data) ? data : (data.products || []);
         
+        // If no products from API, use sample products
         if (products.length === 0) {
-            // Sample products for testing
+            console.log("Using sample products");
             products = [
                 { 
                     sku: "SKU001", 
@@ -59,7 +59,28 @@ async function fetchProducts() {
         
     } catch (error) {
         console.error("Error:", error);
-        showError("Failed to load products");
+        showError("Failed to load products. Using sample products.");
+        
+        // Use sample products on error
+        products = [
+            { 
+                sku: "SKU001", 
+                name: "Gold Necklace", 
+                category: "Necklaces", 
+                price: 25000, 
+                stock: 10, 
+                mainImage: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338"
+            },
+            { 
+                sku: "SKU002", 
+                name: "Diamond Ring", 
+                category: "Rings", 
+                price: 45000, 
+                stock: 5, 
+                mainImage: "https://images.unsplash.com/photo-1605100804763-247f67b3557e"
+            }
+        ];
+        displayProducts(products);
     } finally {
         hideLoading();
     }
@@ -135,34 +156,10 @@ window.addToCartFromProduct = function(sku) {
             product.mainImage || product.image
         );
     } else {
-        // Fallback if cart.js not loaded
         console.error("addToCart function not found");
         alert("Error: Cart system not loaded properly");
     }
 };
-
-function updateCartCount() {
-    try {
-        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-        const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-        
-        document.querySelectorAll('.cart-count').forEach(el => {
-            el.textContent = count;
-            el.style.display = count > 0 ? 'inline-block' : 'none';
-        });
-    } catch (e) {
-        console.error("Error updating cart count:", e);
-    }
-}
-
-function showNotification(message) {
-    // Use cart.js notification if available
-    if (typeof showNotification === 'function') {
-        showNotification(message);
-    } else {
-        alert(message);
-    }
-}
 
 function showLoading() {
     const container = document.getElementById("products");
@@ -178,8 +175,8 @@ function showError(message) {
     if (container) {
         container.innerHTML = `
             <div class="error-message" style="text-align:center; padding:50px; grid-column:1/-1">
-                <p style="color: #f44336; font-size:18px;">${message}</p>
-                <button onclick="location.reload()" style="width:auto; padding:10px 30px; margin-top:20px;">Refresh Page</button>
+                <p style="color: #f44336; font-size:18px; margin-bottom:20px;">${message}</p>
+                <button onclick="location.reload()" style="width:auto; padding:10px 30px;">Refresh Page</button>
             </div>
         `;
     }
