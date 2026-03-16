@@ -1,4 +1,4 @@
-// js/app.js - FIXED Add to Cart
+// js/app.js - UPDATED with correct add to cart
 let products = [];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -25,8 +25,33 @@ async function fetchProducts() {
         if (products.length === 0) {
             // Sample products for testing
             products = [
-                { sku: "SKU001", name: "Gold Necklace", category: "Necklaces", price: 25000, stock: 10, mainImage: "https://via.placeholder.com/300?text=Gold+Necklace" },
-                { sku: "SKU002", name: "Diamond Ring", category: "Rings", price: 45000, stock: 5, mainImage: "https://via.placeholder.com/300?text=Diamond+Ring" }
+                { 
+                    sku: "SKU001", 
+                    name: "Gold Necklace", 
+                    category: "Necklaces", 
+                    price: 25000, 
+                    stock: 10, 
+                    mainImage: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338",
+                    image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338"
+                },
+                { 
+                    sku: "SKU002", 
+                    name: "Diamond Ring", 
+                    category: "Rings", 
+                    price: 45000, 
+                    stock: 5, 
+                    mainImage: "https://images.unsplash.com/photo-1605100804763-247f67b3557e",
+                    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e"
+                },
+                { 
+                    sku: "SKU003", 
+                    name: "Silver Earrings", 
+                    category: "Earrings", 
+                    price: 8000, 
+                    stock: 20, 
+                    mainImage: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908",
+                    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908"
+                }
             ];
         }
         
@@ -62,6 +87,7 @@ function createProductCard(product) {
         <div class="product-images">
             <img src="${mainImage}" 
                  class="main-image"
+                 alt="${product.name}"
                  onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
         </div>
         
@@ -69,11 +95,11 @@ function createProductCard(product) {
             <h3>${product.name}</h3>
             <p class="sku">SKU: ${product.sku}</p>
             <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
-            <div class="price">${CONFIG.CURRENCY}${product.price}</div>
+            <div class="price">${CONFIG.CURRENCY}${product.price.toLocaleString()}</div>
             <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
-                ${product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                ${product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
             </p>
-            <button onclick="addToCart('${product.sku}')" 
+            <button onclick="addToCartFromProduct('${product.sku}')" 
                     class="add-to-cart-btn"
                     ${product.stock <= 0 ? 'disabled' : ''}>
                 Add to Cart
@@ -84,8 +110,8 @@ function createProductCard(product) {
     return card;
 }
 
-// ===== FIXED ADD TO CART FUNCTION =====
-window.addToCart = function(sku) {
+// Add to cart function that calls cart.js
+window.addToCartFromProduct = function(sku) {
     console.log("Add to cart clicked for SKU:", sku);
     
     const product = products.find(p => p.sku === sku);
@@ -100,39 +126,19 @@ window.addToCart = function(sku) {
         return;
     }
     
-    // Get existing cart
-    let cart = [];
-    try {
-        cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    } catch (e) {
-        cart = [];
-    }
-    
-    // Check if product already in cart
-    const existingItem = cart.find(item => item.sku === sku);
-    
-    if (existingItem) {
-        existingItem.quantity = (existingItem.quantity || 1) + 1;
+    // Call the cart.js addToCart function
+    if (typeof addToCart === 'function') {
+        addToCart(
+            product.sku, 
+            product.name, 
+            product.price, 
+            product.mainImage || product.image
+        );
     } else {
-        cart.push({
-            sku: sku,
-            name: product.name,
-            price: product.price,
-            image: product.mainImage || product.image,
-            quantity: 1
-        });
+        // Fallback if cart.js not loaded
+        console.error("addToCart function not found");
+        alert("Error: Cart system not loaded properly");
     }
-    
-    // Save to localStorage
-    localStorage.setItem("cart", JSON.stringify(cart));
-    
-    // Update cart count
-    updateCartCount();
-    
-    // Show notification
-    showNotification(`${product.name} added to cart!`);
-    
-    console.log("Cart updated:", cart);
 };
 
 function updateCartCount() {
@@ -150,14 +156,12 @@ function updateCartCount() {
 }
 
 function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
+    // Use cart.js notification if available
+    if (typeof showNotification === 'function') {
+        showNotification(message);
+    } else {
+        alert(message);
+    }
 }
 
 function showLoading() {
@@ -173,9 +177,9 @@ function showError(message) {
     const container = document.getElementById("products");
     if (container) {
         container.innerHTML = `
-            <div class="error-message">
-                <p style="color: #f44336;">${message}</p>
-                <button onclick="location.reload()">Refresh Page</button>
+            <div class="error-message" style="text-align:center; padding:50px; grid-column:1/-1">
+                <p style="color: #f44336; font-size:18px;">${message}</p>
+                <button onclick="location.reload()" style="width:auto; padding:10px 30px; margin-top:20px;">Refresh Page</button>
             </div>
         `;
     }
