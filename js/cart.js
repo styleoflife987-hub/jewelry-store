@@ -1,6 +1,6 @@
 // js/cart.js - Complete Fixed Version
 
-// ===== CART OPERATIONS =====
+// ===== CORE CART FUNCTIONS =====
 
 // Get cart from localStorage
 function getCart() {
@@ -15,22 +15,19 @@ function getCart() {
 // Save cart to localStorage
 function saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
-    updateCartCount(); // Update count in header
+    updateCartCount();
     return cart;
 }
 
-// Add item to cart
-function addToCart(sku, name, price, image = null) {
+// Add to cart function (exposed globally)
+window.addToCartFunction = function(sku, name, price, image) {
     let cart = getCart();
     
-    // Check if item already exists
     const existingItemIndex = cart.findIndex(item => item.sku === sku);
     
     if (existingItemIndex >= 0) {
-        // Increment quantity
         cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
     } else {
-        // Add new item
         cart.push({
             sku: sku,
             name: name,
@@ -43,9 +40,9 @@ function addToCart(sku, name, price, image = null) {
     saveCart(cart);
     showNotification(`${name} added to cart!`);
     return cart;
-}
+};
 
-// Remove item from cart
+// Remove from cart
 function removeFromCart(sku) {
     let cart = getCart();
     cart = cart.filter(item => item.sku !== sku);
@@ -53,7 +50,7 @@ function removeFromCart(sku) {
     return cart;
 }
 
-// Update item quantity
+// Update quantity
 function updateQuantity(sku, newQuantity) {
     let cart = getCart();
     const itemIndex = cart.findIndex(item => item.sku === sku);
@@ -61,7 +58,6 @@ function updateQuantity(sku, newQuantity) {
     if (itemIndex >= 0) {
         newQuantity = parseInt(newQuantity);
         if (newQuantity <= 0) {
-            // Remove item if quantity is 0 or less
             cart.splice(itemIndex, 1);
         } else {
             cart[itemIndex].quantity = newQuantity;
@@ -86,13 +82,13 @@ function getCartTotal() {
     }, 0);
 }
 
-// Get cart item count
+// Get cart count
 function getCartCount() {
     const cart = getCart();
     return cart.reduce((count, item) => count + (item.quantity || 1), 0);
 }
 
-// Update cart count display in header
+// Update cart count display
 function updateCartCount() {
     const count = getCartCount();
     document.querySelectorAll('.cart-count').forEach(el => {
@@ -103,7 +99,7 @@ function updateCartCount() {
 
 // ===== CART PAGE DISPLAY =====
 
-// Display cart on cart.html page
+// Display cart on cart.html
 function displayCartPage() {
     const cartContainer = document.getElementById('cartItems');
     const totalContainer = document.getElementById('cartTotal');
@@ -163,7 +159,7 @@ function displayCartPage() {
                            value="${item.quantity || 1}" 
                            min="1" 
                            max="10"
-                           onchange="updateCartItem('${item.sku}', this.value)"
+                           onchange="updateCartItemQuantity('${item.sku}', this.value)"
                            style="
                                width: 70px;
                                padding: 8px;
@@ -200,21 +196,22 @@ function displayCartPage() {
     if (totalContainer) totalContainer.textContent = total;
 }
 
-// Update cart item quantity
-window.updateCartItem = function(sku, quantity) {
+// Update cart item quantity (for cart page)
+window.updateCartItemQuantity = function(sku, quantity) {
     quantity = parseInt(quantity);
     if (quantity < 1) quantity = 1;
     if (quantity > 10) quantity = 10;
     
     updateQuantity(sku, quantity);
-    displayCartPage(); // Refresh display
+    displayCartPage();
+    showNotification('Cart updated');
 };
 
-// Remove cart item
+// Remove cart item (for cart page)
 window.removeCartItem = function(sku) {
     if (confirm('Remove this item from cart?')) {
         removeFromCart(sku);
-        displayCartPage(); // Refresh display
+        displayCartPage();
         showNotification('Item removed from cart');
     }
 };
@@ -270,7 +267,7 @@ function displayCheckoutSummary() {
     }
 }
 
-// ===== PLACE ORDER FUNCTION =====
+// ===== PLACE ORDER =====
 
 // Place order and save to Google Sheets
 async function placeOrder(customerDetails) {
@@ -278,56 +275,42 @@ async function placeOrder(customerDetails) {
     
     if (cart.length === 0) {
         alert('Your cart is empty');
-        return false;
+        return { success: false, error: 'Cart is empty' };
     }
     
     const total = getCartTotal();
     
     try {
-        // Prepare order data
-        const orderData = {
+        const params = new URLSearchParams({
             action: 'placeOrder',
             name: customerDetails.name || 'Guest',
             phone: customerDetails.phone || '',
             address: customerDetails.address || '',
-            items: JSON.stringify(cart), // Convert cart to JSON string
-            total: total
-        };
+            items: JSON.stringify(cart),
+            total: total,
+            paymentId: customerDetails.paymentId || ''
+        });
         
-        // Create URL parameters
-        const params = new URLSearchParams(orderData).toString();
-        
-        // Send to Google Apps Script
         const response = await fetch(`${CONFIG.API_URL}?${params}`);
         const result = await response.json();
         
         if (result.success) {
-            // Clear cart after successful order
             clearCart();
-            
-            // Return order ID
-            return {
-                success: true,
-                orderId: result.orderId
-            };
+            return { success: true, orderId: result.orderId };
         } else {
-            throw new Error(result.error || 'Failed to place order');
+            return { success: false, error: result.error || 'Failed to place order' };
         }
         
     } catch (error) {
         console.error('Error placing order:', error);
-        return {
-            success: false,
-            error: error.message
-        };
+        return { success: false, error: error.message };
     }
 }
 
-// ===== NOTIFICATION FUNCTION =====
+// ===== NOTIFICATION =====
 
 // Show notification
 function showNotification(message) {
-    // Remove existing notification
     const existing = document.querySelector('.cart-notification');
     if (existing) existing.remove();
     
@@ -357,12 +340,10 @@ function showNotification(message) {
 
 // ===== INITIALIZATION =====
 
-// Initialize cart on page load
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Update cart count in header
     updateCartCount();
     
-    // Check which page we're on
     const path = window.location.pathname;
     
     if (path.includes('cart.html')) {
@@ -372,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Add animation styles if not already present
+// Add animation styles
 if (!document.getElementById('cart-animation-styles')) {
     const style = document.createElement('style');
     style.id = 'cart-animation-styles';
@@ -385,13 +366,6 @@ if (!document.getElementById('cart-animation-styles')) {
         @keyframes slideOut {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
-        }
-        
-        .cart-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
         }
     `;
     document.head.appendChild(style);
