@@ -14,19 +14,27 @@ function payNow(amount, customerDetails = {}) {
         handler: function(response) {
             alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`);
             
-            // Clear cart after successful payment
+            // Clear cart
             localStorage.removeItem("cart");
             
             // Redirect to tracking page
-            window.location.href = `track.html?order=${response.razorpay_payment_id}`;
+            window.location.href = `track.html?order=${customerDetails.orderId || response.razorpay_payment_id}`;
         },
         prefill: {
             name: customerDetails.name || "",
             contact: customerDetails.phone || "",
             email: customerDetails.email || ""
+        },
+        theme: {
+            color: "#d4af37"
         }
     };
     
-    var rzp = new Razorpay(options);
-    rzp.open();
+    try {
+        var rzp = new Razorpay(options);
+        rzp.open();
+    } catch (error) {
+        console.error("Razorpay error:", error);
+        alert("Payment gateway error. Please try again.");
+    }
 }
