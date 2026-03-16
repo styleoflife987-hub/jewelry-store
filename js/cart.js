@@ -1,5 +1,7 @@
-// js/cart.js - WITH EXCEL STORAGE
+// js/cart.js - COMPLETE LIVE SYNC WITH EXCEL
 let sessionId = generateSessionId();
+let lastSyncTime = 0;
+let syncInterval = null;
 
 // Generate unique session ID
 function generateSessionId() {
@@ -11,57 +13,144 @@ function generateSessionId() {
     return session;
 }
 
-// ===== CART FUNCTIONS WITH EXCEL SYNC =====
+// ===== LIVE SYNC FUNCTIONS =====
 
-// Get cart from Excel
-async function getCartFromExcel() {
-    try {
-        const response = await fetch(`${CONFIG.API_URL}?action=getCart&sessionId=${sessionId}`);
-        const data = await response.json();
-        return data.items || [];
-    } catch (error) {
-        console.error("Error fetching cart from Excel:", error);
-        // Fallback to localStorage
-        return JSON.parse(localStorage.getItem("cart") || "[]");
+// Start auto-sync
+function startAutoSync() {
+    if (syncInterval) clearInterval(syncInterval);
+    syncInterval = setInterval(syncWithExcel, 5000); // Sync every 5 seconds
+}
+
+// Stop auto-sync
+function stopAutoSync() {
+    if (syncInterval) {
+        clearInterval(syncInterval);
+        syncInterval = null;
     }
 }
 
-// Save cart to Excel
-async function saveCartToExcel(cart) {
+// Sync with Excel
+async function syncWithExcel() {
     try {
-        const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+        const response = await fetch(`${CONFIG.API_URL}?action=sync&sessionId=${sessionId}&lastSync=${lastSyncTime}`);
+        const data = await response.json();
         
+        if (data.error) {
+            console.error("Sync error:", data.error);
+            return;
+        }
+        
+        // Update last sync time
+        lastSyncTime = data.serverTime;
+        
+        // Check if cart was updated on server
+        if (data.cart && data.cart.version > getLocalCartVersion()) {
+            console.log("Cart updated from server:", data.cart);
+            updateLocalCart(data.cart);
+        }
+        
+        // Check if products were updated
+        if (data.products && data.products.length > 0) {
+            console.log("Products updated from server:", data.products);
+            updateLocalProducts(data.products);
+        }
+        
+    } catch (error) {
+        console.error("Sync error:", error);
+    }
+}
+
+// Get local cart version
+function getLocalCartVersion() {
+    return Number(localStorage.getItem('cartVersion') || 0);
+}
+
+// Update local cart from server
+function updateLocalCart(serverCart) {
+    localStorage.setItem('cart', JSON.stringify(serverCart.items || []));
+    localStorage.setItem('cartVersion', serverCart.version || 1);
+    localStorage.setItem('cartLastUpdated', serverCart.lastUpdated || new Date().toISOString());
+    
+    // Update UI
+    updateCartCount();
+    if (window.location.pathname.includes('cart.html')) {
+        displayCartPage();
+    }
+}
+
+// Update local products from server
+function updateLocalProducts(updatedProducts) {
+    let products = JSON.parse(localStorage.getItem('products') || '[]');
+    
+    updatedProducts.forEach(updatedProduct => {
+        const index = products.findIndex(p => p.sku === updatedProduct.sku);
+        if (index >= 0) {
+            products[index] = {...products[index], ...updatedProduct};
+        } else {
+            products.push(updatedProduct);
+        }
+    });
+    
+    localStorage.setItem('products', JSON.stringify(products));
+    localStorage.setItem('productsLastUpdated', new Date().toISOString());
+    
+    // Trigger product update event
+    window.dispatchEvent(new CustomEvent('productsUpdated', { detail: products }));
+}
+
+// ===== CART FUNCTIONS =====
+
+// Get cart from localStorage (fast)
+function getLocalCart() {
+    try {
+        return JSON.parse(localStorage.getItem("cart") || "[]");
+    } catch (e) {
+        return [];
+    }
+}
+
+// Save cart to localStorage and sync with Excel
+async function saveCart(cart) {
+    const version = (Number(localStorage.getItem('cartVersion')) || 0) + 1;
+    
+    // Save locally first (for immediate UI update)
+    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem('cartVersion', version);
+    
+    // Calculate total
+    const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    
+    // Sync with Excel
+    try {
         const params = new URLSearchParams({
             action: 'saveCart',
             sessionId: sessionId,
             items: JSON.stringify(cart),
-            total: total
+            total: total,
+            version: version
         });
         
         const response = await fetch(`${CONFIG.API_URL}?${params}`);
         const data = await response.json();
         
         if (data.success) {
-            console.log("Cart saved to Excel:", data.cartId);
-            // Also save to localStorage as backup
-            localStorage.setItem("cart", JSON.stringify(cart));
+            console.log("Cart synced with Excel:", data);
+            localStorage.setItem('cartLastUpdated', data.lastUpdated || new Date().toISOString());
         }
-        
-        return data;
     } catch (error) {
-        console.error("Error saving cart to Excel:", error);
-        // Fallback to localStorage
-        localStorage.setItem("cart", JSON.stringify(cart));
-        return { success: true, fallback: true };
+        console.error("Error syncing cart to Excel:", error);
+        // Store for later sync
+        localStorage.setItem('pendingCartSync', 'true');
     }
+    
+    return cart;
 }
 
-// Add to cart (saves to Excel)
+// Add to cart
 window.addToCart = async function(sku, name, price, image) {
     console.log("Adding to cart:", { sku, name, price });
     
-    // Get current cart from Excel
-    let cart = await getCartFromExcel();
+    let cart = getLocalCart();
     
     const existingItem = cart.find(item => item.sku === sku);
     
@@ -77,10 +166,8 @@ window.addToCart = async function(sku, name, price, image) {
         });
     }
     
-    // Save to Excel
-    await saveCartToExcel(cart);
+    await saveCart(cart);
     
-    // Update UI
     updateCartCount();
     showNotification(`${name} added to cart!`);
     
@@ -89,10 +176,10 @@ window.addToCart = async function(sku, name, price, image) {
 
 // Remove from cart
 window.removeFromCart = async function(sku) {
-    let cart = await getCartFromExcel();
+    let cart = getLocalCart();
     cart = cart.filter(item => item.sku !== sku);
     
-    await saveCartToExcel(cart);
+    await saveCart(cart);
     
     if (window.location.pathname.includes('cart.html')) {
         displayCartPage();
@@ -104,7 +191,7 @@ window.removeFromCart = async function(sku) {
 
 // Update quantity
 window.updateQuantity = async function(sku, newQuantity) {
-    let cart = await getCartFromExcel();
+    let cart = getLocalCart();
     const itemIndex = cart.findIndex(item => item.sku === sku);
     
     if (itemIndex >= 0) {
@@ -115,7 +202,7 @@ window.updateQuantity = async function(sku, newQuantity) {
             cart[itemIndex].quantity = newQuantity;
         }
         
-        await saveCartToExcel(cart);
+        await saveCart(cart);
         
         if (window.location.pathname.includes('cart.html')) {
             displayCartPage();
@@ -126,7 +213,7 @@ window.updateQuantity = async function(sku, newQuantity) {
 
 // Clear cart
 window.clearCart = async function() {
-    await saveCartToExcel([]);
+    await saveCart([]);
     
     try {
         await fetch(`${CONFIG.API_URL}?action=clearCart&sessionId=${sessionId}`);
@@ -134,26 +221,25 @@ window.clearCart = async function() {
         console.error("Error clearing cart in Excel:", error);
     }
     
-    localStorage.removeItem("cart");
     updateCartCount();
     return [];
 };
 
 // Get cart total
-window.getCartTotal = async function() {
-    const cart = await getCartFromExcel();
+window.getCartTotal = function() {
+    const cart = getLocalCart();
     return cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
 };
 
 // Get cart count
-window.getCartCount = async function() {
-    const cart = await getCartFromExcel();
+window.getCartCount = function() {
+    const cart = getLocalCart();
     return cart.reduce((count, item) => count + (item.quantity || 1), 0);
 };
 
 // Update cart count display
-window.updateCartCount = async function() {
-    const count = await window.getCartCount();
+window.updateCartCount = function() {
+    const count = window.getCartCount();
     document.querySelectorAll('.cart-count').forEach(el => {
         el.textContent = count;
         el.style.display = count > 0 ? 'inline-block' : 'none';
@@ -161,14 +247,14 @@ window.updateCartCount = async function() {
 };
 
 // Display cart page
-window.displayCartPage = async function() {
+window.displayCartPage = function() {
     const cartContainer = document.getElementById('cartItems');
     const totalContainer = document.getElementById('cartTotal');
     
     if (!cartContainer) return;
     
-    const cart = await getCartFromExcel();
-    console.log("Displaying cart from Excel:", cart);
+    const cart = getLocalCart();
+    console.log("Displaying cart:", cart);
     
     if (!cart || cart.length === 0) {
         cartContainer.innerHTML = `
@@ -259,14 +345,17 @@ window.displayCartPage = async function() {
 };
 
 // Display checkout summary
-window.displayCheckoutSummary = async function() {
+window.displayCheckoutSummary = function() {
     const summaryContainer = document.getElementById('cartSummary');
+    const orderTotalContainer = document.getElementById('orderTotal');
+    
     if (!summaryContainer) return;
     
-    const cart = await getCartFromExcel();
+    const cart = getLocalCart();
     
     if (!cart || cart.length === 0) {
         summaryContainer.innerHTML = '<p style="color:#f44336; text-align:center">Your cart is empty. <a href="index.html">Shop now</a></p>';
+        if (orderTotalContainer) orderTotalContainer.textContent = '0';
         return;
     }
     
@@ -294,12 +383,13 @@ window.displayCheckoutSummary = async function() {
         </div>
     `;
     
+    if (orderTotalContainer) orderTotalContainer.textContent = total;
     return total;
 };
 
 // Place order
 window.placeOrder = async function(customerDetails) {
-    const cart = await getCartFromExcel();
+    const cart = getLocalCart();
     
     if (!cart || cart.length === 0) {
         alert('Your cart is empty');
@@ -326,7 +416,9 @@ window.placeOrder = async function(customerDetails) {
         if (result.success) {
             // Clear local cart
             localStorage.removeItem("cart");
+            localStorage.removeItem('cartVersion');
             await updateCartCount();
+            
             return { success: true, orderId: result.orderId };
         } else {
             return { success: false, error: result.error };
@@ -380,14 +472,25 @@ window.showNotification = function(message) {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log("Cart.js loaded with Excel sync");
-    await window.updateCartCount();
+    console.log("Cart.js loaded with live sync");
     
+    // Start auto-sync
+    startAutoSync();
+    
+    // Initial cart count update
+    await updateCartCount();
+    
+    // Check which page we're on
     if (window.location.pathname.includes('cart.html')) {
-        await window.displayCartPage();
+        displayCartPage();
     } else if (window.location.pathname.includes('checkout.html')) {
-        await window.displayCheckoutSummary();
+        displayCheckoutSummary();
     }
+    
+    // Clean up on page unload
+    window.addEventListener('beforeunload', function() {
+        stopAutoSync();
+    });
 });
 
 // Add styles
