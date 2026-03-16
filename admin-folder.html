@@ -34,16 +34,13 @@ Jewelry Store Images/
 │   ├── front.jpg
 │   └── side.jpg
             </pre>
-            <p style="margin-top:15px; color:#888">
-                <strong>Folder ID:</strong> 1j_YG8Nplp3ZvTv3Nq-A7Tw08L55q2B03
-            </p>
         </div>
         
         <button onclick="scanFolders()" style="width:auto; padding:12px 30px; margin-bottom:30px">
             🔄 Scan Google Drive
         </button>
         
-        <div id="folderGrid" class="folder-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:20px">
+        <div id="folderGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:20px">
             <!-- Folders will appear here -->
         </div>
     </div>
@@ -72,14 +69,13 @@ Jewelry Store Images/
                 
                 let html = '';
                 products.forEach(product => {
-                    const imageCount = product.imageCount || 0;
                     const images = product.images || [];
                     
                     html += `
                         <div style="background:#222; border-radius:10px; padding:15px; border:1px solid #333">
                             <h4 style="color:#d4af37">${product.name}</h4>
                             <p><strong>SKU:</strong> ${product.sku}</p>
-                            <p><strong>Images:</strong> ${imageCount}</p>
+                            <p><strong>Images:</strong> ${images.length}</p>
                             
                             <div style="display:flex; gap:5px; flex-wrap:wrap; margin:15px 0">
                                 ${images.slice(0, 4).map(img => `
@@ -88,10 +84,8 @@ Jewelry Store Images/
                                          onclick="window.open('${img.url}','_blank')"
                                          onerror="this.style.display='none'">
                                 `).join('')}
-                                ${imageCount > 4 ? `<span style="color:#888">+${imageCount-4} more</span>` : ''}
+                                ${images.length > 4 ? `<span style="color:#888">+${images.length-4} more</span>` : ''}
                             </div>
-                            
-                            <p style="font-size:12px; color:#666">Folder: ${product.images[0]?.folderName || 'N/A'}</p>
                         </div>
                     `;
                 });
@@ -103,7 +97,6 @@ Jewelry Store Images/
             }
         }
         
-        // Auto scan on load
         scanFolders();
     </script>
 </body>
