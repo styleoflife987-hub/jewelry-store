@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart - Style Of Life</title>
+    <title>Cart - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
 </head>
@@ -14,25 +14,20 @@
             <a href="index.html">Home</a>
             <a href="cart.html">Cart <span class="cart-count">0</span></a>
             <a href="track.html">Track Order</a>
-            <a href="login.html">Admin</a>
         </nav>
     </header>
 
-    <div class="cart-container">
-        <h2 style="margin-bottom:30px; color:#d4af37">Your Shopping Cart</h2>
-        
-        <div id="cartItems" class="cart-items"></div>
-        
-        <div class="cart-total">
+    <div class="cart-container" style="max-width:1000px; margin:40px auto; padding:20px">
+        <h2 style="color:#d4af37; margin-bottom:30px">Shopping Cart</h2>
+        <div id="cartItems"></div>
+        <div class="cart-total" style="text-align:right; margin-top:30px">
             <h3>Total: ₹<span id="cartTotal">0</span></h3>
-            <a href="checkout.html">
-                <button style="width:200px; margin-left:auto">Proceed to Checkout</button>
-            </a>
+            <a href="checkout.html"><button style="width:200px; margin-left:auto">Checkout</button></a>
         </div>
     </div>
 
     <footer>
-        © 2026 Style Of Life Jewelry. All rights reserved.
+        © 2026 Style Of Life Jewelry
     </footer>
 
     <script src="js/cart.js"></script>
