@@ -1,6 +1,4 @@
-// js/cart.js - COMPLETE FIXED VERSION
-
-// Make functions globally available
+// js/cart.js - FIXED VERSION
 window.getCart = function() {
     try {
         const cart = localStorage.getItem("cart");
@@ -18,16 +16,16 @@ window.saveCart = function(cart) {
 };
 
 window.addToCart = function(sku, name, price, image) {
-    console.log("addToCart called with:", { sku, name, price, image });
+    console.log("addToCart called with:", { sku, name, price });
     
     if (!sku || !name || !price) {
         console.error("Missing required parameters:", { sku, name, price });
+        alert("Error: Missing product information");
         return;
     }
     
     let cart = window.getCart();
     
-    // Check if item already exists
     const existingItem = cart.find(item => item.sku === sku);
     
     if (existingItem) {
@@ -51,19 +49,14 @@ window.addToCart = function(sku, name, price, image) {
 
 window.removeFromCart = function(sku) {
     let cart = window.getCart();
-    const initialLength = cart.length;
     cart = cart.filter(item => item.sku !== sku);
+    window.saveCart(cart);
     
-    if (cart.length < initialLength) {
-        window.saveCart(cart);
-        
-        if (window.location.pathname.includes('cart.html')) {
-            window.displayCartPage();
-        }
-        
-        window.showNotification('Item removed from cart');
+    if (window.location.pathname.includes('cart.html')) {
+        window.displayCartPage();
     }
     
+    window.showNotification('Item removed from cart');
     return cart;
 };
 
@@ -165,7 +158,7 @@ window.displayCartPage = function() {
                            value="${item.quantity || 1}" 
                            min="1" 
                            max="10"
-                           onchange="updateCartItem('${item.sku}', this.value)"
+                           onchange="window.updateCartItem('${item.sku}', this.value)"
                            style="
                                width: 70px;
                                padding: 8px;
@@ -181,7 +174,7 @@ window.displayCartPage = function() {
                     <div style="font-weight: bold; color: #d4af37; margin-bottom: 5px;">
                         ₹${itemTotal.toLocaleString()}
                     </div>
-                    <button onclick="removeCartItem('${item.sku}')"
+                    <button onclick="window.removeCartItem('${item.sku}')"
                             style="
                                 background: transparent;
                                 color: #f44336;
@@ -204,15 +197,12 @@ window.displayCartPage = function() {
 
 window.displayCheckoutSummary = function() {
     const summaryContainer = document.getElementById('cartSummary');
-    const orderTotalContainer = document.getElementById('orderTotal');
-    
     if (!summaryContainer) return;
     
     const cart = window.getCart();
     
     if (!cart || cart.length === 0) {
         summaryContainer.innerHTML = '<p style="color:#f44336; text-align:center">Your cart is empty. <a href="index.html">Shop now</a></p>';
-        if (orderTotalContainer) orderTotalContainer.textContent = '0';
         return;
     }
     
@@ -239,8 +229,6 @@ window.displayCheckoutSummary = function() {
             <strong style="color: #d4af37;">₹${total.toLocaleString()}</strong>
         </div>
     `;
-    
-    if (orderTotalContainer) orderTotalContainer.textContent = total;
 };
 
 window.updateCartItem = function(sku, quantity) {
@@ -293,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Add animation styles
+// Add styles
 if (!document.getElementById('cart-styles')) {
     const style = document.createElement('style');
     style.id = 'cart-styles';
