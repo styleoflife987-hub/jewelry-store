@@ -22,6 +22,8 @@ function saveCart(cart) {
 
 // Add to cart
 function addToCart(sku, name, price, image) {
+    console.log("Adding to cart:", sku, name, price);
+    
     let cart = getCart();
     
     // Check if item already exists
@@ -41,21 +43,27 @@ function addToCart(sku, name, price, image) {
     
     saveCart(cart);
     showNotification(`${name} added to cart!`);
+    console.log("Cart updated:", cart);
     return cart;
 }
 
 // Remove from cart
 function removeFromCart(sku) {
     let cart = getCart();
+    const initialLength = cart.length;
     cart = cart.filter(item => item.sku !== sku);
-    saveCart(cart);
     
-    // If on cart page, refresh display
-    if (window.location.pathname.includes('cart.html')) {
-        displayCartPage();
+    if (cart.length < initialLength) {
+        saveCart(cart);
+        
+        // If on cart page, refresh display
+        if (window.location.pathname.includes('cart.html')) {
+            displayCartPage();
+        }
+        
+        showNotification('Item removed from cart');
     }
     
-    showNotification('Item removed from cart');
     return cart;
 }
 
@@ -136,7 +144,7 @@ function displayCartPage() {
     let html = '';
     let total = 0;
     
-    cart.forEach((item, index) => {
+    cart.forEach((item) => {
         const itemTotal = item.price * (item.quantity || 1);
         total += itemTotal;
         
@@ -163,7 +171,7 @@ function displayCartPage() {
                 </div>
                 
                 <div style="color: #d4af37; font-weight: bold;">
-                    ₹${item.price}
+                    ₹${item.price.toLocaleString()}
                 </div>
                 
                 <div>
@@ -185,7 +193,7 @@ function displayCartPage() {
                 
                 <div style="text-align: right;">
                     <div style="font-weight: bold; color: #d4af37; margin-bottom: 5px;">
-                        ₹${itemTotal}
+                        ₹${itemTotal.toLocaleString()}
                     </div>
                     <button onclick="removeCartItem('${item.sku}')"
                             style="
@@ -250,7 +258,7 @@ function displayCheckoutSummary() {
                     ${item.name} 
                     <span style="color: #888; font-size: 12px;">x${item.quantity || 1}</span>
                 </span>
-                <span style="color: #d4af37;">₹${itemTotal}</span>
+                <span style="color: #d4af37;">₹${itemTotal.toLocaleString()}</span>
             </div>
         `;
     });
@@ -260,7 +268,7 @@ function displayCheckoutSummary() {
         ${itemsHtml}
         <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 10px; border-top: 2px solid #d4af37;">
             <strong>Total:</strong>
-            <strong style="color: #d4af37;">₹${total}</strong>
+            <strong style="color: #d4af37;">₹${total.toLocaleString()}</strong>
         </div>
     `;
     
@@ -372,14 +380,6 @@ if (!document.getElementById('cart-styles')) {
         @keyframes slideOut {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
-        }
-        
-        .cart-item {
-            transition: all 0.3s ease;
-        }
-        
-        .cart-item:hover {
-            border-color: #d4af37 !important;
         }
     `;
     document.head.appendChild(style);
