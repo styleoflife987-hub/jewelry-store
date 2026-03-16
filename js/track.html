@@ -17,20 +17,47 @@
         </nav>
     </header>
 
-    <div class="tracking-container">
-        <h2 style="color:#d4af37">Track Your Order</h2>
-        <p style="margin-bottom:20px; color:#888">Enter your Order ID to check status</p>
-        
-        <input type="text" id="orderId" placeholder="Enter Order ID (e.g., 1234567890)">
-        <button onclick="trackOrder()" style="margin-top:10px">Track Order</button>
-        
-        <div id="trackingResult"></div>
+    <div style="max-width:500px; margin:100px auto; padding:40px; background:#1a1a1a; border-radius:15px; text-align:center">
+        <h2 style="color:#d4af37; margin-bottom:20px">Track Your Order</h2>
+        <input type="text" id="orderId" placeholder="Enter Order ID" style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white; margin-bottom:15px">
+        <button onclick="trackOrder()" style="padding:12px">Track Order</button>
+        <div id="trackingResult" style="margin-top:30px"></div>
     </div>
 
     <footer>
-        © 2026 Style Of Life Jewelry. All rights reserved.
+        © 2026 Style Of Life Jewelry
     </footer>
 
-    <script src="js/track.js"></script>
+    <script>
+        async function trackOrder() {
+            const orderId = document.getElementById('orderId').value;
+            if (!orderId) {
+                alert('Please enter order ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=track&id=${orderId}`);
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('trackingResult');
+                
+                if (data.error) {
+                    resultDiv.innerHTML = `<p style="color:#f44336">Order not found</p>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div style="background:#222; padding:20px; border-radius:10px">
+                            <p><strong>Order ID:</strong> ${data.orderId}</p>
+                            <p><strong>Status:</strong> <span style="color:#d4af37">${data.status}</span></p>
+                            <p><strong>Total:</strong> ₹${data.total}</p>
+                            <p><strong>Date:</strong> ${new Date(data.date).toLocaleDateString()}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                alert('Error tracking order');
+            }
+        }
+    </script>
 </body>
 </html>
