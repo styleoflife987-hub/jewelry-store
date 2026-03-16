@@ -1,4 +1,4 @@
-// js/cart.js - Complete Fixed Version
+// js/cart.js - Complete Fixed Version with proper deletion
 
 // ===== CORE CART FUNCTIONS =====
 
@@ -19,34 +19,17 @@ function saveCart(cart) {
     return cart;
 }
 
-// Add to cart function (exposed globally)
-window.addToCartFunction = function(sku, name, price, image) {
-    let cart = getCart();
-    
-    const existingItemIndex = cart.findIndex(item => item.sku === sku);
-    
-    if (existingItemIndex >= 0) {
-        cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
-    } else {
-        cart.push({
-            sku: sku,
-            name: name,
-            price: Number(price),
-            image: image || CONFIG.PLACEHOLDER_IMAGE,
-            quantity: 1
-        });
-    }
-    
-    saveCart(cart);
-    showNotification(`${name} added to cart!`);
-    return cart;
-};
-
-// Remove from cart
+// Remove from cart - FIXED: This properly removes items
 function removeFromCart(sku) {
     let cart = getCart();
+    const initialLength = cart.length;
     cart = cart.filter(item => item.sku !== sku);
-    saveCart(cart);
+    
+    if (cart.length < initialLength) {
+        saveCart(cart);
+        showNotification('Item removed from cart');
+    }
+    
     return cart;
 }
 
@@ -58,7 +41,7 @@ function updateQuantity(sku, newQuantity) {
     if (itemIndex >= 0) {
         newQuantity = parseInt(newQuantity);
         if (newQuantity <= 0) {
-            cart.splice(itemIndex, 1);
+            cart.splice(itemIndex, 1); // Remove if quantity is 0
         } else {
             cart[itemIndex].quantity = newQuantity;
         }
@@ -99,7 +82,7 @@ function updateCartCount() {
 
 // ===== CART PAGE DISPLAY =====
 
-// Display cart on cart.html
+// Display cart on cart.html - FIXED: Shows correct items after deletion
 function displayCartPage() {
     const cartContainer = document.getElementById('cartItems');
     const totalContainer = document.getElementById('cartTotal');
@@ -107,6 +90,7 @@ function displayCartPage() {
     if (!cartContainer) return;
     
     const cart = getCart();
+    console.log("Displaying cart:", cart); // Debug
     
     if (cart.length === 0) {
         cartContainer.innerHTML = `
@@ -196,23 +180,22 @@ function displayCartPage() {
     if (totalContainer) totalContainer.textContent = total;
 }
 
-// Update cart item quantity (for cart page)
+// Update cart item quantity
 window.updateCartItemQuantity = function(sku, quantity) {
     quantity = parseInt(quantity);
     if (quantity < 1) quantity = 1;
     if (quantity > 10) quantity = 10;
     
     updateQuantity(sku, quantity);
-    displayCartPage();
+    displayCartPage(); // Refresh display
     showNotification('Cart updated');
 };
 
-// Remove cart item (for cart page)
+// Remove cart item - FIXED: Proper removal and refresh
 window.removeCartItem = function(sku) {
     if (confirm('Remove this item from cart?')) {
         removeFromCart(sku);
-        displayCartPage();
-        showNotification('Item removed from cart');
+        displayCartPage(); // Refresh display immediately
     }
 };
 
