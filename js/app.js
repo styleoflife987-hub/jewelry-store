@@ -1,4 +1,4 @@
-// js/app.js - Auto Image Detection
+// js/app.js - Customer Portal with Auto Image Detection
 let products = [];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,7 +13,7 @@ async function fetchProducts() {
         const response = await fetch(`${CONFIG.API_URL}?action=products`);
         const data = await response.json();
         
-        console.log("Products with images:", data);
+        console.log("Products loaded:", data);
         
         if (data.error) {
             throw new Error(data.error);
@@ -24,7 +24,7 @@ async function fetchProducts() {
         
     } catch (error) {
         console.error("Error:", error);
-        showError("Failed to load products");
+        showError("Failed to load products. Please refresh the page.");
     } finally {
         hideLoading();
     }
@@ -42,84 +42,110 @@ function displayProducts(products) {
     container.innerHTML = "";
     
     products.forEach(product => {
-        const card = document.createElement("div");
-        card.className = "card";
-        
-        // Get images (auto-detected from Drive)
-        const images = product.images || [];
-        const mainImage = product.mainImage || product.image || CONFIG.PLACEHOLDER_IMAGE;
-        const imageCount = product.imageCount || (product.image ? 1 : 0);
-        
-        // Create thumbnails
-        let thumbnails = '';
-        if (images.length > 0) {
-            thumbnails = images.slice(0, 4).map((img, idx) => `
-                <img src="${img.thumbnail || img.url}" 
-                     class="thumbnail ${idx === 0 ? 'active' : ''}"
-                     onclick="changeImage('${product.sku}', '${img.url}', this)">
-            `).join('');
-        }
-        
-        card.innerHTML = `
-            <div class="product-images">
-                <img src="${mainImage}" 
-                     id="img-${product.sku}"
-                     class="main-image"
-                     onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
-                
-                ${imageCount > 1 ? `
-                    <div class="thumbnail-strip">
-                        ${thumbnails}
-                        ${imageCount > 4 ? `
-                            <span class="more-images" onclick="showAllImages('${product.sku}')">
-                                +${imageCount - 4}
-                            </span>
-                        ` : ''}
-                    </div>
-                ` : ''}
-                
-                <span class="image-badge">📷 ${imageCount}</span>
-            </div>
-            
-            <div class="product-info">
-                <h3>${product.name}</h3>
-                <p class="sku">SKU: ${product.sku}</p>
-                <p class="price">₹${product.price}</p>
-                <button onclick="addToCart('${product.sku}')">
-                    Add to Cart
-                </button>
-            </div>
-        `;
-        
+        const card = createProductCard(product);
         container.appendChild(card);
     });
 }
 
-// Change main image when thumbnail clicked
-window.changeImage = function(sku, url, element) {
-    document.getElementById(`img-${sku}`).src = url;
+function createProductCard(product) {
+    const card = document.createElement("div");
+    card.className = "card";
     
-    // Update active thumbnail
-    document.querySelectorAll(`[onclick*="${sku}"]`).forEach(el => {
-        el.classList.remove('active');
-    });
-    element.classList.add('active');
+    // Get images from Drive (auto-detected)
+    const images = product.images || [];
+    const mainImage = product.mainImage || product.image || CONFIG.PLACEHOLDER_IMAGE;
+    const imageCount = product.imageCount || (product.image ? 1 : 0);
+    
+    // Create thumbnail HTML
+    let thumbnails = '';
+    if (images.length > 0) {
+        thumbnails = images.slice(0, 4).map((img, index) => `
+            <img src="${img.thumbnail || img.url}" 
+                 class="thumbnail ${index === 0 ? 'active' : ''}"
+                 onclick="changeMainImage('${product.sku}', '${img.url}', this)"
+                 title="${img.type || 'view'}"
+                 onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+        `).join('');
+    }
+    
+    card.innerHTML = `
+        <div class="product-images">
+            <div class="main-image-container">
+                <img src="${mainImage}" 
+                     id="main-${product.sku}"
+                     class="main-image"
+                     onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+                ${imageCount > 0 ? `
+                    <span class="image-badge">
+                        📷 ${imageCount}
+                    </span>
+                ` : ''}
+            </div>
+            
+            ${images.length > 1 ? `
+                <div class="thumbnail-strip">
+                    ${thumbnails}
+                    ${images.length > 4 ? `
+                        <span class="more-images" onclick="showAllImages('${product.sku}')">
+                            +${images.length - 4}
+                        </span>
+                    ` : ''}
+                </div>
+            ` : ''}
+        </div>
+        
+        <div class="product-info">
+            <h3>${product.name}</h3>
+            <p class="sku">SKU: ${product.sku}</p>
+            <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
+            <div class="price">${CONFIG.CURRENCY}${product.price}</div>
+            <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
+                ${product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
+            </p>
+            <button onclick="addToCart('${product.sku}')" 
+                    ${product.stock <= 0 ? 'disabled' : ''}>
+                Add to Cart
+            </button>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Change main image when thumbnail clicked
+window.changeMainImage = function(sku, imageUrl, element) {
+    const mainImage = document.getElementById(`main-${sku}`);
+    if (mainImage) {
+        mainImage.src = imageUrl;
+        
+        // Update active thumbnail
+        document.querySelectorAll(`[onclick*="${sku}"]`).forEach(el => {
+            el.classList.remove('active');
+        });
+        element.classList.add('active');
+    }
 };
 
 // Show all images in modal
 window.showAllImages = function(sku) {
     const product = products.find(p => p.sku === sku);
-    if (!product || !product.images) return;
+    if (!product || !product.images || product.images.length === 0) {
+        alert("No additional images available");
+        return;
+    }
     
     const modal = document.createElement('div');
     modal.className = 'image-modal';
     modal.innerHTML = `
         <div class="modal-content">
-            <span class="close" onclick="this.parentElement.parentElement.remove()">&times;</span>
-            <h3>${product.name}</h3>
+            <span class="close" onclick="this.closest('.image-modal').remove()">&times;</span>
+            <h2>${product.name}</h2>
+            <p class="sku">SKU: ${product.sku} • ${product.images.length} photos</p>
             <div class="image-grid">
                 ${product.images.map(img => `
-                    <img src="${img.url}" onclick="selectImage('${sku}', '${img.url}')">
+                    <img src="${img.url}" 
+                         onclick="selectImage('${product.sku}', '${img.url}'); this.closest('.image-modal').remove()"
+                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
                 `).join('')}
             </div>
         </div>
@@ -128,9 +154,11 @@ window.showAllImages = function(sku) {
 };
 
 // Select image from modal
-window.selectImage = function(sku, url) {
-    document.getElementById(`img-${sku}`).src = url;
-    document.querySelector('.image-modal').remove();
+window.selectImage = function(sku, imageUrl) {
+    const mainImage = document.getElementById(`main-${sku}`);
+    if (mainImage) {
+        mainImage.src = imageUrl;
+    }
 };
 
 // Add to cart
@@ -138,11 +166,16 @@ window.addToCart = function(sku) {
     const product = products.find(p => p.sku === sku);
     if (!product) return;
     
+    if (product.stock <= 0) {
+        alert("Sorry, this product is out of stock.");
+        return;
+    }
+    
     let cart = JSON.parse(localStorage.getItem("cart") || "[]");
     
-    const existing = cart.find(item => item.sku === sku);
-    if (existing) {
-        existing.quantity = (existing.quantity || 1) + 1;
+    const existingItem = cart.find(item => item.sku === sku);
+    if (existingItem) {
+        existingItem.quantity = (existingItem.quantity || 1) + 1;
     } else {
         cart.push({
             sku: sku,
@@ -155,9 +188,10 @@ window.addToCart = function(sku) {
     
     localStorage.setItem("cart", JSON.stringify(cart));
     updateCartCount();
-    alert(`${product.name} added to cart!`);
+    showNotification(`${product.name} added to cart!`);
 };
 
+// Update cart count
 function updateCartCount() {
     const cart = JSON.parse(localStorage.getItem("cart") || "[]");
     const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
@@ -168,18 +202,36 @@ function updateCartCount() {
     });
 }
 
+// Show notification
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Loading and error functions
 function showLoading() {
     const container = document.getElementById("products");
     if (container) {
-        container.innerHTML = '<div class="loading">Loading products...</div>';
+        container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading products...</p></div>';
     }
 }
 
 function hideLoading() {}
 
-function showError(msg) {
+function showError(message) {
     const container = document.getElementById("products");
     if (container) {
-        container.innerHTML = `<div class="error">${msg}</div>`;
+        container.innerHTML = `
+            <div class="error-message">
+                <p>${message}</p>
+                <button onclick="location.reload()">Refresh Page</button>
+            </div>
+        `;
     }
 }
