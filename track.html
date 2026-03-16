@@ -19,7 +19,7 @@
 
     <div style="max-width:500px; margin:100px auto; padding:40px; background:#1a1a1a; border-radius:15px; text-align:center">
         <h2 style="color:#d4af37; margin-bottom:20px">Track Your Order</h2>
-        <input type="text" id="orderId" placeholder="Enter Order ID" 
+        <input type="text" id="orderId" placeholder="Enter Order ID (e.g., ORD1234567890)" 
                style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white; margin-bottom:15px">
         <button onclick="trackOrder()" style="padding:12px">Track Order</button>
         
@@ -49,8 +49,8 @@
                     resultDiv.innerHTML = `<p style="color:#f44336">Order not found</p>`;
                 } else {
                     let itemsHtml = '';
-                    if (data.items && data.items.length) {
-                        itemsHtml = '<div style="margin:15px 0"><h4>Items:</h4>';
+                    if (data.items && data.items.length > 0) {
+                        itemsHtml = '<div style="margin:15px 0; text-align:left"><h4 style="color:#d4af37; margin-bottom:10px">Items:</h4>';
                         data.items.forEach(item => {
                             itemsHtml += `<p>${item.name} x${item.quantity || 1} - ₹${item.price}</p>`;
                         });
@@ -58,8 +58,9 @@
                     }
                     
                     resultDiv.innerHTML = `
-                        <div style="background:#222; padding:20px; border-radius:10px">
+                        <div style="background:#222; padding:20px; border-radius:10px; text-align:left">
                             <p><strong>Order ID:</strong> ${data.orderId}</p>
+                            <p><strong>Customer:</strong> ${data.name}</p>
                             <p><strong>Status:</strong> <span style="color:#d4af37">${data.status}</span></p>
                             <p><strong>Total:</strong> ₹${data.total}</p>
                             <p><strong>Date:</strong> ${new Date(data.date).toLocaleDateString()}</p>
