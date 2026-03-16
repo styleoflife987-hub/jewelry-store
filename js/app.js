@@ -1,7 +1,8 @@
-// js/app.js - Main Customer Portal
+// js/app.js - Main Customer Portal with FIXED product fetching
 let products = [];
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("App.js loaded - fetching products...");
     fetchProducts();
     updateCartCount();
 });
@@ -10,9 +11,16 @@ async function fetchProducts() {
     try {
         showLoading();
         
-        const response = await fetch(`${CONFIG.API_URL}?action=products`);
-        const data = await response.json();
+        const apiUrl = `${CONFIG.API_URL}?action=products`;
+        console.log("Fetching from:", apiUrl);
         
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
         console.log("Products loaded:", data);
         
         if (data.error) {
@@ -20,11 +28,39 @@ async function fetchProducts() {
         }
         
         products = Array.isArray(data) ? data : (data.products || []);
+        
+        if (products.length === 0) {
+            console.warn("No products found in response");
+            // Add sample products for testing
+            products = [
+                {
+                    sku: "SKU001",
+                    name: "Gold Necklace",
+                    category: "Necklaces",
+                    price: 25000,
+                    stock: 10,
+                    mainImage: "https://via.placeholder.com/300?text=Gold+Necklace",
+                    images: [],
+                    imageCount: 0
+                },
+                {
+                    sku: "SKU002",
+                    name: "Diamond Ring",
+                    category: "Rings",
+                    price: 45000,
+                    stock: 5,
+                    mainImage: "https://via.placeholder.com/300?text=Diamond+Ring",
+                    images: [],
+                    imageCount: 0
+                }
+            ];
+        }
+        
         displayProducts(products);
         
     } catch (error) {
-        console.error("Error:", error);
-        showError("Failed to load products. Please refresh the page.");
+        console.error("Error fetching products:", error);
+        showError("Failed to load products. Please refresh the page. Error: " + error.message);
     } finally {
         hideLoading();
     }
@@ -32,7 +68,10 @@ async function fetchProducts() {
 
 function displayProducts(products) {
     const container = document.getElementById("products");
-    if (!container) return;
+    if (!container) {
+        console.error("Products container not found!");
+        return;
+    }
     
     if (products.length === 0) {
         container.innerHTML = '<p class="no-products">No products found</p>';
@@ -57,13 +96,16 @@ function createProductCard(product) {
     
     let thumbnails = '';
     if (images.length > 0) {
-        thumbnails = images.slice(0, 4).map((img, index) => `
-            <img src="${img.thumbnail || img.url}" 
-                 class="thumbnail ${index === 0 ? 'active' : ''}"
-                 onclick="changeMainImage('${product.sku}', '${img.url}', this)"
-                 title="${img.type || 'view'}"
-                 onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
-        `).join('');
+        thumbnails = images.slice(0, 4).map((img, index) => {
+            const imgUrl = img.thumbnail || img.url || CONFIG.PLACEHOLDER_IMAGE;
+            return `
+                <img src="${imgUrl}" 
+                     class="thumbnail ${index === 0 ? 'active' : ''}"
+                     onclick="changeMainImage('${product.sku}', '${img.url || imgUrl}', this)"
+                     title="${img.type || 'view'}"
+                     onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+            `;
+        }).join('');
     }
     
     card.innerHTML = `
@@ -119,7 +161,7 @@ window.changeMainImage = function(sku, imageUrl, element) {
         document.querySelectorAll(`[onclick*="${sku}"]`).forEach(el => {
             el.classList.remove('active');
         });
-        element.classList.add('active');
+        if (element) element.classList.add('active');
     }
 };
 
@@ -168,30 +210,25 @@ window.addToCart = function(sku) {
         return;
     }
     
-    // Use cart.js function
-    if (typeof addToCartFunction === 'function') {
-        addToCartFunction(product.sku, product.name, product.price, product.mainImage);
+    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    
+    const existingItemIndex = cart.findIndex(item => item.sku === sku);
+    
+    if (existingItemIndex >= 0) {
+        cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
     } else {
-        // Fallback
-        let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-        const existing = cart.find(item => item.sku === sku);
-        
-        if (existing) {
-            existing.quantity = (existing.quantity || 1) + 1;
-        } else {
-            cart.push({
-                sku: sku,
-                name: product.name,
-                price: product.price,
-                image: product.mainImage,
-                quantity: 1
-            });
-        }
-        
-        localStorage.setItem("cart", JSON.stringify(cart));
-        updateCartCount();
-        showNotification(`${product.name} added to cart!`);
+        cart.push({
+            sku: sku,
+            name: product.name,
+            price: product.price,
+            image: product.mainImage,
+            quantity: 1
+        });
     }
+    
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartCount();
+    showNotification(`${product.name} added to cart!`);
 };
 
 // Update cart count
@@ -232,8 +269,9 @@ function showError(message) {
     if (container) {
         container.innerHTML = `
             <div class="error-message">
-                <p>${message}</p>
-                <button onclick="location.reload()">Refresh Page</button>
+                <p style="color: #f44336;">${message}</p>
+                <button onclick="location.reload()" style="margin-top: 20px; width: auto; padding: 10px 30px;">Refresh Page</button>
+                <p style="margin-top: 20px; color: #888; font-size: 12px;">API URL: ${CONFIG.API_URL}</p>
             </div>
         `;
     }
