@@ -161,7 +161,9 @@ window.selectImage = function(sku, imageUrl) {
     }
 };
 
-// Add to cart
+// Add this function to your app.js if not already present
+
+// Add to cart from product page
 window.addToCart = function(sku) {
     const product = products.find(p => p.sku === sku);
     if (!product) return;
@@ -171,24 +173,13 @@ window.addToCart = function(sku) {
         return;
     }
     
-    let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    
-    const existingItem = cart.find(item => item.sku === sku);
-    if (existingItem) {
-        existingItem.quantity = (existingItem.quantity || 1) + 1;
-    } else {
-        cart.push({
-            sku: sku,
-            name: product.name,
-            price: product.price,
-            image: product.mainImage,
-            quantity: 1
-        });
-    }
-    
-    localStorage.setItem("cart", JSON.stringify(cart));
-    updateCartCount();
-    showNotification(`${product.name} added to cart!`);
+    // Use the cart.js function
+    addToCart(
+        product.sku, 
+        product.name, 
+        product.price, 
+        product.mainImage
+    );
 };
 
 // Update cart count
