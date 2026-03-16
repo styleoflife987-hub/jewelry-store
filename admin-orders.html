@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Orders - Style Of Life</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+</head>
+<body onload="checkAdminAuth(); loadOrders()">
+    <header>
+        <div class="logo">STYLE OF LIFE - ORDERS</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="admin.html">Dashboard</a>
+            <a href="admin-products.html">Products</a>
+            <a href="admin-orders.html">Orders</a>
+            <a href="admin-images.html">Images</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+
+    <div style="max-width:1200px; margin:40px auto; padding:20px">
+        <h1 style="color:#d4af37; margin-bottom:30px">Manage Orders</h1>
+        
+        <div style="background:#1a1a1a; padding:30px; border-radius:15px">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px">
+                <h3 style="color:#d4af37">All Orders</h3>
+                <button onclick="loadOrders()" style="width:auto; padding:8px 20px">Refresh</button>
+            </div>
+            <div id="ordersList"></div>
+        </div>
+    </div>
+</body>
+</html>
