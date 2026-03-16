@@ -1,4 +1,4 @@
-// js/app.js - COMPLETE with product display and add to cart
+// js/app.js - COMPLETE FIXED VERSION
 let products = [];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,79 +16,70 @@ async function fetchProducts() {
         console.log("Products loaded:", data);
         
         if (data.error) {
-            throw new Error(data.error);
+            console.warn("API Error:", data.error);
+            // Use sample products if API fails
+            products = getSampleProducts();
+        } else {
+            products = Array.isArray(data) ? data : (data.products || []);
         }
         
-        products = Array.isArray(data) ? data : (data.products || []);
-        
-        // If no products from API, use sample products
+        // If still no products, use samples
         if (products.length === 0) {
-            console.log("Using sample products");
-            products = [
-                { 
-                    sku: "SKU001", 
-                    name: "Gold Necklace", 
-                    category: "Necklaces", 
-                    price: 25000, 
-                    stock: 10, 
-                    mainImage: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338",
-                    image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338"
-                },
-                { 
-                    sku: "SKU002", 
-                    name: "Diamond Ring", 
-                    category: "Rings", 
-                    price: 45000, 
-                    stock: 5, 
-                    mainImage: "https://images.unsplash.com/photo-1605100804763-247f67b3557e",
-                    image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e"
-                },
-                { 
-                    sku: "SKU003", 
-                    name: "Silver Earrings", 
-                    category: "Earrings", 
-                    price: 8000, 
-                    stock: 20, 
-                    mainImage: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908",
-                    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908"
-                }
-            ];
+            products = getSampleProducts();
         }
         
+        console.log("Final products array:", products);
         displayProducts(products);
         
     } catch (error) {
-        console.error("Error:", error);
-        showError("Failed to load products. Using sample products.");
-        
-        // Use sample products on error
-        products = [
-            { 
-                sku: "SKU001", 
-                name: "Gold Necklace", 
-                category: "Necklaces", 
-                price: 25000, 
-                stock: 10, 
-                mainImage: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338"
-            },
-            { 
-                sku: "SKU002", 
-                name: "Diamond Ring", 
-                category: "Rings", 
-                price: 45000, 
-                stock: 5, 
-                mainImage: "https://images.unsplash.com/photo-1605100804763-247f67b3557e"
-            }
-        ];
+        console.error("Error fetching products:", error);
+        products = getSampleProducts();
         displayProducts(products);
+        showError("Using sample products. Check your API connection.");
     } finally {
         hideLoading();
     }
 }
 
+// Sample products for testing
+function getSampleProducts() {
+    return [
+        { 
+            sku: "SKU001", 
+            name: "Gold Necklace", 
+            category: "Necklaces", 
+            price: 25000, 
+            stock: 10, 
+            mainImage: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338",
+            image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338"
+        },
+        { 
+            sku: "SKU002", 
+            name: "Diamond Ring", 
+            category: "Rings", 
+            price: 45000, 
+            stock: 5, 
+            mainImage: "https://images.unsplash.com/photo-1605100804763-247f67b3557e",
+            image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e"
+        },
+        { 
+            sku: "SKU003", 
+            name: "Silver Earrings", 
+            category: "Earrings", 
+            price: 8000, 
+            stock: 20, 
+            mainImage: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908",
+            image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908"
+        }
+    ];
+}
+
 function displayProducts(products) {
     const container = document.getElementById("products");
-    if (!container) return;
+    if (!container) {
+        console.error("Products container not found!");
+        return;
+    }
     
     container.innerHTML = "";
     
@@ -104,6 +95,9 @@ function createProductCard(product) {
     
     const mainImage = product.mainImage || product.image || CONFIG.PLACEHOLDER_IMAGE;
     
+    // Use a unique ID for debugging
+    const productSku = product.sku || `PROD-${Math.random()}`;
+    
     card.innerHTML = `
         <div class="product-images">
             <img src="${mainImage}" 
@@ -114,13 +108,13 @@ function createProductCard(product) {
         
         <div class="product-info">
             <h3>${product.name}</h3>
-            <p class="sku">SKU: ${product.sku}</p>
+            <p class="sku">SKU: ${productSku}</p>
             <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
             <div class="price">${CONFIG.CURRENCY}${product.price.toLocaleString()}</div>
             <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
                 ${product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
             </p>
-            <button onclick="addToCartFromProduct('${product.sku}')" 
+            <button onclick="addToCartHandler('${productSku}')" 
                     class="add-to-cart-btn"
                     ${product.stock <= 0 ? 'disabled' : ''}>
                 Add to Cart
@@ -131,14 +125,17 @@ function createProductCard(product) {
     return card;
 }
 
-// Add to cart function that calls cart.js
-window.addToCartFromProduct = function(sku) {
+// Global handler for add to cart
+window.addToCartHandler = function(sku) {
     console.log("Add to cart clicked for SKU:", sku);
+    console.log("Current products array:", products);
     
+    // Find product in array
     const product = products.find(p => p.sku === sku);
+    
     if (!product) {
-        console.error("Product not found for SKU:", sku);
-        alert("Product not found");
+        console.error("Product not found! Searching all products:", products);
+        alert(`Product with SKU ${sku} not found. Please refresh the page.`);
         return;
     }
     
@@ -147,19 +144,54 @@ window.addToCartFromProduct = function(sku) {
         return;
     }
     
-    // Call the cart.js addToCart function
-    if (typeof addToCart === 'function') {
-        addToCart(
+    // Call cart.js function
+    if (typeof window.addToCart === 'function') {
+        window.addToCart(
             product.sku, 
             product.name, 
             product.price, 
             product.mainImage || product.image
         );
     } else {
-        console.error("addToCart function not found");
-        alert("Error: Cart system not loaded properly");
+        console.error("addToCart function not found in cart.js");
+        // Fallback direct implementation
+        fallbackAddToCart(product);
     }
 };
+
+// Fallback in case cart.js isn't loaded
+function fallbackAddToCart(product) {
+    try {
+        let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+        
+        const existingItem = cart.find(item => item.sku === product.sku);
+        
+        if (existingItem) {
+            existingItem.quantity = (existingItem.quantity || 1) + 1;
+        } else {
+            cart.push({
+                sku: product.sku,
+                name: product.name,
+                price: product.price,
+                image: product.mainImage || product.image,
+                quantity: 1
+            });
+        }
+        
+        localStorage.setItem("cart", JSON.stringify(cart));
+        
+        // Update cart count
+        if (typeof window.updateCartCount === 'function') {
+            window.updateCartCount();
+        }
+        
+        alert(`${product.name} added to cart!`);
+        
+    } catch (e) {
+        console.error("Error in fallback add to cart:", e);
+        alert("Error adding to cart. Please try again.");
+    }
+}
 
 function showLoading() {
     const container = document.getElementById("products");
