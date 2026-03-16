@@ -1,4 +1,4 @@
-// js/app.js - COMPLETE FIXED VERSION
+// js/app.js - FIXED VERSION with proper SKU handling
 let products = [];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,18 +13,14 @@ async function fetchProducts() {
         const response = await fetch(`${CONFIG.API_URL}?action=products`);
         const data = await response.json();
         
-        console.log("Products loaded:", data);
+        console.log("Products loaded from API:", data);
         
         if (data.error) {
             console.warn("API Error:", data.error);
-            // Use sample products if API fails
             products = getSampleProducts();
+        } else if (Array.isArray(data) && data.length > 0) {
+            products = data;
         } else {
-            products = Array.isArray(data) ? data : (data.products || []);
-        }
-        
-        // If still no products, use samples
-        if (products.length === 0) {
             products = getSampleProducts();
         }
         
@@ -41,10 +37,10 @@ async function fetchProducts() {
     }
 }
 
-// Sample products for testing
 function getSampleProducts() {
     return [
         { 
+            id: 1,
             sku: "SKU001", 
             name: "Gold Necklace", 
             category: "Necklaces", 
@@ -54,6 +50,7 @@ function getSampleProducts() {
             image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338"
         },
         { 
+            id: 2,
             sku: "SKU002", 
             name: "Diamond Ring", 
             category: "Rings", 
@@ -63,6 +60,7 @@ function getSampleProducts() {
             image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e"
         },
         { 
+            id: 3,
             sku: "SKU003", 
             name: "Silver Earrings", 
             category: "Earrings", 
@@ -84,6 +82,11 @@ function displayProducts(products) {
     container.innerHTML = "";
     
     products.forEach(product => {
+        // Ensure product has a valid SKU
+        if (!product.sku) {
+            product.sku = `SKU${Math.floor(Math.random() * 1000)}`;
+        }
+        
         const card = createProductCard(product);
         container.appendChild(card);
     });
@@ -95,9 +98,6 @@ function createProductCard(product) {
     
     const mainImage = product.mainImage || product.image || CONFIG.PLACEHOLDER_IMAGE;
     
-    // Use a unique ID for debugging
-    const productSku = product.sku || `PROD-${Math.random()}`;
-    
     card.innerHTML = `
         <div class="product-images">
             <img src="${mainImage}" 
@@ -108,13 +108,13 @@ function createProductCard(product) {
         
         <div class="product-info">
             <h3>${product.name}</h3>
-            <p class="sku">SKU: ${productSku}</p>
+            <p class="sku">SKU: ${product.sku}</p>
             <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
             <div class="price">${CONFIG.CURRENCY}${product.price.toLocaleString()}</div>
             <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
                 ${product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
             </p>
-            <button onclick="addToCartHandler('${productSku}')" 
+            <button onclick="addToCartHandler('${product.sku}')" 
                     class="add-to-cart-btn"
                     ${product.stock <= 0 ? 'disabled' : ''}>
                 Add to Cart
@@ -134,7 +134,7 @@ window.addToCartHandler = function(sku) {
     const product = products.find(p => p.sku === sku);
     
     if (!product) {
-        console.error("Product not found! Searching all products:", products);
+        console.error("Product not found! Available SKUs:", products.map(p => p.sku));
         alert(`Product with SKU ${sku} not found. Please refresh the page.`);
         return;
     }
@@ -154,12 +154,12 @@ window.addToCartHandler = function(sku) {
         );
     } else {
         console.error("addToCart function not found in cart.js");
-        // Fallback direct implementation
+        // Fallback
         fallbackAddToCart(product);
     }
 };
 
-// Fallback in case cart.js isn't loaded
+// Fallback function
 function fallbackAddToCart(product) {
     try {
         let cart = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -181,9 +181,11 @@ function fallbackAddToCart(product) {
         localStorage.setItem("cart", JSON.stringify(cart));
         
         // Update cart count
-        if (typeof window.updateCartCount === 'function') {
-            window.updateCartCount();
-        }
+        const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        document.querySelectorAll('.cart-count').forEach(el => {
+            el.textContent = count;
+            el.style.display = count > 0 ? 'inline-block' : 'none';
+        });
         
         alert(`${product.name} added to cart!`);
         
