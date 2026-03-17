@@ -98,18 +98,11 @@
                 address: address
             };
             
-            const result = await placeOrder(customerDetails);
+            const result = await window.placeOrder(customerDetails);
             
             if (result.success) {
                 alert(`Order placed successfully! Order ID: ${result.orderId}`);
-                
-                // Redirect to payment or tracking
-                const total = getCartTotal();
-                if (total > 0) {
-                    payNow(total, {...customerDetails, orderId: result.orderId});
-                } else {
-                    window.location.href = `track.html?order=${result.orderId}`;
-                }
+                window.location.href = `track.html?order=${result.orderId}`;
             } else {
                 alert('Failed to place order: ' + (result.error || 'Unknown error'));
                 btn.disabled = false;
