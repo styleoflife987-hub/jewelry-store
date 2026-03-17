@@ -23,13 +23,11 @@
     <div style="max-width:1200px; margin:40px auto; padding:20px">
         <h1 style="color:#d4af37; margin-bottom:30px">Live Order Management</h1>
         
-        <!-- Status Bar -->
         <div style="background:#1a1a1a; padding:15px; border-radius:8px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center">
             <span style="color:#4CAF50">🟢 Live - Orders sync with Excel</span>
             <button onclick="loadOrders()" style="width:auto; padding:8px 20px">🔄 Refresh Now</button>
         </div>
         
-        <!-- Orders List -->
         <div style="background:#1a1a1a; padding:30px; border-radius:15px">
             <h3 style="color:#d4af37; margin-bottom:20px">Orders from Excel</h3>
             <div id="ordersList"></div>
@@ -65,7 +63,7 @@
                             <td>${order.orderId}</td>
                             <td>${order.name}<br><small>${order.phone}</small></td>
                             <td><small>${itemsList}</small></td>
-                            <td>₹${order.total.toLocaleString()}</td>
+                            <td>₹${Number(order.total).toLocaleString('en-IN')}</td>
                             <td>
                                 <select onchange="updateOrderStatus('${order.orderId}', this.value)" style="background:#333; color:white; padding:5px;">
                                     <option ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -98,7 +96,7 @@
                 
                 if (data.success) {
                     alert(`✅ Order ${orderId} updated to ${status} in Excel`);
-                    loadOrders(); // Live refresh
+                    loadOrders();
                 } else {
                     alert('Error updating order');
                 }
@@ -130,8 +128,7 @@
             window.location.href = 'login.html';
         }
         
-        // Auto-refresh every 30 seconds
-        setInterval(loadOrders, 30000);
+        setInterval(loadOrders, 5000);
     </script>
 </body>
 </html>
