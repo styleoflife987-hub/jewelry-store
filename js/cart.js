@@ -4,27 +4,19 @@ let lastSyncTime = 0;
 let syncInterval = null;
 let cartSyncInterval = null;
 
-// ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log("✅ Cart.js loaded with session ID:", sessionId);
     
-    // Load cart from localStorage
     loadCartFromStorage();
-    
-    // Start auto-sync
     startAutoSync();
-    
-    // Update cart count on all pages
     updateCartCount();
     
-    // Check which page we're on and display appropriate content
     if (window.location.pathname.includes('cart.html')) {
         displayCartPage();
     } else if (window.location.pathname.includes('checkout.html')) {
         displayCheckoutSummary();
     }
     
-    // Listen for storage events (for multi-tab sync)
     window.addEventListener('storage', function(e) {
         if (e.key === 'cart') {
             console.log("📦 Cart updated in another tab");
@@ -39,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// ===== SESSION MANAGEMENT =====
 function generateSessionId() {
     let session = localStorage.getItem('sessionId');
     if (!session) {
@@ -49,7 +40,6 @@ function generateSessionId() {
     return session;
 }
 
-// ===== LOCAL STORAGE FUNCTIONS =====
 function loadCartFromStorage() {
     try {
         const savedCart = localStorage.getItem('cart');
@@ -72,7 +62,6 @@ function saveCartToStorage(cart) {
     }
 }
 
-// ===== CORE CART FUNCTIONS =====
 function getCart() {
     return loadCartFromStorage();
 }
@@ -87,20 +76,16 @@ function getCartTotal() {
     return cart.reduce((total, item) => total + (Number(item.price) * (item.quantity || 1)), 0);
 }
 
-// ===== ADD TO CART - FIXED VERSION =====
 window.addToCart = function(sku, name, price, image) {
     console.log("🛒 Adding to cart:", { sku, name, price, image });
     
-    // Validate inputs
     if (!sku) {
         console.error("SKU is required");
         showNotification("Error: Product SKU missing", "error");
         return false;
     }
     
-    if (!name) {
-        name = "Product";
-    }
+    if (!name) name = "Product";
     
     if (!price || isNaN(price)) {
         console.error("Invalid price:", price);
@@ -108,22 +93,16 @@ window.addToCart = function(sku, name, price, image) {
         return false;
     }
     
-    // Convert price to number
     price = Number(price);
-    
-    // Get current cart
     let cart = getCart();
     
-    // Check if item already exists
     const existingItemIndex = cart.findIndex(item => item.sku === sku);
     
     if (existingItemIndex >= 0) {
-        // Increment quantity if item exists
         cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
         console.log("➕ Increased quantity for", name);
         showNotification(`${name} quantity updated`, "success");
     } else {
-        // Add new item
         cart.push({
             sku: sku,
             name: name,
@@ -136,19 +115,13 @@ window.addToCart = function(sku, name, price, image) {
         showNotification(`${name} added to cart!`, "success");
     }
     
-    // Save to localStorage
     saveCartToStorage(cart);
-    
-    // Update UI
     updateCartCount();
-    
-    // Sync with server
     syncCartWithServer(cart);
     
     return true;
 };
 
-// ===== REMOVE FROM CART =====
 window.removeFromCart = function(sku) {
     console.log("🗑️ Removing item:", sku);
     
@@ -157,7 +130,6 @@ window.removeFromCart = function(sku) {
     
     cart = cart.filter(item => item.sku !== sku);
     saveCartToStorage(cart);
-    
     updateCartCount();
     
     if (removedItem) {
@@ -172,11 +144,9 @@ window.removeFromCart = function(sku) {
     }
     
     syncCartWithServer(cart);
-    
     return cart;
 };
 
-// ===== UPDATE QUANTITY =====
 window.updateQuantity = function(sku, newQuantity) {
     console.log("📝 Updating quantity:", sku, newQuantity);
     
@@ -201,7 +171,6 @@ window.updateQuantity = function(sku, newQuantity) {
     
     cart[itemIndex].quantity = newQuantity;
     saveCartToStorage(cart);
-    
     updateCartCount();
     
     if (window.location.pathname.includes('cart.html')) {
@@ -212,11 +181,9 @@ window.updateQuantity = function(sku, newQuantity) {
     }
     
     syncCartWithServer(cart);
-    
     return true;
 };
 
-// ===== DISPLAY CART PAGE =====
 window.displayCartPage = function() {
     const cartContainer = document.getElementById('cartItems');
     const totalContainer = document.getElementById('cartTotal');
@@ -224,7 +191,6 @@ window.displayCartPage = function() {
     if (!cartContainer) return;
     
     const cart = getCart();
-    console.log("Displaying cart with", cart.length, "items");
     
     if (!cart || cart.length === 0) {
         cartContainer.innerHTML = `
@@ -319,7 +285,6 @@ window.displayCartPage = function() {
     if (totalContainer) totalContainer.textContent = total.toLocaleString('en-IN');
 };
 
-// Helper functions
 window.updateCartItemQuantity = function(sku, quantity) {
     updateQuantity(sku, quantity);
 };
@@ -330,7 +295,6 @@ window.removeCartItem = function(sku) {
     }
 };
 
-// ===== DISPLAY CHECKOUT SUMMARY =====
 window.displayCheckoutSummary = function() {
     const summaryContainer = document.getElementById('cartSummary');
     const orderTotalContainer = document.getElementById('orderTotal');
@@ -391,7 +355,56 @@ window.displayCheckoutSummary = function() {
     return total;
 };
 
-// ===== UPDATE CART COUNT =====
+window.placeOrder = async function(customerDetails) {
+    console.log("📝 Placing order with details:", customerDetails);
+    
+    const cart = getCart();
+    
+    if (!cart || cart.length === 0) {
+        showNotification("Your cart is empty", "error");
+        return { success: false, error: "Empty cart" };
+    }
+    
+    if (!customerDetails.name || !customerDetails.phone || !customerDetails.address) {
+        showNotification("Please fill all required fields", "error");
+        return { success: false, error: "Missing required fields" };
+    }
+    
+    const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * (item.quantity || 1)), 0);
+    const tax = Math.round(subtotal * 0.18);
+    const shipping = 100;
+    const total = subtotal + tax + shipping;
+    
+    try {
+        const params = new URLSearchParams({
+            action: 'placeOrder',
+            name: customerDetails.name,
+            phone: customerDetails.phone,
+            email: customerDetails.email || '',
+            address: customerDetails.address,
+            items: JSON.stringify(cart),
+            total: total
+        });
+        
+        const response = await fetch(`${CONFIG.API_URL}?${params}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            saveCartToStorage([]);
+            updateCartCount();
+            showNotification(`Order placed successfully! ID: ${result.orderId}`, "success");
+            return { success: true, orderId: result.orderId };
+        } else {
+            throw new Error(result.error || "Failed to place order");
+        }
+        
+    } catch (error) {
+        console.error("Error placing order:", error);
+        showNotification("Failed to place order: " + error.message, "error");
+        return { success: false, error: error.message };
+    }
+};
+
 function updateCartCount() {
     const count = getCartCount();
     document.querySelectorAll('.cart-count').forEach(el => {
@@ -400,7 +413,6 @@ function updateCartCount() {
     });
 }
 
-// ===== LIVE SYNC WITH EXCEL =====
 function startAutoSync() {
     if (syncInterval) clearInterval(syncInterval);
     if (cartSyncInterval) clearInterval(cartSyncInterval);
@@ -412,17 +424,10 @@ function startAutoSync() {
 }
 
 function stopAutoSync() {
-    if (syncInterval) {
-        clearInterval(syncInterval);
-        syncInterval = null;
-    }
-    if (cartSyncInterval) {
-        clearInterval(cartSyncInterval);
-        cartSyncInterval = null;
-    }
+    if (syncInterval) clearInterval(syncInterval);
+    if (cartSyncInterval) clearInterval(cartSyncInterval);
 }
 
-// Sync cart FROM Excel (get updates)
 async function syncCartWithExcel() {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getCart&sessionId=${sessionId}`);
@@ -432,21 +437,13 @@ async function syncCartWithExcel() {
         
         if (serverCart.items && Array.isArray(serverCart.items)) {
             const localCart = getCart();
-            
-            // Only update if server has newer version
             if (serverCart.version > (localStorage.getItem('cartVersion') || 0)) {
                 console.log("📦 Updating cart from Excel");
                 saveCartToStorage(serverCart.items);
                 localStorage.setItem('cartVersion', serverCart.version || 1);
-                
                 updateCartCount();
-                
-                if (window.location.pathname.includes('cart.html')) {
-                    displayCartPage();
-                }
-                if (window.location.pathname.includes('checkout.html')) {
-                    displayCheckoutSummary();
-                }
+                if (window.location.pathname.includes('cart.html')) displayCartPage();
+                if (window.location.pathname.includes('checkout.html')) displayCheckoutSummary();
             }
         }
     } catch (error) {
@@ -454,7 +451,6 @@ async function syncCartWithExcel() {
     }
 }
 
-// Sync cart TO Excel (send updates)
 async function syncCartToExcel() {
     try {
         const cart = getCart();
@@ -482,7 +478,6 @@ async function syncCartToExcel() {
     }
 }
 
-// ===== NOTIFICATION =====
 function showNotification(message, type = "success") {
     const existing = document.querySelector('.notification');
     if (existing) existing.remove();
@@ -518,7 +513,22 @@ function showNotification(message, type = "success") {
     }, 3000);
 }
 
-// Clean up
 window.addEventListener('beforeunload', function() {
     stopAutoSync();
 });
+
+window.getCart = getCart;
+window.getCartCount = getCartCount;
+window.getCartTotal = getCartTotal;
+window.clearCart = function() {
+    if (confirm("Are you sure you want to clear your cart?")) {
+        saveCartToStorage([]);
+        updateCartCount();
+        showNotification("Cart cleared", "info");
+        if (window.location.pathname.includes('cart.html')) displayCartPage();
+        if (window.location.pathname.includes('checkout.html')) displayCheckoutSummary();
+        syncCartWithServer([]);
+        return [];
+    }
+    return getCart();
+};
