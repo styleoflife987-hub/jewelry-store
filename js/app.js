@@ -1,12 +1,21 @@
-// js/app.js - CORRECTED VERSION
+// js/app.js - FIXED VERSION WITH BETTER ERROR HANDLING
 let products = [];
 let syncInterval = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("✅ App.js loaded");
+    console.log("API URL:", CONFIG.API_URL);
     
+    // Show loading immediately
+    showLoading();
+    
+    // Load from localStorage first (for speed)
     loadLocalProducts();
+    
+    // Then fetch from server
     fetchProducts();
+    
+    // Start live sync
     startProductSync();
     
     window.addEventListener('productsUpdated', (e) => {
@@ -20,12 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
 function startProductSync() {
     if (syncInterval) clearInterval(syncInterval);
     syncInterval = setInterval(syncProductsWithExcel, CONFIG.SYNC_INTERVAL);
-    console.log("🔄 Product sync started");
+    console.log("🔄 Product sync started every", CONFIG.SYNC_INTERVAL/1000, "seconds");
 }
 
 async function syncProductsWithExcel() {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=products`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.error) {
@@ -37,7 +51,7 @@ async function syncProductsWithExcel() {
             const localProducts = JSON.parse(localStorage.getItem('products') || '[]');
             
             if (JSON.stringify(data) !== JSON.stringify(localProducts)) {
-                console.log("📊 Products updated from Excel");
+                console.log("📊 Products updated from Excel:", data.length, "products");
                 products = data;
                 localStorage.setItem('products', JSON.stringify(data));
                 displayProducts(data);
@@ -64,10 +78,16 @@ function loadLocalProducts() {
 
 async function fetchProducts() {
     try {
-        showLoading();
+        console.log("🔄 Fetching products from:", CONFIG.API_URL);
         
         const response = await fetch(`${CONFIG.API_URL}?action=products`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log("📦 Received data:", data);
         
         if (data.error) {
             throw new Error(data.error);
@@ -75,19 +95,38 @@ async function fetchProducts() {
         
         if (Array.isArray(data) && data.length > 0) {
             products = data;
+            console.log("✅ Fetched", products.length, "products from server");
         } else {
+            console.log("⚠️ No products from server, using sample products");
             products = getSampleProducts();
         }
         
+        // Save to localStorage
         localStorage.setItem('products', JSON.stringify(products));
+        
+        // Display products
         displayProducts(products);
-        console.log("✅ Fetched", products.length, "products from server");
         
     } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("❌ Error fetching products:", error);
+        
+        // If no products in localStorage, use sample products
         if (products.length === 0) {
+            console.log("Using sample products as fallback");
             products = getSampleProducts();
             displayProducts(products);
+        }
+        
+        // Show error message to user
+        const container = document.getElementById("products");
+        if (container && products.length === 0) {
+            container.innerHTML = `
+                <div class="error-message">
+                    <p style="color: #f44336; margin-bottom: 10px;">⚠️ Failed to load products</p>
+                    <p style="color: #888; font-size: 14px;">Please check your internet connection or try again later.</p>
+                    <button onclick="location.reload()" style="width: auto; margin-top: 15px; padding: 8px 20px;">Retry</button>
+                </div>
+            `;
         }
     } finally {
         hideLoading();
@@ -125,19 +164,43 @@ function getSampleProducts() {
             stock: 8, 
             mainImage: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908",
             description: "Freshwater Pearl Earrings with Gold"
+        },
+        { 
+            id: "4",
+            sku: "SKU004", 
+            name: "Silver Bracelet", 
+            category: "Bracelets", 
+            price: 12000, 
+            stock: 15, 
+            mainImage: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a",
+            description: "Sterling Silver Bracelet"
+        },
+        { 
+            id: "5",
+            sku: "SKU005", 
+            name: "Gold Bangles", 
+            category: "Bangles", 
+            price: 35000, 
+            stock: 7, 
+            mainImage: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0",
+            description: "Traditional Gold Bangles"
         }
     ];
 }
 
 function displayProducts(products) {
     const container = document.getElementById("products");
-    if (!container) return;
-    
-    if (!products || products.length === 0) {
-        container.innerHTML = '<div class="error-message">No products found</div>';
+    if (!container) {
+        console.log("Products container not found");
         return;
     }
     
+    if (!products || products.length === 0) {
+        container.innerHTML = '<div class="error-message">No products available</div>';
+        return;
+    }
+    
+    console.log("Displaying", products.length, "products");
     container.innerHTML = "";
     
     products.forEach(product => {
@@ -150,6 +213,7 @@ function createProductCard(product) {
     const card = document.createElement("div");
     card.className = "card";
     
+    // Ensure all required fields exist with defaults
     const sku = product.sku || product.id || `SKU${Math.random().toString(36).substr(2, 5)}`;
     const name = product.name || "Unknown Product";
     const category = product.category || CONFIG.DEFAULT_CATEGORY;
@@ -199,6 +263,8 @@ window.addToCartHandler = function(sku) {
         return;
     }
     
+    console.log("Found product:", product);
+    
     if (product.stock <= 0) {
         alert("Sorry, this product is out of stock.");
         return;
@@ -224,7 +290,9 @@ function showLoading() {
     }
 }
 
-function hideLoading() {}
+function hideLoading() {
+    // Loading removed automatically when products are displayed
+}
 
 window.addEventListener('beforeunload', function() {
     if (syncInterval) {
