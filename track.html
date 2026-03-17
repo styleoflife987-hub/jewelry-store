@@ -14,6 +14,7 @@
             <a href="index.html">Home</a>
             <a href="cart.html">Cart <span class="cart-count">0</span></a>
             <a href="track.html">Track Order</a>
+            <a href="login.html">Admin</a>
         </nav>
     </header>
 
@@ -57,19 +58,27 @@
                         itemsHtml += '</div>';
                     }
                     
+                    const statusColors = {
+                        'Pending': '#ff9800',
+                        'Processing': '#2196f3',
+                        'Shipped': '#9c27b0',
+                        'Delivered': '#4caf50',
+                        'Cancelled': '#f44336'
+                    };
+                    
                     resultDiv.innerHTML = `
                         <div style="background:#222; padding:20px; border-radius:10px; text-align:left">
                             <p><strong>Order ID:</strong> ${data.orderId}</p>
                             <p><strong>Customer:</strong> ${data.name}</p>
-                            <p><strong>Status:</strong> <span style="color:#d4af37">${data.status}</span></p>
-                            <p><strong>Total:</strong> ₹${data.total}</p>
+                            <p><strong>Status:</strong> <span style="color: ${statusColors[data.status] || '#d4af37'}; font-weight: bold;">${data.status}</span></p>
+                            <p><strong>Total:</strong> ₹${data.total.toLocaleString()}</p>
                             <p><strong>Date:</strong> ${new Date(data.date).toLocaleDateString()}</p>
                             ${itemsHtml}
                         </div>
                     `;
                 }
             } catch (error) {
-                resultDiv.innerHTML = `<p style="color:#f44336">Error tracking order</p>`;
+                resultDiv.innerHTML = `<p style="color:#f44336">Error tracking order: ${error.message}</p>`;
             }
         }
         
