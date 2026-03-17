@@ -1,13 +1,10 @@
 // js/admin.js - Complete Admin Functions
-
-// Check if user is logged in
 function checkAdminAuth() {
     if (!sessionStorage.getItem('adminLoggedIn')) {
         window.location.href = 'login.html';
     }
 }
 
-// ===== DASHBOARD =====
 async function loadDashboardStats() {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=dashboard`);
@@ -15,14 +12,13 @@ async function loadDashboardStats() {
         
         document.getElementById('totalProducts').textContent = stats.totalProducts || 0;
         document.getElementById('totalOrders').textContent = stats.totalOrders || 0;
-        document.getElementById('totalRevenue').textContent = `₹${(stats.totalRevenue || 0).toLocaleString()}`;
+        document.getElementById('totalRevenue').textContent = `₹${(stats.totalRevenue || 0).toLocaleString('en-IN')}`;
         document.getElementById('pendingOrders').textContent = stats.pendingOrders || 0;
     } catch (error) {
         console.error('Error loading stats:', error);
     }
 }
 
-// ===== PRODUCTS MANAGEMENT =====
 async function loadProducts() {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=products`);
@@ -39,13 +35,13 @@ async function loadProducts() {
         let html = '<div class="products-grid-admin">';
         products.forEach(product => {
             html += `
-                <div class="product-card-admin" style="background:#222; padding:15px; border-radius:8px; margin-bottom:10px">
+                <div class="product-card-admin">
                     <div style="display:flex; gap:15px;">
                         <img src="${product.mainImage || CONFIG.PLACEHOLDER_IMAGE}" style="width:80px; height:80px; object-fit:cover; border-radius:4px;" onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
                         <div style="flex:1">
                             <h4>${product.name}</h4>
                             <p>SKU: ${product.sku}</p>
-                            <p>Price: ₹${product.price} | Stock: ${product.stock}</p>
+                            <p>Price: ₹${Number(product.price).toLocaleString('en-IN')} | Stock: ${product.stock}</p>
                         </div>
                         <div>
                             <button onclick="editProduct('${product.id}')" style="width:auto; padding:5px 15px; margin-bottom:5px;">Edit</button>
@@ -59,10 +55,6 @@ async function loadProducts() {
         container.innerHTML = html;
     } catch (error) {
         console.error('Error loading products:', error);
-        const container = document.getElementById('productsList');
-        if (container) {
-            container.innerHTML = '<p style="color:#f44336">Error loading products</p>';
-        }
     }
 }
 
@@ -106,7 +98,7 @@ async function addProduct() {
             document.getElementById('price').value = '';
             document.getElementById('stock').value = '10';
             document.getElementById('description').value = '';
-            loadProducts(); // Refresh list
+            loadProducts();
         } else {
             alert('Error adding product: ' + data.error);
         }
@@ -127,7 +119,7 @@ async function deleteProduct(id) {
         
         if (data.success) {
             alert('Product deleted successfully');
-            loadProducts(); // Refresh list
+            loadProducts();
         } else {
             alert('Error deleting product');
         }
@@ -138,10 +130,8 @@ async function deleteProduct(id) {
 
 function editProduct(id) {
     alert(`Edit functionality for product ID: ${id} - Would open edit form in production`);
-    // In production, you would open a modal with product details
 }
 
-// ===== ORDERS MANAGEMENT =====
 async function loadOrders() {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=orders`);
@@ -155,18 +145,19 @@ async function loadOrders() {
             return;
         }
         
-        let html = '<div style="overflow-x:auto"><table style="width:100%; border-collapse:collapse">';
-        html += '<tr style="background:#d4af37; color:black"><th>Order ID</th><th>Customer</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr>';
+        let html = '<div style="overflow-x:auto"><table><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr>';
         
         orders.forEach(order => {
+            const itemsList = order.items.map(item => `${item.name} x${item.quantity}`).join('<br>');
+            
             html += `
-                <tr style="border-bottom:1px solid #333">
-                    <td style="padding:10px">${order.orderId}</td>
-                    <td style="padding:10px">${order.name}<br><small>${order.phone}</small></td>
-                    <td style="padding:10px">₹${order.total.toLocaleString()}</td>
-                    <td style="padding:10px">
-                        <select onchange="updateOrderStatus('${order.orderId}', this.value)" 
-                                style="background:#333; color:white; padding:5px; border-radius:4px;">
+                <tr>
+                    <td>${order.orderId}</td>
+                    <td>${order.name}<br><small>${order.phone}</small></td>
+                    <td><small>${itemsList}</small></td>
+                    <td>₹${Number(order.total).toLocaleString('en-IN')}</td>
+                    <td>
+                        <select onchange="updateOrderStatus('${order.orderId}', this.value)" style="background:#333; color:white; padding:5px;">
                             <option ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
                             <option ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
                             <option ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
@@ -174,9 +165,8 @@ async function loadOrders() {
                             <option ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                         </select>
                     </td>
-                    <td style="padding:10px">${new Date(order.date).toLocaleDateString()}</td>
-                    <td style="padding:10px">
-                        <button onclick="viewOrderDetails('${order.orderId}')" style="width:auto; padding:5px 10px;">View</button>
+                    <td>${new Date(order.date).toLocaleDateString()}</td>
+                    <td>
                         <button onclick="deleteOrder('${order.orderId}')" style="width:auto; padding:5px 10px; background:#f44336;">Delete</button>
                     </td>
                 </tr>
@@ -187,10 +177,6 @@ async function loadOrders() {
         container.innerHTML = html;
     } catch (error) {
         console.error('Error loading orders:', error);
-        const container = document.getElementById('ordersList');
-        if (container) {
-            container.innerHTML = '<p style="color:#f44336">Error loading orders</p>';
-        }
     }
 }
 
@@ -200,25 +186,26 @@ async function updateOrderStatus(orderId, status) {
         const data = await response.json();
         
         if (data.success) {
-            showNotification(`Order ${orderId} updated to ${status}`);
+            alert(`✅ Order ${orderId} updated to ${status}`);
+            loadOrders();
         } else {
-            alert('Error updating order status');
+            alert('Error updating order');
         }
     } catch (error) {
-        alert('Error updating order status: ' + error.message);
+        alert('Error updating order: ' + error.message);
     }
 }
 
 async function deleteOrder(orderId) {
-    if (!confirm('Are you sure you want to delete this order?')) return;
+    if (!confirm('Delete this order?')) return;
     
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=deleteOrder&orderId=${orderId}`);
         const data = await response.json();
         
         if (data.success) {
-            alert('Order deleted successfully');
-            loadOrders(); // Refresh list
+            alert('✅ Order deleted');
+            loadOrders();
         } else {
             alert('Error deleting order');
         }
@@ -227,11 +214,6 @@ async function deleteOrder(orderId) {
     }
 }
 
-function viewOrderDetails(orderId) {
-    alert(`View details for order: ${orderId} - Would show order details modal in production`);
-}
-
-// ===== IMAGES MANAGEMENT =====
 async function scanFolders() {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=products`);
@@ -247,26 +229,18 @@ async function scanFolders() {
         
         let html = '';
         products.forEach(product => {
-            const images = product.images || [];
-            
             html += `
                 <div style="background:#222; border-radius:10px; padding:15px; border:1px solid #333">
                     <h4 style="color:#d4af37">${product.name}</h4>
                     <p><strong>SKU:</strong> ${product.sku}</p>
-                    <p><strong>Images:</strong> ${images.length}</p>
-                    
-                    <div style="display:flex; gap:5px; flex-wrap:wrap; margin:15px 0">
-                        ${images.slice(0, 4).map(img => `
-                            <img src="${img.thumbnail || img.url || product.mainImage}" 
-                                 style="width:60px; height:60px; object-fit:cover; border-radius:4px; cursor:pointer"
-                                 onclick="window.open('${img.url || product.mainImage}','_blank')"
-                                 onerror="this.style.display='none'">
-                        `).join('')}
-                        ${images.length > 4 ? `<span style="color:#888">+${images.length-4} more</span>` : ''}
+                    <p><strong>Price:</strong> ₹${Number(product.price).toLocaleString('en-IN')}</p>
+                    <p><strong>Stock:</strong> ${product.stock}</p>
+                    <div style="margin:10px 0">
+                        <img src="${product.mainImage || CONFIG.PLACEHOLDER_IMAGE}" 
+                             style="width:100%; height:150px; object-fit:cover; border-radius:4px;"
+                             onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
                     </div>
-                    
-                    <p style="font-size:12px; color:#666">Folder: ${product.sku}_*</p>
-                    <p style="font-size:12px; color:#4CAF50">Images working: ${(images.length > 0 || product.mainImage) ? '✅' : '❌'}</p>
+                    <p style="font-size:12px; color:#4CAF50">Status: ✅ Active</p>
                 </div>
             `;
         });
@@ -274,38 +248,9 @@ async function scanFolders() {
         grid.innerHTML = html;
     } catch (error) {
         console.error('Error scanning folders:', error);
-        const grid = document.getElementById('folderGrid');
-        if (grid) {
-            grid.innerHTML = '<p style="color:#f44336">Error loading images</p>';
-        }
     }
 }
 
-// ===== NOTIFICATION =====
-function showNotification(message) {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: #d4af37;
-        color: black;
-        padding: 15px 25px;
-        border-radius: 8px;
-        font-weight: bold;
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
-    `;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// ===== LOGOUT =====
 function logout() {
     sessionStorage.removeItem('adminLoggedIn');
     window.location.href = 'login.html';
