@@ -21,8 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadLocalProducts() {
     const localProducts = localStorage.getItem('products');
     if (localProducts) {
-        products = JSON.parse(localProducts);
-        displayProducts(products);
+        try {
+            products = JSON.parse(localProducts);
+            displayProducts(products);
+        } catch (e) {
+            console.error("Error parsing local products:", e);
+        }
     }
 }
 
@@ -45,7 +49,7 @@ async function fetchProducts() {
         displayProducts(products);
         
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error fetching products:", error);
         if (products.length === 0) {
             products = getSampleProducts();
             displayProducts(products);
@@ -63,7 +67,8 @@ function getSampleProducts() {
             category: "Necklaces", 
             price: 25000, 
             stock: 10, 
-            mainImage: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338"
+            mainImage: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338",
+            description: "22k Gold Necklace with traditional design"
         },
         { 
             sku: "SKU002", 
@@ -71,7 +76,17 @@ function getSampleProducts() {
             category: "Rings", 
             price: 45000, 
             stock: 5, 
-            mainImage: "https://images.unsplash.com/photo-1605100804763-247f67b3557e"
+            mainImage: "https://images.unsplash.com/photo-1605100804763-247f67b3557e",
+            description: "Solitaire Diamond Ring in 18k Gold"
+        },
+        { 
+            sku: "SKU003", 
+            name: "Pearl Earrings", 
+            category: "Earrings", 
+            price: 15000, 
+            stock: 8, 
+            mainImage: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908",
+            description: "Freshwater Pearl Earrings with Gold"
         }
     ];
 }
@@ -79,6 +94,11 @@ function getSampleProducts() {
 function displayProducts(products) {
     const container = document.getElementById("products");
     if (!container) return;
+    
+    if (products.length === 0) {
+        container.innerHTML = '<div class="error-message">No products found</div>';
+        return;
+    }
     
     container.innerHTML = "";
     
@@ -106,7 +126,7 @@ function createProductCard(product) {
             <h3>${product.name}</h3>
             <p class="sku">SKU: ${product.sku}</p>
             <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
-            <div class="price">${CONFIG.CURRENCY}${product.price.toLocaleString()}</div>
+            <div class="price">${CONFIG.CURRENCY}${Number(product.price).toLocaleString()}</div>
             <p class="stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
                 ${product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
             </p>
@@ -144,6 +164,9 @@ window.addToCartHandler = async function(sku) {
             product.price, 
             product.mainImage || product.image
         );
+    } else {
+        console.error("addToCart function not found");
+        alert("Cart system not initialized. Please refresh the page.");
     }
 };
 
@@ -154,4 +177,6 @@ function showLoading() {
     }
 }
 
-function hideLoading() {}
+function hideLoading() {
+    // Loading removed automatically when products are displayed
+}
