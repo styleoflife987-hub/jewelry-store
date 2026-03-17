@@ -13,6 +13,7 @@
         <nav>
             <a href="index.html">Home</a>
             <a href="cart.html">Cart <span class="cart-count">0</span></a>
+            <a href="track.html">Track Order</a>
         </nav>
     </header>
 
@@ -76,7 +77,12 @@
             const address = document.getElementById('address').value.trim();
             
             if (!name || !phone || !address) {
-                alert('Please fill all fields');
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            if (phone.length !== 10 || isNaN(phone)) {
+                alert('Please enter a valid 10-digit phone number');
                 return;
             }
             
@@ -85,11 +91,25 @@
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            const result = await placeOrder({ name, phone, address });
+            const customerDetails = {
+                name: name,
+                phone: phone,
+                email: document.getElementById('email').value.trim(),
+                address: address
+            };
+            
+            const result = await placeOrder(customerDetails);
             
             if (result.success) {
                 alert(`Order placed successfully! Order ID: ${result.orderId}`);
-                window.location.href = `track.html?order=${result.orderId}`;
+                
+                // Redirect to payment or tracking
+                const total = getCartTotal();
+                if (total > 0) {
+                    payNow(total, {...customerDetails, orderId: result.orderId});
+                } else {
+                    window.location.href = `track.html?order=${result.orderId}`;
+                }
             } else {
                 alert('Failed to place order: ' + (result.error || 'Unknown error'));
                 btn.disabled = false;
