@@ -53,7 +53,7 @@
                     if (data.items && data.items.length > 0) {
                         itemsHtml = '<div style="margin:15px 0; text-align:left"><h4 style="color:#d4af37; margin-bottom:10px">Items:</h4>';
                         data.items.forEach(item => {
-                            itemsHtml += `<p>${item.name} x${item.quantity || 1} - ₹${item.price}</p>`;
+                            itemsHtml += `<p>${item.name} x${item.quantity || 1} - ₹${Number(item.price).toLocaleString('en-IN')}</p>`;
                         });
                         itemsHtml += '</div>';
                     }
@@ -71,7 +71,7 @@
                             <p><strong>Order ID:</strong> ${data.orderId}</p>
                             <p><strong>Customer:</strong> ${data.name}</p>
                             <p><strong>Status:</strong> <span style="color: ${statusColors[data.status] || '#d4af37'}; font-weight: bold;">${data.status}</span></p>
-                            <p><strong>Total:</strong> ₹${data.total.toLocaleString()}</p>
+                            <p><strong>Total:</strong> ₹${Number(data.total).toLocaleString('en-IN')}</p>
                             <p><strong>Date:</strong> ${new Date(data.date).toLocaleDateString()}</p>
                             ${itemsHtml}
                         </div>
@@ -82,7 +82,6 @@
             }
         }
         
-        // Check URL for order ID
         const urlParams = new URLSearchParams(window.location.search);
         const orderId = urlParams.get('order');
         if (orderId) {
