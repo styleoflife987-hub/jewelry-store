@@ -19,6 +19,7 @@ function generateSessionId() {
 function startAutoSync() {
     if (syncInterval) clearInterval(syncInterval);
     syncInterval = setInterval(syncWithExcel, 5000); // Sync every 5 seconds
+    console.log("Auto-sync started");
 }
 
 // Stop auto-sync
@@ -26,6 +27,7 @@ function stopAutoSync() {
     if (syncInterval) {
         clearInterval(syncInterval);
         syncInterval = null;
+        console.log("Auto-sync stopped");
     }
 }
 
@@ -76,6 +78,9 @@ function updateLocalCart(serverCart) {
     if (window.location.pathname.includes('cart.html')) {
         displayCartPage();
     }
+    if (window.location.pathname.includes('checkout.html')) {
+        displayCheckoutSummary();
+    }
 }
 
 // Update local products from server
@@ -105,6 +110,7 @@ function getLocalCart() {
     try {
         return JSON.parse(localStorage.getItem("cart") || "[]");
     } catch (e) {
+        console.error("Error parsing cart:", e);
         return [];
     }
 }
@@ -184,6 +190,9 @@ window.removeFromCart = async function(sku) {
     if (window.location.pathname.includes('cart.html')) {
         displayCartPage();
     }
+    if (window.location.pathname.includes('checkout.html')) {
+        displayCheckoutSummary();
+    }
     
     showNotification('Item removed from cart');
     return cart;
@@ -206,6 +215,9 @@ window.updateQuantity = async function(sku, newQuantity) {
         
         if (window.location.pathname.includes('cart.html')) {
             displayCartPage();
+        }
+        if (window.location.pathname.includes('checkout.html')) {
+            displayCheckoutSummary();
         }
     }
     return cart;
@@ -341,7 +353,7 @@ window.displayCartPage = function() {
     });
     
     cartContainer.innerHTML = html;
-    if (totalContainer) totalContainer.textContent = total;
+    if (totalContainer) totalContainer.textContent = total.toLocaleString();
 };
 
 // Display checkout summary
