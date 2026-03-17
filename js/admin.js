@@ -15,7 +15,7 @@ async function loadDashboardStats() {
         
         document.getElementById('totalProducts').textContent = stats.totalProducts || 0;
         document.getElementById('totalOrders').textContent = stats.totalOrders || 0;
-        document.getElementById('totalRevenue').textContent = `₹${stats.totalRevenue || 0}`;
+        document.getElementById('totalRevenue').textContent = `₹${(stats.totalRevenue || 0).toLocaleString()}`;
         document.getElementById('pendingOrders').textContent = stats.pendingOrders || 0;
     } catch (error) {
         console.error('Error loading stats:', error);
@@ -41,7 +41,7 @@ async function loadProducts() {
             html += `
                 <div class="product-card-admin" style="background:#222; padding:15px; border-radius:8px; margin-bottom:10px">
                     <div style="display:flex; gap:15px;">
-                        <img src="${product.mainImage || CONFIG.PLACEHOLDER_IMAGE}" style="width:80px; height:80px; object-fit:cover; border-radius:4px;">
+                        <img src="${product.mainImage || CONFIG.PLACEHOLDER_IMAGE}" style="width:80px; height:80px; object-fit:cover; border-radius:4px;" onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
                         <div style="flex:1">
                             <h4>${product.name}</h4>
                             <p>SKU: ${product.sku}</p>
@@ -59,6 +59,10 @@ async function loadProducts() {
         container.innerHTML = html;
     } catch (error) {
         console.error('Error loading products:', error);
+        const container = document.getElementById('productsList');
+        if (container) {
+            container.innerHTML = '<p style="color:#f44336">Error loading products</p>';
+        }
     }
 }
 
@@ -74,6 +78,11 @@ async function addProduct() {
         alert('Please fill required fields');
         return;
     }
+    
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Adding...';
     
     try {
         const params = new URLSearchParams({
@@ -102,7 +111,10 @@ async function addProduct() {
             alert('Error adding product: ' + data.error);
         }
     } catch (error) {
-        alert('Error adding product');
+        alert('Error adding product: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
     }
 }
 
@@ -120,8 +132,13 @@ async function deleteProduct(id) {
             alert('Error deleting product');
         }
     } catch (error) {
-        alert('Error deleting product');
+        alert('Error deleting product: ' + error.message);
     }
+}
+
+function editProduct(id) {
+    alert(`Edit functionality for product ID: ${id} - Would open edit form in production`);
+    // In production, you would open a modal with product details
 }
 
 // ===== ORDERS MANAGEMENT =====
@@ -145,8 +162,8 @@ async function loadOrders() {
             html += `
                 <tr style="border-bottom:1px solid #333">
                     <td style="padding:10px">${order.orderId}</td>
-                    <td style="padding:10px">${order.name}</td>
-                    <td style="padding:10px">₹${order.total}</td>
+                    <td style="padding:10px">${order.name}<br><small>${order.phone}</small></td>
+                    <td style="padding:10px">₹${order.total.toLocaleString()}</td>
                     <td style="padding:10px">
                         <select onchange="updateOrderStatus('${order.orderId}', this.value)" 
                                 style="background:#333; color:white; padding:5px; border-radius:4px;">
@@ -170,6 +187,10 @@ async function loadOrders() {
         container.innerHTML = html;
     } catch (error) {
         console.error('Error loading orders:', error);
+        const container = document.getElementById('ordersList');
+        if (container) {
+            container.innerHTML = '<p style="color:#f44336">Error loading orders</p>';
+        }
     }
 }
 
@@ -180,9 +201,11 @@ async function updateOrderStatus(orderId, status) {
         
         if (data.success) {
             showNotification(`Order ${orderId} updated to ${status}`);
+        } else {
+            alert('Error updating order status');
         }
     } catch (error) {
-        alert('Error updating order status');
+        alert('Error updating order status: ' + error.message);
     }
 }
 
@@ -196,15 +219,16 @@ async function deleteOrder(orderId) {
         if (data.success) {
             alert('Order deleted successfully');
             loadOrders(); // Refresh list
+        } else {
+            alert('Error deleting order');
         }
     } catch (error) {
-        alert('Error deleting order');
+        alert('Error deleting order: ' + error.message);
     }
 }
 
 function viewOrderDetails(orderId) {
-    // In a real app, show order details modal
-    alert(`View details for order: ${orderId}`);
+    alert(`View details for order: ${orderId} - Would show order details modal in production`);
 }
 
 // ===== IMAGES MANAGEMENT =====
@@ -233,16 +257,16 @@ async function scanFolders() {
                     
                     <div style="display:flex; gap:5px; flex-wrap:wrap; margin:15px 0">
                         ${images.slice(0, 4).map(img => `
-                            <img src="${img.thumbnail}" 
+                            <img src="${img.thumbnail || img.url || product.mainImage}" 
                                  style="width:60px; height:60px; object-fit:cover; border-radius:4px; cursor:pointer"
-                                 onclick="window.open('${img.url}','_blank')"
+                                 onclick="window.open('${img.url || product.mainImage}','_blank')"
                                  onerror="this.style.display='none'">
                         `).join('')}
                         ${images.length > 4 ? `<span style="color:#888">+${images.length-4} more</span>` : ''}
                     </div>
                     
                     <p style="font-size:12px; color:#666">Folder: ${product.sku}_*</p>
-                    <p style="font-size:12px; color:#4CAF50">Images working: ${images.length > 0 ? '✅' : '❌'}</p>
+                    <p style="font-size:12px; color:#4CAF50">Images working: ${(images.length > 0 || product.mainImage) ? '✅' : '❌'}</p>
                 </div>
             `;
         });
@@ -250,7 +274,10 @@ async function scanFolders() {
         grid.innerHTML = html;
     } catch (error) {
         console.error('Error scanning folders:', error);
-        document.getElementById('folderGrid').innerHTML = '<p style="color:#f44336">Error loading images</p>';
+        const grid = document.getElementById('folderGrid');
+        if (grid) {
+            grid.innerHTML = '<p style="color:#f44336">Error loading images</p>';
+        }
     }
 }
 
@@ -272,7 +299,10 @@ function showNotification(message) {
     notification.textContent = message;
     document.body.appendChild(notification);
     
-    setTimeout(() => notification.remove(), 3000);
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 // ===== LOGOUT =====
