@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
 </head>
-<body onload="checkAuth(); loadOrders()">
+<body onload="checkAdminAuth(); loadOrders()">
     <header>
         <div class="logo">STYLE OF LIFE - LIVE ORDERS</div>
         <nav>
@@ -37,7 +37,7 @@
     </div>
 
     <script>
-        function checkAuth() {
+        function checkAdminAuth() {
             if (!sessionStorage.getItem('adminLoggedIn')) {
                 window.location.href = 'login.html';
             }
@@ -65,7 +65,7 @@
                             <td>${order.orderId}</td>
                             <td>${order.name}<br><small>${order.phone}</small></td>
                             <td><small>${itemsList}</small></td>
-                            <td>₹${order.total}</td>
+                            <td>₹${order.total.toLocaleString()}</td>
                             <td>
                                 <select onchange="updateOrderStatus('${order.orderId}', this.value)" style="background:#333; color:white; padding:5px;">
                                     <option ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -99,9 +99,11 @@
                 if (data.success) {
                     alert(`✅ Order ${orderId} updated to ${status} in Excel`);
                     loadOrders(); // Live refresh
+                } else {
+                    alert('Error updating order');
                 }
             } catch (error) {
-                alert('Error updating order');
+                alert('Error updating order: ' + error.message);
             }
         }
         
@@ -115,9 +117,11 @@
                 if (data.success) {
                     alert('✅ Order deleted from Excel');
                     loadOrders();
+                } else {
+                    alert('Error deleting order');
                 }
             } catch (error) {
-                alert('Error deleting order');
+                alert('Error deleting order: ' + error.message);
             }
         }
         
