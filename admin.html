@@ -6,8 +6,9 @@
     <title>Admin Dashboard - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
 </head>
-<body onload="checkAuth(); loadDashboard()">
+<body onload="checkAdminAuth(); loadDashboardStats()">
     <header>
         <div class="logo">STYLE OF LIFE - ADMIN</div>
         <nav>
@@ -53,32 +54,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function checkAuth() {
-            if (!sessionStorage.getItem('adminLoggedIn')) {
-                window.location.href = 'login.html';
-            }
-        }
-        
-        async function loadDashboard() {
-            try {
-                const response = await fetch(`${CONFIG.API_URL}?action=dashboard`);
-                const stats = await response.json();
-                
-                document.getElementById('totalProducts').textContent = stats.totalProducts || 0;
-                document.getElementById('totalOrders').textContent = stats.totalOrders || 0;
-                document.getElementById('totalRevenue').textContent = `₹${stats.totalRevenue || 0}`;
-                document.getElementById('pendingOrders').textContent = stats.pendingOrders || 0;
-            } catch (error) {
-                console.error('Error loading stats:', error);
-            }
-        }
-        
-        function logout() {
-            sessionStorage.removeItem('adminLoggedIn');
-            window.location.href = 'login.html';
-        }
-    </script>
 </body>
 </html>
