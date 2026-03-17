@@ -11,6 +11,6 @@ const CONFIG = {
     PLACEHOLDER_IMAGE: "https://via.placeholder.com/300x300?text=No+Image",
     DEFAULT_CATEGORY: "Jewelry",
     
-    // Refresh interval in milliseconds (30 seconds)
-    REFRESH_INTERVAL: 30000
+    // Sync interval in milliseconds (5 seconds for real-time)
+    SYNC_INTERVAL: 5000
 };
