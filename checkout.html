@@ -99,12 +99,7 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            updateCheckoutSummary();
-        });
-        
         async function processOrder() {
-            // Get form values
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -112,7 +107,6 @@
             const pincode = document.getElementById('pincode').value.trim();
             const city = document.getElementById('city').value.trim();
             
-            // Validate
             if (!name || !phone || !address || !pincode || !city) {
                 alert('Please fill all required fields');
                 return;
@@ -128,12 +122,10 @@
                 return;
             }
             
-            // Disable button
             const btn = document.getElementById('placeOrderBtn');
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            // Prepare order data
             const fullAddress = `${address}, ${city} - ${pincode}`;
             const cart = getCart();
             const subtotal = getCartTotal();
@@ -142,6 +134,7 @@
             const total = subtotal + tax + shipping;
             
             const orderData = {
+                orderId: 'ORD' + Date.now(),
                 name: name,
                 phone: phone,
                 email: email,
@@ -151,53 +144,21 @@
                 tax: tax,
                 shipping: shipping,
                 total: total,
-                orderId: 'ORD' + Date.now()
+                status: 'Pending',
+                date: new Date().toISOString()
             };
             
-            // Save order locally first
-            saveOrder(orderData);
-            
-            // Try to sync with server
-            try {
-                const params = new URLSearchParams({
-                    action: 'placeOrder',
-                    name: name,
-                    phone: phone,
-                    email: email,
-                    address: fullAddress,
-                    items: JSON.stringify(cart),
-                    total: total
-                });
-                
-                const response = await fetch(`${CONFIG.API_URL}?${params}`);
-                const result = await response.json();
-                
-                if (result.success) {
-                    orderData.orderId = result.orderId;
-                }
-            } catch (error) {
-                console.log('Order saved locally (offline mode)');
-            }
+            // Save order locally
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.push(orderData);
+            localStorage.setItem('orders', JSON.stringify(orders));
             
             // Clear cart
-            clearCartLocal();
-            
-            // Show success message
-            alert(`Order placed successfully! Order ID: ${orderData.orderId}`);
-            
-            // Redirect to tracking
-            window.location.href = `track.html?order=${orderData.orderId}`;
-        }
-        
-        function saveOrder(order) {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            orders.push(order);
-            localStorage.setItem('orders', JSON.stringify(orders));
-        }
-        
-        function clearCartLocal() {
             localStorage.removeItem('cart');
             updateCartCount();
+            
+            alert(`Order placed successfully! Order ID: ${orderData.orderId}`);
+            window.location.href = `track.html?order=${orderData.orderId}`;
         }
     </script>
 </body>
