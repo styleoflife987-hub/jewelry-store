@@ -6,7 +6,6 @@
     <title>Checkout - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
-    <script src="js/sync.js"></script>
 </head>
 <body>
     <header>
@@ -41,18 +40,18 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="address">Shipping Address *</label>
-                    <textarea id="address" rows="3" placeholder="Street address, city, pincode" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="pincode">Pincode *</label>
-                    <input type="text" id="pincode" placeholder="6 digit pincode" maxlength="6" required>
+                    <label for="address">Street Address *</label>
+                    <input type="text" id="address" placeholder="Street address" required>
                 </div>
                 
                 <div class="form-group">
                     <label for="city">City *</label>
                     <input type="text" id="city" placeholder="City" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pincode">Pincode *</label>
+                    <input type="text" id="pincode" placeholder="6 digit pincode" maxlength="6" required>
                 </div>
             </div>
             
@@ -96,8 +95,11 @@
     </footer>
 
     <script src="js/cart.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/payment.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
     <script>
-        // Update checkout summary on load
         document.addEventListener('DOMContentLoaded', function() {
             updateCheckoutSummary();
         });
@@ -108,11 +110,11 @@
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
             const address = document.getElementById('address').value.trim();
-            const pincode = document.getElementById('pincode').value.trim();
             const city = document.getElementById('city').value.trim();
+            const pincode = document.getElementById('pincode').value.trim();
             
             // Validate
-            if (!name || !phone || !address || !pincode || !city) {
+            if (!name || !phone || !address || !city || !pincode) {
                 alert('Please fill all required fields');
                 return;
             }
@@ -140,7 +142,7 @@
             const shipping = 100;
             const total = subtotal + tax + shipping;
             
-            // Prepare full address
+            // Full address
             const fullAddress = `${address}, ${city} - ${pincode}`;
             
             // Disable button
@@ -148,64 +150,23 @@
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            // Prepare order data
-            const orderData = {
-                name: name,
-                phone: phone,
-                email: email,
-                address: fullAddress,
-                items: JSON.stringify(cart),
-                total: total
-            };
-            
-            console.log('Sending order to Excel:', orderData);
-            
             try {
-                // Send to Excel via Apps Script
-                const params = new URLSearchParams({
-                    action: 'placeOrder',
+                // Send to Excel
+                const result = await placeOrderInExcel({
                     name: name,
                     phone: phone,
                     email: email,
                     address: fullAddress,
-                    items: JSON.stringify(cart),
+                    items: cart,
                     total: total
                 });
                 
-                const response = await fetch(`${CONFIG.API_URL}?${params}`);
-                const result = await response.json();
-                
-                console.log('Excel response:', result);
-                
                 if (result.success) {
-                    // Save order locally as backup
-                    const localOrder = {
-                        orderId: result.orderId,
-                        name: name,
-                        phone: phone,
-                        email: email,
-                        address: fullAddress,
-                        items: cart,
-                        subtotal: subtotal,
-                        tax: tax,
-                        shipping: shipping,
-                        total: total,
-                        status: 'Pending',
-                        date: new Date().toISOString()
-                    };
-                    
-                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-                    orders.push(localOrder);
-                    localStorage.setItem('orders', JSON.stringify(orders));
-                    
                     // Clear cart
                     localStorage.removeItem('cart');
                     updateCartCount();
                     
-                    // Show success
                     alert(`✅ Order placed successfully! Order ID: ${result.orderId}`);
-                    
-                    // Redirect to tracking
                     window.location.href = `track.html?order=${result.orderId}`;
                 } else {
                     throw new Error(result.error || 'Failed to place order');
@@ -213,10 +174,9 @@
             } catch (error) {
                 console.error('Order error:', error);
                 
-                // Fallback - save locally only
+                // Fallback - save locally
                 const fallbackOrderId = 'ORD' + Date.now();
-                
-                const fallbackOrder = {
+                saveOrderLocally({
                     orderId: fallbackOrderId,
                     name: name,
                     phone: phone,
@@ -229,17 +189,13 @@
                     total: total,
                     status: 'Pending',
                     date: new Date().toISOString()
-                };
-                
-                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-                orders.push(fallbackOrder);
-                localStorage.setItem('orders', JSON.stringify(orders));
+                });
                 
                 // Clear cart
                 localStorage.removeItem('cart');
                 updateCartCount();
                 
-                alert(`⚠️ Order placed locally (offline mode). Order ID: ${fallbackOrderId}`);
+                alert(`⚠️ Order saved locally. Order ID: ${fallbackOrderId}`);
                 window.location.href = `track.html?order=${fallbackOrderId}`;
             }
         }
@@ -251,7 +207,6 @@
             const shipping = 100;
             const total = subtotal + tax + shipping;
             
-            // Update summary items
             const summaryContainer = document.getElementById('cartSummary');
             if (summaryContainer) {
                 if (cart.length === 0) {
@@ -262,7 +217,7 @@
                         itemsHtml += `
                             <div style="display: flex; justify-content: space-between; margin: 5px 0;">
                                 <span>${item.name} x${item.quantity}</span>
-                                <span>₹${(item.price * item.quantity).toLocaleString()}</span>
+                                <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
                             </div>
                         `;
                     });
@@ -270,10 +225,9 @@
                 }
             }
             
-            // Update totals
-            document.getElementById('orderSubtotal').textContent = subtotal.toLocaleString();
-            document.getElementById('orderTax').textContent = tax.toLocaleString();
-            document.getElementById('orderTotal').textContent = total.toLocaleString();
+            document.getElementById('orderSubtotal').textContent = subtotal.toLocaleString('en-IN');
+            document.getElementById('orderTax').textContent = tax.toLocaleString('en-IN');
+            document.getElementById('orderTotal').textContent = total.toLocaleString('en-IN');
         }
     </script>
 </body>
