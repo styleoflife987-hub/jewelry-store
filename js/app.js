@@ -1,4 +1,4 @@
-// js/app.js - COMPLETELY FIXED VERSION
+// js/app.js - COMPLETE FIXED VERSION
 let products = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -11,10 +11,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadProducts() {
     const container = document.getElementById('products');
-    if (!container) return;
+    if (!container) {
+        console.error('Products container not found!');
+        return;
+    }
     
     // Show loading
-    container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading products...</p></div>';
+    container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading exquisite jewelry...</p></div>';
     
     let loadedFromServer = false;
     
@@ -31,7 +34,19 @@ async function loadProducts() {
         console.log('Server response:', data);
         
         if (data && !data.error && Array.isArray(data) && data.length > 0) {
-            products = data;
+            // Format the data properly
+            products = data.map(item => ({
+                id: item.id || Math.random().toString(36).substr(2, 9),
+                sku: item.sku || `SKU${item.id || Date.now()}`,
+                name: item.name || 'Product',
+                category: item.category || CONFIG.DEFAULT_CATEGORY,
+                price: Number(item.price) || 0,
+                stock: Number(item.stock) || 0,
+                description: item.description || '',
+                mainImage: item.mainImage || item.image || CONFIG.PLACEHOLDER_IMAGE,
+                images: item.images || []
+            }));
+            
             loadedFromServer = true;
             console.log(`✅ Loaded ${products.length} products from server`);
             
@@ -46,21 +61,21 @@ async function loadProducts() {
     
     // If server failed, try localStorage
     if (!loadedFromServer) {
-        const localProducts = localStorage.getItem('products');
-        if (localProducts) {
-            try {
+        try {
+            const localProducts = localStorage.getItem('products');
+            if (localProducts) {
                 products = JSON.parse(localProducts);
                 if (products.length > 0) {
                     loadedFromServer = true;
                     console.log(`✅ Loaded ${products.length} products from localStorage`);
                 }
-            } catch (e) {
-                console.error('Error parsing localStorage products:', e);
             }
+        } catch (e) {
+            console.error('Error parsing localStorage products:', e);
         }
     }
     
-    // If still no products, use sample products
+    // If still no products, use sample products with CORRECT structure
     if (!loadedFromServer || products.length === 0) {
         console.log('Using sample products');
         products = getSampleProducts();
@@ -82,8 +97,8 @@ function getSampleProducts() {
             category: 'Necklaces',
             price: 25000,
             stock: 10,
-            mainImage: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338',
-            description: '22k Gold Necklace with traditional design'
+            description: '22k Gold Necklace with traditional design',
+            mainImage: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338'
         },
         {
             id: 2,
@@ -92,8 +107,8 @@ function getSampleProducts() {
             category: 'Rings',
             price: 45000,
             stock: 5,
-            mainImage: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e',
-            description: 'Solitaire Diamond Ring in 18k Gold'
+            description: 'Solitaire Diamond Ring in 18k Gold',
+            mainImage: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e'
         },
         {
             id: 3,
@@ -102,8 +117,8 @@ function getSampleProducts() {
             category: 'Earrings',
             price: 15000,
             stock: 8,
-            mainImage: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908',
-            description: 'Freshwater Pearl Earrings with Gold'
+            description: 'Freshwater Pearl Earrings with Gold',
+            mainImage: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908'
         },
         {
             id: 4,
@@ -112,8 +127,8 @@ function getSampleProducts() {
             category: 'Bracelets',
             price: 12000,
             stock: 15,
-            mainImage: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a',
-            description: 'Sterling Silver Bracelet with design'
+            description: 'Sterling Silver Bracelet with design',
+            mainImage: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a'
         },
         {
             id: 5,
@@ -122,8 +137,8 @@ function getSampleProducts() {
             category: 'Bangles',
             price: 35000,
             stock: 7,
-            mainImage: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0',
-            description: 'Set of 2 Traditional Gold Bangles'
+            description: 'Set of 2 Traditional Gold Bangles',
+            mainImage: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0'
         }
     ];
 }
@@ -137,32 +152,38 @@ function displayProducts(products) {
         return;
     }
     
+    console.log('Displaying products:', products);
+    
     let html = '';
     
     products.forEach(product => {
+        // Ensure all required fields exist with defaults
+        const sku = product.sku || `SKU${product.id || Math.random().toString(36).substr(2, 5)}`;
+        const name = product.name || 'Product';
+        const category = product.category || CONFIG.DEFAULT_CATEGORY;
         const price = Number(product.price) || 0;
         const stock = Number(product.stock) || 0;
         const image = product.mainImage || product.image || CONFIG.PLACEHOLDER_IMAGE;
-        const sku = product.sku || `SKU${product.id}`;
         
         html += `
-            <div class="card" data-sku="${sku}">
+            <div class="card" data-product-sku="${sku}">
                 <div class="product-images">
                     <img src="${image}" 
                          class="main-image"
-                         alt="${product.name}"
-                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+                         alt="${name}"
+                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'"
+                         loading="lazy">
                 </div>
                 
                 <div class="product-info">
-                    <h3>${product.name}</h3>
-                    <p class="sku">SKU: ${sku}</p>
-                    <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
+                    <h3>${name}</h3>
+                    <p class="sku">SKU: <span class="sku-value">${sku}</span></p>
+                    <p class="category">${category}</p>
                     <div class="price">${CONFIG.CURRENCY}${price.toLocaleString('en-IN')}</div>
                     <p class="stock ${stock > 0 ? 'in-stock' : 'out-of-stock'}">
                         ${stock > 0 ? `In Stock (${stock})` : 'Out of Stock'}
                     </p>
-                    <button onclick="addToCart('${sku}', '${product.name.replace(/'/g, "\\'")}', ${price}, '${image}')" 
+                    <button onclick="addToCart('${sku}', '${name.replace(/'/g, "\\'")}', ${price}, '${image}')" 
                             class="add-to-cart-btn"
                             ${stock <= 0 ? 'disabled' : ''}>
                         Add to Cart
@@ -173,29 +194,36 @@ function displayProducts(products) {
     });
     
     container.innerHTML = html;
+    console.log('✅ Products displayed successfully');
 }
 
-// Direct call to cart function - no extra handler
+// Global add to cart function
 window.addToCart = function(sku, name, price, image) {
-    console.log('🛒 Adding to cart:', { sku, name, price });
+    console.log('🛒 Adding to cart:', { sku, name, price, image });
     
-    // Validate
+    // Validate inputs
     if (!sku) {
-        alert('Error: Product SKU missing');
+        console.error('SKU is required');
+        showNotification('Error: Product SKU missing', 'error');
         return false;
     }
     
+    if (!name) name = 'Product';
+    
     price = Number(price);
     if (isNaN(price) || price <= 0) {
-        alert('Error: Invalid price');
+        console.error('Invalid price:', price);
+        showNotification('Error: Invalid price', 'error');
         return false;
     }
     
     // Get existing cart
     let cart = [];
     try {
-        cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const savedCart = localStorage.getItem('cart');
+        cart = savedCart ? JSON.parse(savedCart) : [];
     } catch (e) {
+        console.error('Error parsing cart:', e);
         cart = [];
     }
     
@@ -205,28 +233,37 @@ window.addToCart = function(sku, name, price, image) {
     if (existingIndex >= 0) {
         // Increment quantity
         cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+        console.log(`Increased quantity for ${name} to ${cart[existingIndex].quantity}`);
     } else {
         // Add new item
         cart.push({
             sku: sku,
-            name: name || 'Product',
+            name: name,
             price: price,
             image: image || CONFIG.PLACEHOLDER_IMAGE,
             quantity: 1,
             addedAt: new Date().toISOString()
         });
+        console.log(`Added new item: ${name}`);
     }
     
     // Save cart
-    localStorage.setItem('cart', JSON.stringify(cart));
+    try {
+        localStorage.setItem('cart', JSON.stringify(cart));
+        console.log('Cart saved:', cart);
+    } catch (e) {
+        console.error('Error saving cart:', e);
+        showNotification('Error saving to cart', 'error');
+        return false;
+    }
     
     // Update cart count
     updateCartCount();
     
     // Show notification
-    showNotification(`${name || 'Product'} added to cart!`);
+    showNotification(`${name} added to cart!`, 'success');
     
-    // Try to sync with server (don't wait)
+    // Try to sync with server (don't wait for it)
     syncCartWithServer(cart);
     
     return true;
@@ -242,6 +279,8 @@ function updateCartCount() {
             el.textContent = count;
             el.style.display = count > 0 ? 'inline-block' : 'none';
         });
+        
+        console.log('Cart count updated:', count);
     } catch (e) {
         console.error('Error updating cart count:', e);
     }
@@ -251,51 +290,73 @@ function updateCartCount() {
 async function syncCartWithServer(cart) {
     try {
         const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+        const sessionId = localStorage.getItem('sessionId') || 'session_' + Date.now();
+        
+        if (!localStorage.getItem('sessionId')) {
+            localStorage.setItem('sessionId', sessionId);
+        }
         
         const params = new URLSearchParams({
             action: 'saveCart',
-            sessionId: localStorage.getItem('sessionId') || 'guest_' + Date.now(),
+            sessionId: sessionId,
             items: JSON.stringify(cart),
             total: total
         });
         
-        await fetch(`${CONFIG.API_URL}?${params}`);
-        console.log('✅ Cart synced with server');
+        const response = await fetch(`${CONFIG.API_URL}?${params}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ Cart synced with server');
+        }
     } catch (error) {
         console.log('Server sync failed (offline mode)');
     }
 }
 
 // Show notification
-function showNotification(message) {
+function showNotification(message, type = 'success') {
+    // Remove existing notification
     const existing = document.querySelector('.notification');
     if (existing) existing.remove();
     
+    // Create notification
     const notification = document.createElement('div');
     notification.className = 'notification';
+    
+    // Set colors based on type
+    const colors = {
+        success: '#d4af37',
+        error: '#f44336',
+        warning: '#ff9800',
+        info: '#2196f3'
+    };
+    
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: #d4af37;
-        color: black;
+        background: ${colors[type] || colors.success};
+        color: ${type === 'success' ? 'black' : 'white'};
         padding: 15px 25px;
         border-radius: 8px;
         font-weight: bold;
-        z-index: 1000;
+        z-index: 9999;
         animation: slideIn 0.3s ease;
         box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     `;
+    
     notification.textContent = message;
     document.body.appendChild(notification);
     
+    // Auto remove after 3 seconds
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
 
-// Update cart count on page load
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     updateCartCount();
 });
