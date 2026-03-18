@@ -8,33 +8,39 @@
 </head>
 <body>
     <header>
-        <div class="logo">STYLE OF LIFE</div>
+        <div class="logo">✨ STYLE OF LIFE</div>
         <nav>
             <a href="index.html">Home</a>
             <a href="cart.html">Cart <span class="cart-count">0</span></a>
-            <a href="track.html">Track Order</a>
         </nav>
     </header>
 
-    <div style="max-width:400px; margin:100px auto; padding:40px; background:#1a1a1a; border-radius:15px">
-        <h2 style="color:#d4af37; text-align:center; margin-bottom:30px">Admin Login</h2>
-        
-        <div style="margin-bottom:15px">
-            <input type="text" id="username" placeholder="Username" 
-                   style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white">
+    <div class="login-container">
+        <div class="login-box">
+            <h2>Admin Login</h2>
+            <p style="color: #888; margin-bottom: 20px;">Enter your credentials to access admin panel</p>
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter password">
+            </div>
+            
+            <button onclick="login()" class="login-btn">Login</button>
+            
+            <p class="login-hint">
+                Default: admin / 1234
+            </p>
         </div>
-        
-        <div style="margin-bottom:20px">
-            <input type="password" id="password" placeholder="Password" 
-                   style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white">
-        </div>
-        
-        <button onclick="login()">Login</button>
-        
-        <p style="text-align:center; margin-top:20px; color:#888; font-size:14px">
-            Default: admin / 1234
-        </p>
     </div>
+
+    <footer>
+        <p>© 2026 Style Of Life Jewelry</p>
+    </footer>
 
     <script>
         function login() {
@@ -45,7 +51,7 @@
                 sessionStorage.setItem('adminLoggedIn', 'true');
                 window.location.href = 'admin.html';
             } else {
-                alert('Invalid credentials');
+                alert('Invalid credentials! Use admin/1234');
             }
         }
     </script>
