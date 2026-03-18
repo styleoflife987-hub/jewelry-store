@@ -1,4 +1,4 @@
-// js/app.js - SHOW ONLY PRODUCTS FROM EXCEL
+// js/app.js - SHOW PRODUCTS EXACTLY AS IN EXCEL
 let products = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load products from Excel only
     loadProductsFromExcel();
+    
+    // Update cart count
+    updateCartCount();
 });
 
 async function loadProductsFromExcel() {
@@ -33,19 +36,19 @@ async function loadProductsFromExcel() {
         // Check if we got products from Excel
         if (data && !data.error && Array.isArray(data)) {
             if (data.length > 0) {
-                // Format the products from Excel
+                // Map Excel data to product format
                 products = data.map(item => ({
-                    id: item.id || item.ID || Math.random().toString(36).substr(2, 9),
-                    sku: item.sku || item.SKU || `SKU${item.id || Date.now()}`,
-                    name: item.name || item.Name || item.productName || 'Product',
-                    category: item.category || item.Category || CONFIG.DEFAULT_CATEGORY,
+                    id: item.id || item.ID,
+                    sku: item.sku || item.SKU,
+                    name: item.name || item.Name,
                     price: Number(item.price || item.Price || 0),
                     stock: Number(item.stock || item.Stock || 0),
+                    category: item.category || item.Category || 'Jewelry',
                     description: item.description || item.Description || '',
-                    mainImage: item.mainImage || item.image || item.Image || item.MainImage || CONFIG.PLACEHOLDER_IMAGE
+                    lastUpdated: item.lastUpdated || item.LastUpdated || new Date().toISOString()
                 }));
                 
-                console.log(`✅ Loaded ${products.length} products from Excel`);
+                console.log(`✅ Loaded ${products.length} products from Excel:`, products);
                 
                 // Save to localStorage as backup
                 localStorage.setItem('products', JSON.stringify(products));
@@ -53,10 +56,10 @@ async function loadProductsFromExcel() {
                 // Display products
                 displayProducts(products);
             } else {
-                // Excel has no products - show empty state
+                // Excel has no products
                 console.log('Excel has no products');
                 container.innerHTML = `
-                    <div class="error-message" style="text-align: center; padding: 60px;">
+                    <div class="error-message" style="text-align: center; padding: 60px; background: #1a1a1a; border-radius: 10px;">
                         <p style="color: #d4af37; font-size: 18px; margin-bottom: 20px;">No products found in Excel</p>
                         <p style="color: #888; margin-bottom: 30px;">Please add products in the admin panel first.</p>
                         <a href="admin-products.html" style="display: inline-block; padding: 12px 30px; background: #d4af37; color: black; text-decoration: none; border-radius: 6px; font-weight: bold;">Go to Admin Panel</a>
@@ -69,14 +72,14 @@ async function loadProductsFromExcel() {
     } catch (error) {
         console.error('Failed to load from Excel:', error);
         
-        // Show error message - NO SAMPLE PRODUCTS
+        // Show error message
         container.innerHTML = `
-            <div class="error-message" style="text-align: center; padding: 60px;">
+            <div class="error-message" style="text-align: center; padding: 60px; background: #1a1a1a; border-radius: 10px;">
                 <p style="color: #f44336; font-size: 18px; margin-bottom: 20px;">⚠️ Cannot connect to Excel</p>
                 <p style="color: #888; margin-bottom: 10px;">Error: ${error.message}</p>
                 <p style="color: #888; margin-bottom: 30px;">Please check your internet connection and try again.</p>
-                <button onclick="location.reload()" style="background: #d4af37; color: black; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer;">Retry</button>
-                <a href="admin-products.html" style="display: inline-block; margin-left: 10px; padding: 12px 30px; background: #333; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Go to Admin</a>
+                <button onclick="location.reload()" style="background: #d4af37; color: black; border: none; padding: 12px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-right: 10px;">Retry</button>
+                <a href="admin-products.html" style="display: inline-block; padding: 12px 30px; background: #333; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Go to Admin</a>
             </div>
         `;
     }
@@ -88,7 +91,7 @@ function displayProducts(products) {
     
     if (!products || products.length === 0) {
         container.innerHTML = `
-            <div class="error-message" style="text-align: center; padding: 60px;">
+            <div class="error-message" style="text-align: center; padding: 60px; background: #1a1a1a; border-radius: 10px;">
                 <p style="color: #d4af37; font-size: 18px; margin-bottom: 20px;">No products available</p>
                 <p style="color: #888; margin-bottom: 30px;">Add products in the admin panel to see them here.</p>
                 <a href="admin-products.html" style="display: inline-block; padding: 12px 30px; background: #d4af37; color: black; text-decoration: none; border-radius: 6px; font-weight: bold;">Add Products</a>
@@ -102,27 +105,28 @@ function displayProducts(products) {
     let html = '';
     
     products.forEach(product => {
-        // Ensure all required fields exist
-        const sku = product.sku || `SKU${product.id}`;
+        // Use exactly the data from Excel
+        const sku = product.sku || 'N/A';
         const name = product.name || 'Product';
-        const category = product.category || CONFIG.DEFAULT_CATEGORY;
         const price = Number(product.price) || 0;
         const stock = Number(product.stock) || 0;
-        const image = product.mainImage || CONFIG.PLACEHOLDER_IMAGE;
+        const category = product.category || 'Jewelry';
+        
+        // Use placeholder image since Excel doesn't have images
+        const image = CONFIG.PLACEHOLDER_IMAGE;
         
         html += `
-            <div class="card" data-product-sku="${sku}">
+            <div class="card" data-product-id="${product.id}" data-product-sku="${sku}">
                 <div class="product-images">
                     <img src="${image}" 
                          class="main-image"
                          alt="${name}"
-                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'"
-                         loading="lazy">
+                         style="object-fit: contain; padding: 20px; background: #2a2a2a;">
                 </div>
                 
                 <div class="product-info">
-                    <h3>${name}</h3>
                     <p class="sku">SKU: <span class="sku-value">${sku}</span></p>
+                    <h3>${name}</h3>
                     <p class="category">${category}</p>
                     <div class="price">${CONFIG.CURRENCY}${price.toLocaleString('en-IN')}</div>
                     <p class="stock ${stock > 0 ? 'in-stock' : 'out-of-stock'}">
@@ -144,16 +148,16 @@ function displayProducts(products) {
 
 // Global add to cart function
 window.addToCart = function(sku, name, price, image) {
-    console.log('🛒 Adding to cart:', { sku, name, price, image });
+    console.log('🛒 Adding to cart:', { sku, name, price });
     
     if (!sku) {
-        alert('Error: Product SKU missing');
+        showNotification('Error: Product SKU missing', 'error');
         return false;
     }
     
     price = Number(price);
     if (isNaN(price) || price <= 0) {
-        alert('Error: Invalid price');
+        showNotification('Error: Invalid price', 'error');
         return false;
     }
     
@@ -170,6 +174,7 @@ window.addToCart = function(sku, name, price, image) {
     
     if (existingIndex >= 0) {
         cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+        showNotification(`${name} quantity updated`, 'success');
     } else {
         cart.push({
             sku: sku,
@@ -178,6 +183,7 @@ window.addToCart = function(sku, name, price, image) {
             image: image || CONFIG.PLACEHOLDER_IMAGE,
             quantity: 1
         });
+        showNotification(`${name} added to cart!`, 'success');
     }
     
     // Save cart
@@ -185,9 +191,6 @@ window.addToCart = function(sku, name, price, image) {
     
     // Update cart count
     updateCartCount();
-    
-    // Show notification
-    showNotification(`${name} added to cart!`);
     
     return true;
 };
@@ -208,15 +211,26 @@ function updateCartCount() {
 }
 
 // Show notification
-function showNotification(message) {
+function showNotification(message, type = 'success') {
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+    
     const notification = document.createElement('div');
     notification.className = 'notification';
+    
+    const colors = {
+        success: '#d4af37',
+        error: '#f44336',
+        warning: '#ff9800',
+        info: '#2196f3'
+    };
+    
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: #d4af37;
-        color: black;
+        background: ${colors[type] || colors.success};
+        color: ${type === 'success' ? 'black' : 'white'};
         padding: 15px 25px;
         border-radius: 8px;
         font-weight: bold;
@@ -224,6 +238,7 @@ function showNotification(message) {
         animation: slideIn 0.3s ease;
         box-shadow: 0 5px 20px rgba(0,0,0,0.3);
     `;
+    
     notification.textContent = message;
     document.body.appendChild(notification);
     
@@ -232,8 +247,3 @@ function showNotification(message) {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
-
-// Initialize cart count on page load
-document.addEventListener('DOMContentLoaded', function() {
-    updateCartCount();
-});
