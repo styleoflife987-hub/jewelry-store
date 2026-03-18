@@ -1,4 +1,4 @@
-// js/cart.js - WITH LIVE SYNC
+// js/cart.js - Cart System
 let cart = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -8,16 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname.includes('cart.html')) {
         displayCart();
     }
-    
-    // Listen for sync updates
-    window.addEventListener('syncComplete', function(e) {
-        if (e.detail.cart && e.detail.cart.sessionId === localStorage.getItem('sessionId')) {
-            loadCart();
-            if (window.location.pathname.includes('cart.html')) {
-                displayCart();
-            }
-        }
-    });
 });
 
 function loadCart() {
@@ -31,15 +21,6 @@ function loadCart() {
 function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
-    
-    // Push to Excel
-    if (window.pushToExcel) {
-        window.pushToExcel('saveCart', {
-            sessionId: localStorage.getItem('sessionId'),
-            items: JSON.stringify(cart),
-            total: getCartTotal()
-        });
-    }
 }
 
 window.getCart = function() {
@@ -62,6 +43,46 @@ function updateCartCount() {
     });
 }
 
+window.addToCart = function(sku, name, price, image) {
+    if (!sku) {
+        showNotification('Error: Invalid product', 'error');
+        return false;
+    }
+    
+    price = Number(price);
+    if (isNaN(price) || price <= 0) {
+        showNotification('Error: Invalid price', 'error');
+        return false;
+    }
+    
+    const existingIndex = cart.findIndex(item => item.sku === sku);
+    
+    if (existingIndex >= 0) {
+        cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+    } else {
+        cart.push({
+            sku: sku,
+            name: name || 'Product',
+            price: price,
+            image: image || CONFIG.PLACEHOLDER_IMAGE,
+            quantity: 1
+        });
+    }
+    
+    saveCart();
+    showNotification(`${name} added to cart!`);
+    
+    if (window.pushToExcel) {
+        window.pushToExcel('saveCart', {
+            sessionId: localStorage.getItem('sessionId') || 'guest_' + Date.now(),
+            items: JSON.stringify(cart),
+            total: window.getCartTotal()
+        });
+    }
+    
+    return true;
+};
+
 window.removeFromCart = function(sku) {
     cart = cart.filter(item => item.sku !== sku);
     saveCart();
@@ -70,16 +91,14 @@ window.removeFromCart = function(sku) {
         displayCart();
     }
     
-    showNotification('Item removed from cart');
+    showNotification('Item removed');
 };
 
 window.updateQuantity = function(sku, newQuantity) {
     const itemIndex = cart.findIndex(item => item.sku === sku);
-    
     if (itemIndex === -1) return;
     
     newQuantity = parseInt(newQuantity);
-    
     if (isNaN(newQuantity) || newQuantity < 1) {
         cart.splice(itemIndex, 1);
     } else {
@@ -110,6 +129,7 @@ window.clearCart = function() {
 function displayCart() {
     const container = document.getElementById('cartItems');
     const subtotalEl = document.getElementById('cartSubtotal');
+    const taxEl = document.getElementById('cartTax');
     const totalEl = document.getElementById('cartTotal');
     
     if (!container) return;
@@ -122,6 +142,7 @@ function displayCart() {
             </div>
         `;
         if (subtotalEl) subtotalEl.textContent = '0';
+        if (taxEl) taxEl.textContent = '0';
         if (totalEl) totalEl.textContent = '0';
         return;
     }
@@ -140,13 +161,13 @@ function displayCart() {
                     <h4>${item.name}</h4>
                     <p style="color: #888;">SKU: ${item.sku}</p>
                 </div>
-                <div style="color: #d4af37;">₹${item.price.toLocaleString()}</div>
+                <div style="color: #d4af37;">₹${item.price.toLocaleString('en-IN')}</div>
                 <div>
                     <input type="number" value="${item.quantity}" min="1" max="10" 
                            onchange="updateQuantity('${item.sku}', this.value)"
-                           style="width: 60px; padding: 5px; background: #333; color: white; border: 1px solid #444; border-radius: 4px;">
+                           style="width: 60px; padding: 5px; background: #333; color: white; border: 1px solid #444; border-radius: 4px; text-align: center;">
                 </div>
-                <div style="font-weight: bold;">₹${itemTotal.toLocaleString()}</div>
+                <div style="font-weight: bold;">₹${itemTotal.toLocaleString('en-IN')}</div>
                 <button onclick="removeFromCart('${item.sku}')" style="background: transparent; color: #f44336; border: 1px solid #f44336; padding: 5px 10px; width: auto;">Remove</button>
             </div>
         `;
@@ -155,10 +176,27 @@ function displayCart() {
     container.innerHTML = html;
     
     const tax = Math.round(subtotal * 0.18);
-    const total = subtotal + tax + 100;
+    const shipping = 100;
+    const total = subtotal + tax + shipping;
     
-    if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString();
-    if (totalEl) totalEl.textContent = total.toLocaleString();
+    if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('en-IN');
+    if (taxEl) taxEl.textContent = tax.toLocaleString('en-IN');
+    if (totalEl) totalEl.textContent = total.toLocaleString('en-IN');
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.style.background = type === 'success' ? '#d4af37' : '#f44336';
+    notification.style.color = type === 'success' ? 'black' : 'white';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 window.displayCart = displayCart;
+window.showNotification = showNotification;
