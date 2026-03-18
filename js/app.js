@@ -1,4 +1,4 @@
-// js/app.js - SHOW PRODUCTS EXACTLY AS IN EXCEL
+// js/app.js - SHOW ONLY PRODUCTS FROM EXCEL
 let products = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -36,7 +36,7 @@ async function loadProductsFromExcel() {
         // Check if we got products from Excel
         if (data && !data.error && Array.isArray(data)) {
             if (data.length > 0) {
-                // Map Excel data to product format
+                // Map Excel data to product format - EXACTLY as in your Excel
                 products = data.map(item => ({
                     id: item.id || item.ID,
                     sku: item.sku || item.SKU,
@@ -44,8 +44,7 @@ async function loadProductsFromExcel() {
                     price: Number(item.price || item.Price || 0),
                     stock: Number(item.stock || item.Stock || 0),
                     category: item.category || item.Category || 'Jewelry',
-                    description: item.description || item.Description || '',
-                    lastUpdated: item.lastUpdated || item.LastUpdated || new Date().toISOString()
+                    description: item.description || item.Description || ''
                 }));
                 
                 console.log(`✅ Loaded ${products.length} products from Excel:`, products);
@@ -71,6 +70,19 @@ async function loadProductsFromExcel() {
         }
     } catch (error) {
         console.error('Failed to load from Excel:', error);
+        
+        // Check if we have products in localStorage as fallback
+        const localProducts = localStorage.getItem('products');
+        if (localProducts) {
+            try {
+                products = JSON.parse(localProducts);
+                if (products.length > 0) {
+                    console.log('✅ Using products from localStorage as fallback');
+                    displayProducts(products);
+                    return;
+                }
+            } catch (e) {}
+        }
         
         // Show error message
         container.innerHTML = `
@@ -112,7 +124,7 @@ function displayProducts(products) {
         const stock = Number(product.stock) || 0;
         const category = product.category || 'Jewelry';
         
-        // Use placeholder image since Excel doesn't have images
+        // Use placeholder image
         const image = CONFIG.PLACEHOLDER_IMAGE;
         
         html += `
