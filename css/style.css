@@ -1,4 +1,4 @@
-/* css/style.css - Complete Professional Styling */
+/* css/style.css - Complete Styling */
 * {
     margin: 0;
     padding: 0;
@@ -30,7 +30,6 @@ body {
     flex-direction: column;
 }
 
-/* Header */
 header {
     display: flex;
     justify-content: space-between;
@@ -74,7 +73,6 @@ nav a:hover, nav a.active {
     font-weight: bold;
 }
 
-/* Container */
 .container {
     max-width: 1200px;
     margin: 40px auto;
@@ -82,7 +80,6 @@ nav a:hover, nav a.active {
     flex: 1;
 }
 
-/* Hero Section */
 .hero {
     height: 400px;
     background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
@@ -110,7 +107,6 @@ nav a:hover, nav a.active {
     color: white;
 }
 
-/* Page Title */
 .page-title {
     color: var(--gold);
     margin-bottom: 30px;
@@ -129,7 +125,6 @@ nav a:hover, nav a.active {
     background: var(--gold);
 }
 
-/* Products Grid */
 .products {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -139,7 +134,6 @@ nav a:hover, nav a.active {
     margin: 0 auto;
 }
 
-/* Product Card */
 .card {
     background: var(--darker);
     border-radius: 12px;
@@ -160,6 +154,9 @@ nav a:hover, nav a.active {
     height: 250px;
     overflow: hidden;
     background: #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .main-image {
@@ -219,7 +216,6 @@ nav a:hover, nav a.active {
     color: var(--danger);
 }
 
-/* Buttons */
 button {
     width: 100%;
     padding: 12px;
@@ -235,7 +231,7 @@ button {
     letter-spacing: 1px;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     background: var(--gold-dark);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
@@ -244,26 +240,11 @@ button:hover {
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
 }
 
 .add-to-cart-btn {
     background: var(--gold);
     color: var(--black);
-}
-
-.add-to-cart-btn:hover {
-    background: var(--gold-dark);
-}
-
-/* Cart Page */
-.cart-container {
-    background: var(--darker);
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 20px;
-    border: 1px solid var(--gray);
 }
 
 .cart-item {
@@ -341,7 +322,6 @@ button:disabled {
     color: white;
 }
 
-/* Checkout Page */
 .checkout-grid {
     display: grid;
     grid-template-columns: 1fr 350px;
@@ -411,7 +391,6 @@ button:disabled {
     margin-top: 15px;
 }
 
-/* Track Order Page */
 .track-container {
     max-width: 600px;
     margin: 0 auto;
@@ -449,25 +428,6 @@ button:disabled {
     border-radius: 8px;
 }
 
-.order-details {
-    background: var(--darker);
-    padding: 20px;
-    border-radius: 8px;
-}
-
-.order-details h3 {
-    color: var(--gold);
-    margin-bottom: 15px;
-}
-
-.track-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--light-gray);
-}
-
-/* Login Page */
 .login-container {
     display: flex;
     justify-content: center;
@@ -507,7 +467,6 @@ button:disabled {
     border-top: 1px solid var(--gray);
 }
 
-/* Admin Panel */
 .admin-container {
     max-width: 1400px;
     margin: 40px auto;
@@ -580,6 +539,8 @@ button:disabled {
     border-radius: 6px;
     transition: all 0.3s;
     border: 1px solid var(--light-gray);
+    cursor: pointer;
+    font-size: 14px;
 }
 
 .action-btn:hover {
@@ -588,7 +549,6 @@ button:disabled {
     border-color: var(--gold);
 }
 
-/* Add Product Form */
 .add-product-form {
     background: var(--darker);
     padding: 30px;
@@ -619,7 +579,6 @@ button:disabled {
     font-size: 16px;
 }
 
-/* Products Grid Admin */
 .products-grid-admin {
     display: grid;
     gap: 15px;
@@ -676,7 +635,6 @@ button:disabled {
     background: #d32f2f;
 }
 
-/* Orders Table */
 .orders-table-container {
     background: var(--darker);
     padding: 30px;
@@ -711,7 +669,6 @@ button:disabled {
     color: white;
 }
 
-/* Loading Spinner */
 .loading-spinner {
     grid-column: 1/-1;
     text-align: center;
@@ -728,7 +685,6 @@ button:disabled {
     margin: 0 auto 20px;
 }
 
-/* Notifications */
 .notification {
     position: fixed;
     top: 20px;
@@ -741,7 +697,6 @@ button:disabled {
     box-shadow: 0 5px 20px rgba(0,0,0,0.3);
 }
 
-/* Footer */
 footer {
     background: var(--black);
     text-align: center;
@@ -751,7 +706,6 @@ footer {
     border-top: 1px solid var(--gold);
 }
 
-/* Animations */
 @keyframes slideIn {
     from {
         transform: translateX(100%);
@@ -763,22 +717,10 @@ footer {
     }
 }
 
-@keyframes slideOut {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-}
-
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
 
-/* Responsive Design */
 @media (max-width: 968px) {
     .checkout-grid {
         grid-template-columns: 1fr;
