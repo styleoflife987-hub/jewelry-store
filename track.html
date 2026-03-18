@@ -27,11 +27,6 @@
             </div>
             
             <div id="trackingResult" class="tracking-result"></div>
-            
-            <div class="order-help">
-                <h4>Need Help?</h4>
-                <p>Contact us: support@styleoflife.com | +91 98765 43210</p>
-            </div>
         </div>
     </div>
 
@@ -40,7 +35,7 @@
     </footer>
 
     <script>
-        async function trackOrder() {
+        function trackOrder() {
             const orderId = document.getElementById('orderId').value.trim();
             if (!orderId) {
                 alert('Please enter order ID');
@@ -48,33 +43,19 @@
             }
             
             const resultDiv = document.getElementById('trackingResult');
-            resultDiv.innerHTML = '<div class="loading">Tracking your order...</div>';
             
-            // First check local storage
-            const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const localOrder = localOrders.find(o => o.orderId === orderId);
+            // Check local storage first
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const order = orders.find(o => o.orderId === orderId);
             
-            if (localOrder) {
-                displayOrderDetails(localOrder);
-                return;
-            }
-            
-            // Then try server
-            try {
-                const response = await fetch(`${CONFIG.API_URL}?action=track&id=${orderId}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    resultDiv.innerHTML = '<div class="error-message">Order not found</div>';
-                } else {
-                    displayOrderDetails(data);
-                }
-            } catch (error) {
-                resultDiv.innerHTML = '<div class="error-message">Error tracking order. Please try again.</div>';
+            if (order) {
+                displayOrder(order);
+            } else {
+                resultDiv.innerHTML = '<p class="error-message">Order not found</p>';
             }
         }
         
-        function displayOrderDetails(order) {
+        function displayOrder(order) {
             const resultDiv = document.getElementById('trackingResult');
             
             const statusColors = {
@@ -92,7 +73,7 @@
                     itemsHtml += `
                         <div class="track-item">
                             <span>${item.name} x${item.quantity}</span>
-                            <span>₹${(item.price * item.quantity).toLocaleString()}</span>
+                            <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
                         </div>
                     `;
                 });
@@ -103,8 +84,10 @@
                     <h3>Order Details</h3>
                     <p><strong>Order ID:</strong> ${order.orderId}</p>
                     <p><strong>Customer:</strong> ${order.name}</p>
-                    <p><strong>Status:</strong> <span style="color: ${statusColors[order.status] || '#d4af37'}; font-weight: bold;">${order.status || 'Pending'}</span></p>
-                    <p><strong>Total:</strong> ₹${order.total?.toLocaleString() || 0}</p>
+                    <p><strong>Phone:</strong> ${order.phone}</p>
+                    <p><strong>Address:</strong> ${order.address}</p>
+                    <p><strong>Status:</strong> <span style="color: ${statusColors[order.status] || '#d4af37'}; font-weight: bold;">${order.status}</span></p>
+                    <p><strong>Total:</strong> ₹${order.total.toLocaleString('en-IN')}</p>
                     <p><strong>Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
                     ${itemsHtml}
                 </div>
