@@ -88,12 +88,7 @@
         
         document.addEventListener('DOMContentLoaded', function() {
             loadProducts();
-            
-            window.addEventListener('syncComplete', function(e) {
-                if (e.detail.products) {
-                    loadProducts();
-                }
-            });
+            window.addEventListener('syncComplete', function() { loadProducts(); });
         });
         
         async function loadProducts() {
@@ -103,7 +98,6 @@
                 displayProducts(products);
                 localStorage.setItem('products', JSON.stringify(products));
             } catch (error) {
-                console.error('Error loading products:', error);
                 const localProducts = JSON.parse(localStorage.getItem('products') || '[]');
                 displayProducts(localProducts);
             }
@@ -111,7 +105,6 @@
         
         function displayProducts(products) {
             const container = document.getElementById('productsList');
-            
             if (!products || products.length === 0) {
                 container.innerHTML = '<p>No products found in Excel</p>';
                 return;
@@ -120,7 +113,7 @@
             let html = '';
             products.forEach(product => {
                 html += `
-                    <div class="product-card-admin" data-product-id="${product.id}">
+                    <div class="product-card-admin">
                         <div class="product-card-info">
                             <h4>${product.name}</h4>
                             <p class="product-sku">SKU: ${product.sku}</p>
@@ -134,7 +127,6 @@
                     </div>
                 `;
             });
-            
             container.innerHTML = html;
         }
         
@@ -171,14 +163,12 @@
                 
                 if (data.success) {
                     alert('✅ Product added to Excel successfully!');
-                    
                     document.getElementById('sku').value = '';
                     document.getElementById('name').value = '';
                     document.getElementById('category').value = '';
                     document.getElementById('price').value = '';
                     document.getElementById('stock').value = '450';
                     document.getElementById('description').value = '';
-                    
                     await forceSync();
                     loadProducts();
                 } else {
@@ -194,11 +184,9 @@
         
         async function deleteProduct(id) {
             if (!confirm('Delete this product from Excel?')) return;
-            
             try {
                 const response = await fetch(`${CONFIG.API_URL}?action=deleteProduct&id=${id}`);
                 const data = await response.json();
-                
                 if (data.success) {
                     alert('✅ Product deleted from Excel');
                     await forceSync();
