@@ -1,4 +1,4 @@
-// js/cart.js - COMPLETE FIXED VERSION
+// js/cart.js - Complete Cart System
 let cart = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -14,12 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname.includes('cart.html') || 
         window.location.pathname.endsWith('cart.html')) {
         displayCart();
-    }
-    
-    // If on checkout page, update summary
-    if (window.location.pathname.includes('checkout.html') ||
-        window.location.pathname.endsWith('checkout.html')) {
-        updateCheckoutSummary();
     }
 });
 
@@ -79,9 +73,6 @@ window.removeFromCart = function(sku) {
     if (window.location.pathname.includes('cart.html')) {
         displayCart();
     }
-    if (window.location.pathname.includes('checkout.html')) {
-        updateCheckoutSummary();
-    }
     
     if (removedItem) {
         showNotification(`${removedItem.name} removed from cart`, 'info');
@@ -97,11 +88,9 @@ window.updateQuantity = function(sku, newQuantity) {
     newQuantity = parseInt(newQuantity);
     
     if (isNaN(newQuantity) || newQuantity < 1) {
-        // Remove if invalid
         cart.splice(itemIndex, 1);
         showNotification('Item removed', 'info');
     } else {
-        // Cap at 10
         if (newQuantity > 10) {
             newQuantity = 10;
             showNotification('Maximum quantity is 10', 'warning');
@@ -113,9 +102,6 @@ window.updateQuantity = function(sku, newQuantity) {
     
     if (window.location.pathname.includes('cart.html')) {
         displayCart();
-    }
-    if (window.location.pathname.includes('checkout.html')) {
-        updateCheckoutSummary();
     }
 };
 
@@ -133,9 +119,6 @@ window.clearCart = function() {
         if (window.location.pathname.includes('cart.html')) {
             displayCart();
         }
-        if (window.location.pathname.includes('checkout.html')) {
-            updateCheckoutSummary();
-        }
         
         showNotification('Cart cleared', 'info');
     }
@@ -149,10 +132,7 @@ function displayCart() {
     const totalEl = document.getElementById('cartTotal');
     const checkoutBtn = document.getElementById('checkoutBtn');
     
-    if (!container) {
-        console.log('Cart container not found');
-        return;
-    }
+    if (!container) return;
     
     if (cart.length === 0) {
         container.innerHTML = `
@@ -179,10 +159,10 @@ function displayCart() {
         subtotal += itemTotal;
         
         html += `
-            <div class="cart-item" style="display: grid; grid-template-columns: 100px 2fr 1fr 100px 100px 50px; gap: 15px; align-items: center; background: #1a1a1a; padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333;">
-                <img src="${item.image}" alt="${item.name}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+            <div class="cart-item">
+                <img src="${item.image}" alt="${item.name}">
                 <div>
-                    <h4 style="margin-bottom: 5px;">${item.name}</h4>
+                    <h4>${item.name}</h4>
                     <p style="color: #888; font-size: 12px;">SKU: ${item.sku}</p>
                 </div>
                 <div style="color: #d4af37; font-weight: bold;">₹${item.price.toLocaleString('en-IN')}</div>
@@ -195,16 +175,15 @@ function displayCart() {
                            style="width: 70px; padding: 8px; background: #333; border: 1px solid #444; color: white; border-radius: 4px; text-align: center;">
                 </div>
                 <div style="font-weight: bold; color: #d4af37;">₹${itemTotal.toLocaleString('en-IN')}</div>
-                <button onclick="removeFromCart('${item.sku}')" style="background: transparent; color: #f44336; border: 1px solid #f44336; padding: 5px 10px; width: auto; font-size: 12px; cursor: pointer;">Remove</button>
+                <button onclick="removeFromCart('${item.sku}')" style="background: transparent; color: #f44336; border: 1px solid #f44336; padding: 5px 10px; width: auto;">Remove</button>
             </div>
         `;
     });
     
     container.innerHTML = html;
     
-    // Calculate totals
     const tax = Math.round(subtotal * 0.18);
-    const shipping = subtotal >= 50000 ? 0 : 100;
+    const shipping = 100;
     const total = subtotal + tax + shipping;
     
     if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('en-IN');
@@ -212,70 +191,7 @@ function displayCart() {
     if (totalEl) totalEl.textContent = total.toLocaleString('en-IN');
 }
 
-// Update checkout summary
-window.updateCheckoutSummary = function() {
-    const summaryContainer = document.getElementById('cartSummary');
-    const subtotalEl = document.getElementById('orderSubtotal');
-    const taxEl = document.getElementById('orderTax');
-    const totalEl = document.getElementById('orderTotal');
-    
-    if (!summaryContainer) return;
-    
-    if (cart.length === 0) {
-        summaryContainer.innerHTML = '<p style="color: #f44336; text-align: center;">Your cart is empty. <a href="index.html" style="color: #d4af37;">Shop now</a></p>';
-        return;
-    }
-    
-    let subtotal = 0;
-    let itemsHtml = '';
-    
-    cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        subtotal += itemTotal;
-        
-        itemsHtml += `
-            <div style="display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #333;">
-                <span>${item.name} <span style="color: #888;">x${item.quantity}</span></span>
-                <span style="color: #d4af37;">₹${itemTotal.toLocaleString('en-IN')}</span>
-            </div>
-        `;
-    });
-    
-    const tax = Math.round(subtotal * 0.18);
-    const shipping = subtotal >= 50000 ? 0 : 100;
-    const total = subtotal + tax + shipping;
-    
-    summaryContainer.innerHTML = `
-        <h3 style="color: #d4af37; margin-bottom: 15px;">Order Summary</h3>
-        ${itemsHtml}
-        <div style="margin-top: 15px;">
-            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
-                <span>Subtotal:</span>
-                <span>₹${subtotal.toLocaleString('en-IN')}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
-                <span>Shipping:</span>
-                <span>${shipping === 0 ? 'Free' : '₹' + shipping}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
-                <span>GST (18%):</span>
-                <span>₹${tax.toLocaleString('en-IN')}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 10px; border-top: 2px solid #d4af37; font-weight: bold;">
-                <span>Total:</span>
-                <span style="color: #d4af37; font-size: 20px;">₹${total.toLocaleString('en-IN')}</span>
-            </div>
-        </div>
-    `;
-    
-    if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('en-IN');
-    if (taxEl) taxEl.textContent = tax.toLocaleString('en-IN');
-    if (totalEl) totalEl.textContent = total.toLocaleString('en-IN');
-    
-    return total;
-};
-
-// Show notification
+// Show notification (reuse from app.js)
 function showNotification(message, type = 'success') {
     const existing = document.querySelector('.notification');
     if (existing) existing.remove();
@@ -312,9 +228,3 @@ function showNotification(message, type = 'success') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
-
-// Make functions globally available
-window.getCart = window.getCart;
-window.getCartCount = window.getCartCount;
-window.getCartTotal = window.getCartTotal;
-window.updateCheckoutSummary = window.updateCheckoutSummary;
