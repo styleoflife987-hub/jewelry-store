@@ -3,90 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Orders - Style Of Life</title>
+    <title>Manage Orders - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
 </head>
-<body onload="checkAdminAuth(); loadOrders()">
+<body>
     <header>
-        <div class="logo">STYLE OF LIFE - LIVE ORDERS</div>
+        <div class="logo">✨ STYLE OF LIFE - ORDERS</div>
         <nav>
             <a href="index.html">Home</a>
             <a href="admin.html">Dashboard</a>
             <a href="admin-products.html">Products</a>
-            <a href="admin-orders.html">Orders</a>
-            <a href="admin-images.html">Images</a>
+            <a href="admin-orders.html" class="active">Orders</a>
             <a href="#" onclick="logout()">Logout</a>
         </nav>
     </header>
 
-    <div style="max-width:1200px; margin:40px auto; padding:20px">
-        <h1 style="color:#d4af37; margin-bottom:30px">Live Order Management</h1>
+    <div class="admin-container">
+        <h1 class="page-title">Order Management</h1>
         
-        <div style="background:#1a1a1a; padding:15px; border-radius:8px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center">
-            <span style="color:#4CAF50">🟢 Live - Orders sync with Excel</span>
-            <button onclick="loadOrders()" style="width:auto; padding:8px 20px">🔄 Refresh Now</button>
+        <div class="sync-status">
+            <span class="status-indicator">🟢</span>
+            <span>Live sync with Excel - Orders update in real-time</span>
+            <button onclick="loadOrders()" class="refresh-btn">↻ Refresh</button>
         </div>
         
-        <div style="background:#1a1a1a; padding:30px; border-radius:15px">
-            <h3 style="color:#d4af37; margin-bottom:20px">Orders from Excel</h3>
-            <div id="ordersList"></div>
+        <!-- Orders List -->
+        <div class="orders-table-container">
+            <h2>All Orders</h2>
+            <div id="ordersList" class="orders-list">
+                <p>Loading orders...</p>
+            </div>
         </div>
     </div>
 
+    <footer>
+        <p>© 2026 Style Of Life Jewelry - Order Management</p>
+    </footer>
+
     <script>
-        function checkAdminAuth() {
-            if (!sessionStorage.getItem('adminLoggedIn')) {
-                window.location.href = 'login.html';
-            }
+        // Check authentication
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
         }
         
+        // Load orders on page load
+        document.addEventListener('DOMContentLoaded', loadOrders);
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadOrders, 30000);
+        
         async function loadOrders() {
+            const container = document.getElementById('ordersList');
+            
             try {
+                // Try server first
                 const response = await fetch(`${CONFIG.API_URL}?action=orders`);
                 const orders = await response.json();
                 
-                const container = document.getElementById('ordersList');
-                
-                if (!orders || orders.length === 0) {
-                    container.innerHTML = '<p>No orders found in Excel</p>';
-                    return;
+                if (orders && orders.length > 0) {
+                    displayOrders(orders);
+                    // Save to localStorage
+                    localStorage.setItem('orders', JSON.stringify(orders));
+                } else {
+                    // Check local storage
+                    const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    if (localOrders.length > 0) {
+                        displayOrders(localOrders);
+                    } else {
+                        container.innerHTML = '<p class="no-data">No orders found</p>';
+                    }
                 }
-                
-                let html = '<div style="overflow-x:auto"><table style="width:100%"><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr>';
-                
-                orders.forEach(order => {
-                    const itemsList = order.items.map(item => `${item.name} x${item.quantity}`).join('<br>');
-                    
-                    html += `
-                        <tr>
-                            <td>${order.orderId}</td>
-                            <td>${order.name}<br><small>${order.phone}</small></td>
-                            <td><small>${itemsList}</small></td>
-                            <td>₹${Number(order.total).toLocaleString('en-IN')}</td>
-                            <td>
-                                <select onchange="updateOrderStatus('${order.orderId}', this.value)" style="background:#333; color:white; padding:5px;">
-                                    <option ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                    <option ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
-                                    <option ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                                    <option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                                    <option ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                                </select>
-                            </td>
-                            <td>${new Date(order.date).toLocaleDateString()}</td>
-                            <td>
-                                <button onclick="deleteOrder('${order.orderId}')" style="width:auto; padding:5px 10px; background:#f44336;">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                html += '</table></div>';
-                container.innerHTML = html;
             } catch (error) {
-                console.error('Error loading orders:', error);
-                document.getElementById('ordersList').innerHTML = '<p style="color:#f44336">Error loading orders</p>';
+                // Fallback to localStorage
+                const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                if (localOrders.length > 0) {
+                    displayOrders(localOrders);
+                } else {
+                    container.innerHTML = '<p class="no-data">No orders found</p>';
+                }
             }
+        }
+        
+        function displayOrders(orders) {
+            const container = document.getElementById('ordersList');
+            
+            let html = `
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            orders.forEach(order => {
+                const itemsList = order.items ? order.items.map(item => 
+                    `${item.name} x${item.quantity}`
+                ).join('<br>') : 'No items';
+                
+                const statusClass = `status-${order.status?.toLowerCase() || 'pending'}`;
+                
+                html += `
+                    <tr>
+                        <td><strong>${order.orderId}</strong></td>
+                        <td>
+                            ${order.name}<br>
+                            <small>${order.phone}</small>
+                        </td>
+                        <td><small>${itemsList}</small></td>
+                        <td>₹${(order.total || 0).toLocaleString()}</td>
+                        <td>
+                            <select onchange="updateOrderStatus('${order.orderId}', this.value)" class="status-select ${statusClass}">
+                                <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </td>
+                        <td>${new Date(order.date).toLocaleDateString()}</td>
+                        <td>
+                            <button onclick="viewOrderDetails('${order.orderId}')" class="view-btn">👁️ View</button>
+                            <button onclick="deleteOrder('${order.orderId}')" class="delete-btn">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
         }
         
         async function updateOrderStatus(orderId, status) {
@@ -95,8 +148,15 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert(`✅ Order ${orderId} updated to ${status} in Excel`);
-                    loadOrders();
+                    alert(`✅ Order ${orderId} updated to ${status}`);
+                    
+                    // Update local storage
+                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    const orderIndex = orders.findIndex(o => o.orderId === orderId);
+                    if (orderIndex >= 0) {
+                        orders[orderIndex].status = status;
+                        localStorage.setItem('orders', JSON.stringify(orders));
+                    }
                 } else {
                     alert('Error updating order');
                 }
@@ -106,14 +166,20 @@
         }
         
         async function deleteOrder(orderId) {
-            if (!confirm('Delete this order from Excel?')) return;
+            if (!confirm('Delete this order permanently?')) return;
             
             try {
                 const response = await fetch(`${CONFIG.API_URL}?action=deleteOrder&orderId=${orderId}`);
                 const data = await response.json();
                 
                 if (data.success) {
-                    alert('✅ Order deleted from Excel');
+                    alert('✅ Order deleted');
+                    
+                    // Update local storage
+                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    const updatedOrders = orders.filter(o => o.orderId !== orderId);
+                    localStorage.setItem('orders', JSON.stringify(updatedOrders));
+                    
                     loadOrders();
                 } else {
                     alert('Error deleting order');
@@ -123,12 +189,21 @@
             }
         }
         
+        function viewOrderDetails(orderId) {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const order = orders.find(o => o.orderId === orderId);
+            
+            if (order) {
+                alert(JSON.stringify(order, null, 2));
+            } else {
+                alert(`Order ${orderId} details - Would show modal in production`);
+            }
+        }
+        
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');
             window.location.href = 'login.html';
         }
-        
-        setInterval(loadOrders, 5000);
     </script>
 </body>
 </html>
