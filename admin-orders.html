@@ -6,7 +6,6 @@
     <title>Manage Orders - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
-    <script src="js/sync.js"></script>
 </head>
 <body>
     <header>
@@ -23,14 +22,12 @@
     <div class="admin-container">
         <h1 class="page-title">Order Management</h1>
         
-        <!-- Live Sync Status -->
         <div class="sync-status" style="background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
             <span class="status-indicator" style="color: #4CAF50;">🟢</span>
             <span>Live sync with Excel - Orders update in real-time</span>
             <button onclick="forceSync()" style="width: auto; padding: 8px 20px; margin-left: auto;">🔄 Sync Now</button>
         </div>
         
-        <!-- Orders List -->
         <div class="orders-table-container">
             <h2>All Orders from Excel</h2>
             <div id="ordersList" class="orders-list">
@@ -43,8 +40,8 @@
         <p>© 2026 Style Of Life Jewelry - Live Sync Active</p>
     </footer>
 
+    <script src="js/sync.js"></script>
     <script>
-        // Check authentication
         if (!sessionStorage.getItem('adminLoggedIn')) {
             window.location.href = 'login.html';
         }
@@ -52,14 +49,12 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadOrders();
             
-            // Listen for sync updates
             window.addEventListener('syncComplete', function(e) {
                 if (e.detail.orders) {
                     loadOrders();
                 }
             });
             
-            // Auto refresh every 5 seconds
             setInterval(loadOrders, 5000);
         });
         
@@ -67,11 +62,12 @@
             try {
                 const response = await fetch(`${CONFIG.API_URL}?action=orders&t=${Date.now()}`);
                 const orders = await response.json();
-                
                 displayOrders(orders);
+                localStorage.setItem('orders', JSON.stringify(orders));
             } catch (error) {
                 console.error('Error loading orders:', error);
-                document.getElementById('ordersList').innerHTML = '<p style="color: #f44336;">Error loading orders</p>';
+                const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                displayOrders(localOrders);
             }
         }
         
@@ -112,7 +108,7 @@
                             <small>${order.phone}</small>
                         </td>
                         <td><small>${itemsList}</small></td>
-                        <td>₹${(order.total || 0).toLocaleString()}</td>
+                        <td>₹${(order.total || 0).toLocaleString('en-IN')}</td>
                         <td>
                             <select onchange="updateOrderStatus('${order.orderId}', this.value)" class="status-select">
                                 <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
@@ -147,11 +143,7 @@
                 
                 if (data.success) {
                     alert(`✅ Order ${orderId} updated to ${status} in Excel`);
-                    
-                    // Force sync to update all clients
                     await forceSync();
-                    
-                    // Reload orders
                     loadOrders();
                 } else {
                     alert('Error updating order');
@@ -175,11 +167,7 @@
                 
                 if (data.success) {
                     alert('✅ Order deleted from Excel');
-                    
-                    // Force sync to update all clients
                     await forceSync();
-                    
-                    // Reload orders
                     loadOrders();
                 } else {
                     alert('Error deleting order');
