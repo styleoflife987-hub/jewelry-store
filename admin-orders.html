@@ -48,13 +48,7 @@
         
         document.addEventListener('DOMContentLoaded', function() {
             loadOrders();
-            
-            window.addEventListener('syncComplete', function(e) {
-                if (e.detail.orders) {
-                    loadOrders();
-                }
-            });
-            
+            window.addEventListener('syncComplete', function() { loadOrders(); });
             setInterval(loadOrders, 5000);
         });
         
@@ -65,7 +59,6 @@
                 displayOrders(orders);
                 localStorage.setItem('orders', JSON.stringify(orders));
             } catch (error) {
-                console.error('Error loading orders:', error);
                 const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
                 displayOrders(localOrders);
             }
@@ -73,40 +66,19 @@
         
         function displayOrders(orders) {
             const container = document.getElementById('ordersList');
-            
             if (!orders || orders.length === 0) {
                 container.innerHTML = '<p>No orders found in Excel</p>';
                 return;
             }
             
-            let html = `
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Customer</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            let html = `<table class="orders-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>`;
             
             orders.forEach(order => {
-                const itemsList = order.items ? order.items.map(item => 
-                    `${item.name} x${item.quantity}`
-                ).join('<br>') : 'No items';
-                
+                const itemsList = order.items ? order.items.map(item => `${item.name} x${item.quantity}`).join('<br>') : 'No items';
                 html += `
                     <tr>
                         <td><strong>${order.orderId}</strong></td>
-                        <td>
-                            ${order.name}<br>
-                            <small>${order.phone}</small>
-                        </td>
+                        <td>${order.name}<br><small>${order.phone}</small></td>
                         <td><small>${itemsList}</small></td>
                         <td>₹${(order.total || 0).toLocaleString('en-IN')}</td>
                         <td>
@@ -119,9 +91,7 @@
                             </select>
                         </td>
                         <td>${new Date(order.date).toLocaleDateString()}</td>
-                        <td>
-                            <button onclick="deleteOrder('${order.orderId}')" class="delete-btn">🗑️</button>
-                        </td>
+                        <td><button onclick="deleteOrder('${order.orderId}')" class="delete-btn">🗑️</button></td>
                     </tr>
                 `;
             });
@@ -132,21 +102,12 @@
         
         async function updateOrderStatus(orderId, status) {
             try {
-                const params = new URLSearchParams({
-                    action: 'updateOrderStatus',
-                    orderId: orderId,
-                    status: status
-                });
-                
-                const response = await fetch(`${CONFIG.API_URL}?${params}`);
+                const response = await fetch(`${CONFIG.API_URL}?action=updateOrderStatus&orderId=${orderId}&status=${status}`);
                 const data = await response.json();
-                
                 if (data.success) {
                     alert(`✅ Order ${orderId} updated to ${status} in Excel`);
                     await forceSync();
                     loadOrders();
-                } else {
-                    alert('Error updating order');
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -155,22 +116,13 @@
         
         async function deleteOrder(orderId) {
             if (!confirm('Delete this order from Excel?')) return;
-            
             try {
-                const params = new URLSearchParams({
-                    action: 'deleteOrder',
-                    orderId: orderId
-                });
-                
-                const response = await fetch(`${CONFIG.API_URL}?${params}`);
+                const response = await fetch(`${CONFIG.API_URL}?action=deleteOrder&orderId=${orderId}`);
                 const data = await response.json();
-                
                 if (data.success) {
                     alert('✅ Order deleted from Excel');
                     await forceSync();
                     loadOrders();
-                } else {
-                    alert('Error deleting order');
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
