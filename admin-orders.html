@@ -22,13 +22,6 @@
     <div class="admin-container">
         <h1 class="page-title">Order Management</h1>
         
-        <div class="sync-status">
-            <span class="status-indicator">🟢</span>
-            <span>Live sync with Excel - Orders update in real-time</span>
-            <button onclick="loadOrders()" class="refresh-btn">↻ Refresh</button>
-        </div>
-        
-        <!-- Orders List -->
         <div class="orders-table-container">
             <h2>All Orders</h2>
             <div id="ordersList" class="orders-list">
@@ -47,46 +40,20 @@
             window.location.href = 'login.html';
         }
         
-        // Load orders on page load
         document.addEventListener('DOMContentLoaded', loadOrders);
         
-        // Auto-refresh every 30 seconds
-        setInterval(loadOrders, 30000);
-        
-        async function loadOrders() {
-            const container = document.getElementById('ordersList');
-            
-            try {
-                // Try server first
-                const response = await fetch(`${CONFIG.API_URL}?action=orders`);
-                const orders = await response.json();
-                
-                if (orders && orders.length > 0) {
-                    displayOrders(orders);
-                    // Save to localStorage
-                    localStorage.setItem('orders', JSON.stringify(orders));
-                } else {
-                    // Check local storage
-                    const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-                    if (localOrders.length > 0) {
-                        displayOrders(localOrders);
-                    } else {
-                        container.innerHTML = '<p class="no-data">No orders found</p>';
-                    }
-                }
-            } catch (error) {
-                // Fallback to localStorage
-                const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-                if (localOrders.length > 0) {
-                    displayOrders(localOrders);
-                } else {
-                    container.innerHTML = '<p class="no-data">No orders found</p>';
-                }
-            }
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            displayOrders(orders);
         }
         
         function displayOrders(orders) {
             const container = document.getElementById('ordersList');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<p>No orders found</p>';
+                return;
+            }
             
             let html = `
                 <table class="orders-table">
@@ -109,8 +76,6 @@
                     `${item.name} x${item.quantity}`
                 ).join('<br>') : 'No items';
                 
-                const statusClass = `status-${order.status?.toLowerCase() || 'pending'}`;
-                
                 html += `
                     <tr>
                         <td><strong>${order.orderId}</strong></td>
@@ -119,9 +84,9 @@
                             <small>${order.phone}</small>
                         </td>
                         <td><small>${itemsList}</small></td>
-                        <td>₹${(order.total || 0).toLocaleString()}</td>
+                        <td>₹${(order.total || 0).toLocaleString('en-IN')}</td>
                         <td>
-                            <select onchange="updateOrderStatus('${order.orderId}', this.value)" class="status-select ${statusClass}">
+                            <select onchange="updateOrderStatus('${order.orderId}', this.value)" class="status-select">
                                 <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
                                 <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
                                 <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
@@ -131,7 +96,6 @@
                         </td>
                         <td>${new Date(order.date).toLocaleDateString()}</td>
                         <td>
-                            <button onclick="viewOrderDetails('${order.orderId}')" class="view-btn">👁️ View</button>
                             <button onclick="deleteOrder('${order.orderId}')" class="delete-btn">🗑️</button>
                         </td>
                     </tr>
@@ -142,62 +106,27 @@
             container.innerHTML = html;
         }
         
-        async function updateOrderStatus(orderId, status) {
-            try {
-                const response = await fetch(`${CONFIG.API_URL}?action=updateOrderStatus&orderId=${orderId}&status=${status}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    alert(`✅ Order ${orderId} updated to ${status}`);
-                    
-                    // Update local storage
-                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-                    const orderIndex = orders.findIndex(o => o.orderId === orderId);
-                    if (orderIndex >= 0) {
-                        orders[orderIndex].status = status;
-                        localStorage.setItem('orders', JSON.stringify(orders));
-                    }
-                } else {
-                    alert('Error updating order');
-                }
-            } catch (error) {
-                alert('Error updating order: ' + error.message);
-            }
-        }
-        
-        async function deleteOrder(orderId) {
-            if (!confirm('Delete this order permanently?')) return;
-            
-            try {
-                const response = await fetch(`${CONFIG.API_URL}?action=deleteOrder&orderId=${orderId}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    alert('✅ Order deleted');
-                    
-                    // Update local storage
-                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-                    const updatedOrders = orders.filter(o => o.orderId !== orderId);
-                    localStorage.setItem('orders', JSON.stringify(updatedOrders));
-                    
-                    loadOrders();
-                } else {
-                    alert('Error deleting order');
-                }
-            } catch (error) {
-                alert('Error deleting order: ' + error.message);
-            }
-        }
-        
-        function viewOrderDetails(orderId) {
+        function updateOrderStatus(orderId, status) {
             const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const order = orders.find(o => o.orderId === orderId);
+            const orderIndex = orders.findIndex(o => o.orderId === orderId);
             
-            if (order) {
-                alert(JSON.stringify(order, null, 2));
-            } else {
-                alert(`Order ${orderId} details - Would show modal in production`);
+            if (orderIndex >= 0) {
+                orders[orderIndex].status = status;
+                localStorage.setItem('orders', JSON.stringify(orders));
+                alert(`✅ Order ${orderId} updated to ${status}`);
+                loadOrders();
             }
+        }
+        
+        function deleteOrder(orderId) {
+            if (!confirm('Delete this order?')) return;
+            
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const updatedOrders = orders.filter(o => o.orderId !== orderId);
+            localStorage.setItem('orders', JSON.stringify(updatedOrders));
+            
+            alert('✅ Order deleted');
+            loadOrders();
         }
         
         function logout() {
