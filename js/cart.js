@@ -1,8 +1,7 @@
-// js/cart.js - CORRECTED WITH LIVE SYNC
+// js/cart.js - COMPLETE CORRECTED CART SYSTEM
 let sessionId = generateSessionId();
 let lastSyncTime = 0;
 let syncInterval = null;
-let cartSyncInterval = null;
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', function() {
@@ -24,27 +23,21 @@ document.addEventListener('DOMContentLoaded', function() {
         displayCheckoutSummary();
     }
     
-    // Listen for storage events (for multi-tab sync)
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'cart') {
-            console.log("📦 Cart updated in another tab");
-            updateCartCount();
-            if (window.location.pathname.includes('cart.html')) {
-                displayCartPage();
-            }
-            if (window.location.pathname.includes('checkout.html')) {
-                displayCheckoutSummary();
-            }
-        }
+    // Clean up on page unload
+    window.addEventListener('beforeunload', function() {
+        stopAutoSync();
     });
 });
 
 // ===== SESSION MANAGEMENT =====
 function generateSessionId() {
+    // Try to get existing session from localStorage
     let session = localStorage.getItem('sessionId');
     if (!session) {
+        // Create new session if none exists
         session = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('sessionId', session);
+        console.log("🆕 New session created:", session);
     }
     return session;
 }
@@ -54,10 +47,12 @@ function loadCartFromStorage() {
     try {
         const savedCart = localStorage.getItem('cart');
         if (savedCart) {
-            return JSON.parse(savedCart);
+            const cart = JSON.parse(savedCart);
+            console.log("📦 Loaded cart from storage:", cart);
+            return cart;
         }
     } catch (e) {
-        console.error("Error loading cart:", e);
+        console.error("Error loading cart from storage:", e);
     }
     return [];
 }
@@ -65,9 +60,10 @@ function loadCartFromStorage() {
 function saveCartToStorage(cart) {
     try {
         localStorage.setItem('cart', JSON.stringify(cart));
+        console.log("💾 Saved cart to storage:", cart);
         return true;
     } catch (e) {
-        console.error("Error saving cart:", e);
+        console.error("Error saving cart to storage:", e);
         return false;
     }
 }
@@ -84,32 +80,19 @@ function getCartCount() {
 
 function getCartTotal() {
     const cart = getCart();
-    return cart.reduce((total, item) => total + (Number(item.price) * (item.quantity || 1)), 0);
+    return cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
 }
 
-// ===== ADD TO CART - FIXED VERSION =====
+// ===== ADD TO CART =====
 window.addToCart = function(sku, name, price, image) {
     console.log("🛒 Adding to cart:", { sku, name, price, image });
     
     // Validate inputs
-    if (!sku) {
-        console.error("SKU is required");
-        showNotification("Error: Product SKU missing", "error");
+    if (!sku || !name || !price) {
+        console.error("Missing required product information");
+        showNotification("Error: Invalid product", "error");
         return false;
     }
-    
-    if (!name) {
-        name = "Product";
-    }
-    
-    if (!price || isNaN(price)) {
-        console.error("Invalid price:", price);
-        showNotification("Error: Invalid price", "error");
-        return false;
-    }
-    
-    // Convert price to number
-    price = Number(price);
     
     // Get current cart
     let cart = getCart();
@@ -121,19 +104,17 @@ window.addToCart = function(sku, name, price, image) {
         // Increment quantity if item exists
         cart[existingItemIndex].quantity = (cart[existingItemIndex].quantity || 1) + 1;
         console.log("➕ Increased quantity for", name);
-        showNotification(`${name} quantity updated`, "success");
     } else {
         // Add new item
         cart.push({
             sku: sku,
             name: name,
-            price: price,
+            price: Number(price),
             image: image || CONFIG.PLACEHOLDER_IMAGE,
             quantity: 1,
             addedAt: new Date().toISOString()
         });
         console.log("✨ Added new item:", name);
-        showNotification(`${name} added to cart!`, "success");
     }
     
     // Save to localStorage
@@ -141,8 +122,9 @@ window.addToCart = function(sku, name, price, image) {
     
     // Update UI
     updateCartCount();
+    showNotification(`${name} added to cart!`, "success");
     
-    // Sync with server
+    // Try to sync with server (don't await - do it in background)
     syncCartWithServer(cart);
     
     return true;
@@ -158,19 +140,19 @@ window.removeFromCart = function(sku) {
     cart = cart.filter(item => item.sku !== sku);
     saveCartToStorage(cart);
     
+    // Update UI
     updateCartCount();
     
     if (removedItem) {
         showNotification(`${removedItem.name} removed from cart`, "info");
     }
     
+    // Refresh cart page if open
     if (window.location.pathname.includes('cart.html')) {
         displayCartPage();
     }
-    if (window.location.pathname.includes('checkout.html')) {
-        displayCheckoutSummary();
-    }
     
+    // Sync with server
     syncCartWithServer(cart);
     
     return cart;
@@ -191,6 +173,7 @@ window.updateQuantity = function(sku, newQuantity) {
     newQuantity = parseInt(newQuantity);
     
     if (isNaN(newQuantity) || newQuantity < 1) {
+        // If invalid or less than 1, remove the item
         return window.removeFromCart(sku);
     }
     
@@ -202,18 +185,36 @@ window.updateQuantity = function(sku, newQuantity) {
     cart[itemIndex].quantity = newQuantity;
     saveCartToStorage(cart);
     
+    // Update UI
     updateCartCount();
     
     if (window.location.pathname.includes('cart.html')) {
         displayCartPage();
     }
-    if (window.location.pathname.includes('checkout.html')) {
-        displayCheckoutSummary();
-    }
     
+    // Sync with server
     syncCartWithServer(cart);
     
     return true;
+};
+
+// ===== CLEAR CART =====
+window.clearCart = function() {
+    if (confirm("Are you sure you want to clear your cart?")) {
+        saveCartToStorage([]);
+        updateCartCount();
+        showNotification("Cart cleared", "info");
+        
+        if (window.location.pathname.includes('cart.html')) {
+            displayCartPage();
+        }
+        
+        // Sync with server
+        syncCartWithServer([]);
+        
+        return [];
+    }
+    return getCart();
 };
 
 // ===== DISPLAY CART PAGE =====
@@ -221,12 +222,16 @@ window.displayCartPage = function() {
     const cartContainer = document.getElementById('cartItems');
     const totalContainer = document.getElementById('cartTotal');
     
-    if (!cartContainer) return;
+    if (!cartContainer) {
+        console.log("Cart container not found on this page");
+        return;
+    }
     
     const cart = getCart();
-    console.log("Displaying cart with", cart.length, "items");
+    console.log("Displaying cart page with", cart.length, "items");
     
     if (!cart || cart.length === 0) {
+        // Empty cart display
         cartContainer.innerHTML = `
             <div style="text-align:center; padding:60px; background:#1a1a1a; border-radius:10px">
                 <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.5">
@@ -236,7 +241,7 @@ window.displayCartPage = function() {
                 </svg>
                 <p style="font-size:18px; color:#888; margin-top:20px">Your cart is empty</p>
                 <a href="index.html">
-                    <button style="width:200px; margin:20px auto 0;">Continue Shopping</button>
+                    <button style="width:200px; margin:20px auto 0; background:#d4af37; color:black;">Continue Shopping</button>
                 </a>
             </div>
         `;
@@ -244,11 +249,12 @@ window.displayCartPage = function() {
         return;
     }
     
+    // Build cart items HTML
     let html = '';
     let total = 0;
     
-    cart.forEach((item) => {
-        const itemTotal = Number(item.price) * (item.quantity || 1);
+    cart.forEach((item, index) => {
+        const itemTotal = item.price * (item.quantity || 1);
         total += itemTotal;
         
         html += `
@@ -262,41 +268,60 @@ window.displayCartPage = function() {
                 border-radius: 10px;
                 margin-bottom: 15px;
                 border: 1px solid #333;
+                transition: all 0.3s ease;
             ">
+                <!-- Product Image -->
                 <img src="${item.image || CONFIG.PLACEHOLDER_IMAGE}" 
                      alt="${item.name}"
                      style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;"
                      onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
                 
+                <!-- Product Details -->
                 <div>
-                    <h4 style="margin-bottom: 5px;">${item.name}</h4>
-                    <p style="color: #888; font-size: 12px;">SKU: ${item.sku}</p>
+                    <h4 style="margin-bottom: 5px; color: white;">${item.name}</h4>
+                    <p style="color: #888; font-size: 12px; margin: 0;">SKU: ${item.sku}</p>
                 </div>
                 
+                <!-- Unit Price -->
                 <div style="color: #d4af37; font-weight: bold;">
-                    ₹${Number(item.price).toLocaleString('en-IN')}
+                    ₹${Number(item.price).toLocaleString()}
                 </div>
                 
+                <!-- Quantity Control -->
                 <div>
-                    <input type="number" 
-                           value="${item.quantity || 1}" 
-                           min="1" 
-                           max="10"
-                           onchange="updateCartItemQuantity('${item.sku}', this.value)"
-                           style="
-                               width: 70px;
-                               padding: 8px;
-                               background: #333;
-                               border: 1px solid #444;
-                               color: white;
-                               border-radius: 4px;
-                               text-align: center;
-                           ">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <button onclick="decrementQuantity('${item.sku}')" 
+                                style="width: 30px; height: 30px; padding: 0; background: #333; color: white; border: 1px solid #444;">
+                            −
+                        </button>
+                        <input type="number" 
+                               id="qty-${item.sku}"
+                               value="${item.quantity || 1}" 
+                               min="1" 
+                               max="10"
+                               onchange="updateCartItemQuantity('${item.sku}', this.value)"
+                               style="
+                                   width: 50px;
+                                   height: 30px;
+                                   padding: 0;
+                                   text-align: center;
+                                   background: #333;
+                                   border: 1px solid #444;
+                                   color: white;
+                                   border-radius: 4px;
+                                   font-size: 14px;
+                               ">
+                        <button onclick="incrementQuantity('${item.sku}')" 
+                                style="width: 30px; height: 30px; padding: 0; background: #333; color: white; border: 1px solid #444;">
+                            +
+                        </button>
+                    </div>
                 </div>
                 
+                <!-- Item Total & Actions -->
                 <div style="text-align: right;">
-                    <div style="font-weight: bold; color: #d4af37; margin-bottom: 5px;">
-                        ₹${itemTotal.toLocaleString('en-IN')}
+                    <div style="font-weight: bold; color: #d4af37; font-size: 18px; margin-bottom: 8px;">
+                        ₹${itemTotal.toLocaleString()}
                     </div>
                     <button onclick="removeCartItem('${item.sku}')"
                             style="
@@ -307,6 +332,7 @@ window.displayCartPage = function() {
                                 width: auto;
                                 font-size: 12px;
                                 margin: 0;
+                                display: inline-block;
                             ">
                         Remove
                     </button>
@@ -316,10 +342,32 @@ window.displayCartPage = function() {
     });
     
     cartContainer.innerHTML = html;
-    if (totalContainer) totalContainer.textContent = total.toLocaleString('en-IN');
+    if (totalContainer) totalContainer.textContent = total.toLocaleString();
 };
 
-// Helper functions
+// Helper functions for quantity controls
+window.incrementQuantity = function(sku) {
+    const input = document.getElementById(`qty-${sku}`);
+    if (input) {
+        const newVal = parseInt(input.value) + 1;
+        if (newVal <= 10) {
+            input.value = newVal;
+            updateCartItemQuantity(sku, newVal);
+        }
+    }
+};
+
+window.decrementQuantity = function(sku) {
+    const input = document.getElementById(`qty-${sku}`);
+    if (input) {
+        const newVal = parseInt(input.value) - 1;
+        if (newVal >= 1) {
+            input.value = newVal;
+            updateCartItemQuantity(sku, newVal);
+        }
+    }
+};
+
 window.updateCartItemQuantity = function(sku, quantity) {
     updateQuantity(sku, quantity);
 };
@@ -335,33 +383,43 @@ window.displayCheckoutSummary = function() {
     const summaryContainer = document.getElementById('cartSummary');
     const orderTotalContainer = document.getElementById('orderTotal');
     
-    if (!summaryContainer) return;
+    if (!summaryContainer) {
+        console.log("Checkout summary container not found");
+        return;
+    }
     
     const cart = getCart();
+    console.log("Displaying checkout summary with", cart.length, "items");
     
     if (!cart || cart.length === 0) {
-        summaryContainer.innerHTML = '<p style="color:#f44336; text-align:center">Your cart is empty. <a href="index.html">Shop now</a></p>';
+        summaryContainer.innerHTML = `
+            <div style="text-align:center; padding:20px;">
+                <p style="color:#f44336;">Your cart is empty</p>
+                <a href="index.html" style="color:#d4af37;">Shop now</a>
+            </div>
+        `;
         if (orderTotalContainer) orderTotalContainer.textContent = '0';
         return;
     }
     
     let itemsHtml = '';
     let subtotal = 0;
+    const shipping = 100; // Fixed shipping charge
+    const taxRate = 0.18; // 18% GST
     
     cart.forEach(item => {
-        const itemTotal = Number(item.price) * (item.quantity || 1);
+        const itemTotal = item.price * (item.quantity || 1);
         subtotal += itemTotal;
         
         itemsHtml += `
             <div style="display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #333;">
                 <span>${item.name} <span style="color:#888;">x${item.quantity || 1}</span></span>
-                <span style="color: #d4af37;">₹${itemTotal.toLocaleString('en-IN')}</span>
+                <span style="color: #d4af37;">₹${itemTotal.toLocaleString()}</span>
             </div>
         `;
     });
     
-    const tax = Math.round(subtotal * 0.18);
-    const shipping = 100;
+    const tax = Math.round(subtotal * taxRate);
     const total = subtotal + tax + shipping;
     
     summaryContainer.innerHTML = `
@@ -370,7 +428,7 @@ window.displayCheckoutSummary = function() {
         <div style="margin-top: 15px;">
             <div style="display: flex; justify-content: space-between; margin: 5px 0;">
                 <span>Subtotal:</span>
-                <span>₹${subtotal.toLocaleString('en-IN')}</span>
+                <span>₹${subtotal.toLocaleString()}</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin: 5px 0;">
                 <span>Shipping:</span>
@@ -378,11 +436,11 @@ window.displayCheckoutSummary = function() {
             </div>
             <div style="display: flex; justify-content: space-between; margin: 5px 0;">
                 <span>GST (18%):</span>
-                <span>₹${tax.toLocaleString('en-IN')}</span>
+                <span>₹${tax.toLocaleString()}</span>
             </div>
             <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 10px; border-top: 2px solid #d4af37; font-weight: bold;">
                 <span>Total:</span>
-                <span style="color: #d4af37; font-size: 20px;">₹${total.toLocaleString('en-IN')}</span>
+                <span style="color: #d4af37; font-size: 20px;">₹${total.toLocaleString()}</span>
             </div>
         </div>
     `;
@@ -391,116 +449,222 @@ window.displayCheckoutSummary = function() {
     return total;
 };
 
-// ===== UPDATE CART COUNT =====
+// ===== PLACE ORDER =====
+window.placeOrder = async function(customerDetails) {
+    console.log("📝 Placing order with details:", customerDetails);
+    
+    const cart = getCart();
+    
+    if (!cart || cart.length === 0) {
+        showNotification("Your cart is empty", "error");
+        return { success: false, error: "Empty cart" };
+    }
+    
+    // Validate customer details
+    if (!customerDetails.name || !customerDetails.phone || !customerDetails.address) {
+        showNotification("Please fill all required fields", "error");
+        return { success: false, error: "Missing required fields" };
+    }
+    
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    const tax = Math.round(subtotal * 0.18); // 18% GST
+    const shipping = 100;
+    const total = subtotal + tax + shipping;
+    
+    const orderData = {
+        orderId: "ORD" + Date.now(),
+        customerName: customerDetails.name,
+        phone: customerDetails.phone,
+        email: customerDetails.email || "",
+        address: customerDetails.address,
+        items: cart,
+        subtotal: subtotal,
+        tax: tax,
+        shipping: shipping,
+        total: total,
+        status: "Pending",
+        date: new Date().toISOString()
+    };
+    
+    console.log("Order data:", orderData);
+    
+    try {
+        // Try to save to server
+        const params = new URLSearchParams({
+            action: 'placeOrder',
+            name: customerDetails.name,
+            phone: customerDetails.phone,
+            email: customerDetails.email || '',
+            address: customerDetails.address,
+            items: JSON.stringify(cart),
+            total: total
+        });
+        
+        const response = await fetch(`${CONFIG.API_URL}?${params}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            // Clear cart after successful order
+            saveCartToStorage([]);
+            updateCartCount();
+            
+            showNotification(`Order placed successfully! ID: ${result.orderId}`, "success");
+            
+            return { 
+                success: true, 
+                orderId: result.orderId,
+                orderData: orderData
+            };
+        } else {
+            throw new Error(result.error || "Failed to place order");
+        }
+        
+    } catch (error) {
+        console.error("Error placing order:", error);
+        
+        // Fallback: Save order locally
+        const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        localOrders.push(orderData);
+        localStorage.setItem('orders', JSON.stringify(localOrders));
+        
+        // Clear cart
+        saveCartToStorage([]);
+        updateCartCount();
+        
+        showNotification("Order saved locally (offline mode)", "warning");
+        
+        return { 
+            success: true, 
+            orderId: orderData.orderId,
+            orderData: orderData,
+            offline: true
+        };
+    }
+};
+
+// ===== UPDATE CART COUNT DISPLAY =====
 function updateCartCount() {
     const count = getCartCount();
+    console.log("Updating cart count:", count);
+    
     document.querySelectorAll('.cart-count').forEach(el => {
         el.textContent = count;
         el.style.display = count > 0 ? 'inline-block' : 'none';
     });
 }
 
-// ===== LIVE SYNC WITH EXCEL =====
-function startAutoSync() {
-    if (syncInterval) clearInterval(syncInterval);
-    if (cartSyncInterval) clearInterval(cartSyncInterval);
-    
-    syncInterval = setInterval(syncCartWithExcel, CONFIG.SYNC_INTERVAL);
-    cartSyncInterval = setInterval(syncCartToExcel, CONFIG.SYNC_INTERVAL);
-    
-    console.log("🔄 Live sync started");
-}
-
-function stopAutoSync() {
-    if (syncInterval) {
-        clearInterval(syncInterval);
-        syncInterval = null;
-    }
-    if (cartSyncInterval) {
-        clearInterval(cartSyncInterval);
-        cartSyncInterval = null;
-    }
-}
-
-// Sync cart FROM Excel (get updates)
-async function syncCartWithExcel() {
+// ===== SYNC WITH SERVER =====
+async function syncCartWithServer(cart) {
     try {
-        const response = await fetch(`${CONFIG.API_URL}?action=getCart&sessionId=${sessionId}`);
-        const serverCart = await response.json();
-        
-        if (serverCart.error) return;
-        
-        if (serverCart.items && Array.isArray(serverCart.items)) {
-            const localCart = getCart();
-            
-            // Only update if server has newer version
-            if (serverCart.version > (localStorage.getItem('cartVersion') || 0)) {
-                console.log("📦 Updating cart from Excel");
-                saveCartToStorage(serverCart.items);
-                localStorage.setItem('cartVersion', serverCart.version || 1);
-                
-                updateCartCount();
-                
-                if (window.location.pathname.includes('cart.html')) {
-                    displayCartPage();
-                }
-                if (window.location.pathname.includes('checkout.html')) {
-                    displayCheckoutSummary();
-                }
-            }
-        }
-    } catch (error) {
-        console.log("⚠️ Cart sync failed:", error.message);
-    }
-}
-
-// Sync cart TO Excel (send updates)
-async function syncCartToExcel() {
-    try {
-        const cart = getCart();
-        const total = getCartTotal();
-        const version = (Number(localStorage.getItem('cartVersion')) || 0) + 1;
+        const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
         
         const params = new URLSearchParams({
             action: 'saveCart',
             sessionId: sessionId,
             items: JSON.stringify(cart),
-            total: total,
-            version: version
+            total: total
         });
         
         const response = await fetch(`${CONFIG.API_URL}?${params}`);
         const data = await response.json();
         
         if (data.success) {
-            localStorage.setItem('cartVersion', data.version || version);
+            console.log("✅ Cart synced with server");
             lastSyncTime = Date.now();
-            console.log("✅ Cart synced to Excel");
         }
     } catch (error) {
-        console.log("⚠️ Cart sync to Excel failed:", error.message);
+        console.log("⚠️ Server sync failed (offline mode)");
     }
 }
 
-// ===== NOTIFICATION =====
+// ===== AUTO-SYNC FUNCTIONS =====
+function startAutoSync() {
+    if (syncInterval) clearInterval(syncInterval);
+    syncInterval = setInterval(autoSync, 10000); // Sync every 10 seconds
+    console.log("🔄 Auto-sync started");
+}
+
+function stopAutoSync() {
+    if (syncInterval) {
+        clearInterval(syncInterval);
+        syncInterval = null;
+        console.log("⏹️ Auto-sync stopped");
+    }
+}
+
+async function autoSync() {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=sync&sessionId=${sessionId}&lastSync=${lastSyncTime}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            return;
+        }
+        
+        lastSyncTime = data.serverTime;
+        
+        // Check if cart was updated on server
+        if (data.cart && data.cart.version > getLocalCartVersion()) {
+            console.log("📦 Cart updated from server");
+            updateCartFromServer(data.cart);
+        }
+        
+    } catch (error) {
+        // Silent fail - just log
+        console.log("Auto-sync unavailable");
+    }
+}
+
+function getLocalCartVersion() {
+    return Number(localStorage.getItem('cartVersion') || 0);
+}
+
+function updateCartFromServer(serverCart) {
+    if (serverCart.items && serverCart.items.length > 0) {
+        saveCartToStorage(serverCart.items);
+        localStorage.setItem('cartVersion', serverCart.version || 1);
+        updateCartCount();
+        
+        if (window.location.pathname.includes('cart.html')) {
+            displayCartPage();
+        }
+        if (window.location.pathname.includes('checkout.html')) {
+            displayCheckoutSummary();
+        }
+    }
+}
+
+// ===== NOTIFICATION SYSTEM =====
 function showNotification(message, type = "success") {
+    // Remove any existing notification
     const existing = document.querySelector('.notification');
     if (existing) existing.remove();
     
+    // Create notification element
     const notification = document.createElement('div');
     notification.className = 'notification';
     
-    let bgColor = '#d4af37';
-    if (type === "error") bgColor = '#f44336';
-    if (type === "warning") bgColor = '#ff9800';
-    if (type === "info") bgColor = '#2196f3';
+    // Set colors based on type
+    let bgColor = '#d4af37'; // default gold
+    let textColor = 'black';
+    
+    if (type === "error") {
+        bgColor = '#f44336';
+        textColor = 'white';
+    } else if (type === "warning") {
+        bgColor = '#ff9800';
+        textColor = 'black';
+    } else if (type === "info") {
+        bgColor = '#2196f3';
+        textColor = 'white';
+    }
     
     notification.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
         background: ${bgColor};
-        color: ${type === "error" ? 'white' : 'black'};
+        color: ${textColor};
         padding: 15px 25px;
         border-radius: 8px;
         font-weight: bold;
@@ -512,13 +676,15 @@ function showNotification(message, type = "success") {
     notification.textContent = message;
     document.body.appendChild(notification);
     
+    // Auto remove after 3 seconds
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
 
-// Clean up
-window.addEventListener('beforeunload', function() {
-    stopAutoSync();
-});
+// ===== EXPOSE FUNCTIONS GLOBALLY =====
+window.getCart = getCart;
+window.getCartCount = getCartCount;
+window.getCartTotal = getCartTotal;
+window.clearCart = clearCart;
