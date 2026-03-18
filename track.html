@@ -35,7 +35,7 @@
     </footer>
 
     <script>
-        function trackOrder() {
+        async function trackOrder() {
             const orderId = document.getElementById('orderId').value.trim();
             if (!orderId) {
                 alert('Please enter order ID');
@@ -43,15 +43,29 @@
             }
             
             const resultDiv = document.getElementById('trackingResult');
+            resultDiv.innerHTML = '<p>Tracking your order...</p>';
             
-            // Check local storage first
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const order = orders.find(o => o.orderId === orderId);
+            // First check Excel
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=track&id=${orderId}`);
+                const data = await response.json();
+                
+                if (data && !data.error) {
+                    displayOrder(data);
+                    return;
+                }
+            } catch (error) {
+                console.log('Excel tracking failed, checking local...');
+            }
             
-            if (order) {
-                displayOrder(order);
+            // Then check local storage
+            const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const localOrder = localOrders.find(o => o.orderId === orderId);
+            
+            if (localOrder) {
+                displayOrder(localOrder);
             } else {
-                resultDiv.innerHTML = '<p class="error-message">Order not found</p>';
+                resultDiv.innerHTML = '<p style="color: #f44336;">Order not found</p>';
             }
         }
         
@@ -71,23 +85,23 @@
                 itemsHtml = '<h4>Items:</h4>';
                 order.items.forEach(item => {
                     itemsHtml += `
-                        <div class="track-item">
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0;">
                             <span>${item.name} x${item.quantity}</span>
-                            <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                            <span>₹${(item.price * item.quantity).toLocaleString()}</span>
                         </div>
                     `;
                 });
             }
             
             resultDiv.innerHTML = `
-                <div class="order-details">
-                    <h3>Order Details</h3>
+                <div style="background: #1a1a1a; padding: 20px; border-radius: 10px;">
+                    <h3 style="color: #d4af37; margin-bottom: 15px;">Order Details</h3>
                     <p><strong>Order ID:</strong> ${order.orderId}</p>
                     <p><strong>Customer:</strong> ${order.name}</p>
                     <p><strong>Phone:</strong> ${order.phone}</p>
                     <p><strong>Address:</strong> ${order.address}</p>
-                    <p><strong>Status:</strong> <span style="color: ${statusColors[order.status] || '#d4af37'}; font-weight: bold;">${order.status}</span></p>
-                    <p><strong>Total:</strong> ₹${order.total.toLocaleString('en-IN')}</p>
+                    <p><strong>Status:</strong> <span style="color: ${statusColors[order.status] || '#d4af37'}; font-weight: bold;">${order.status || 'Pending'}</span></p>
+                    <p><strong>Total:</strong> ₹${(order.total || 0).toLocaleString()}</p>
                     <p><strong>Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
                     ${itemsHtml}
                 </div>
