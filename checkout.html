@@ -6,6 +6,7 @@
     <title>Checkout - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
+    <script src="js/sync.js"></script>
 </head>
 <body>
     <header>
@@ -95,11 +96,14 @@
     </footer>
 
     <script src="js/cart.js"></script>
-    <script src="js/payment.js"></script>
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    
     <script>
+        // Update checkout summary on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCheckoutSummary();
+        });
+
         async function processOrder() {
+            // Get form values
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -107,6 +111,7 @@
             const pincode = document.getElementById('pincode').value.trim();
             const city = document.getElementById('city').value.trim();
             
+            // Validate
             if (!name || !phone || !address || !pincode || !city) {
                 alert('Please fill all required fields');
                 return;
@@ -122,43 +127,153 @@
                 return;
             }
             
+            // Get cart data
+            const cart = getCart();
+            if (cart.length === 0) {
+                alert('Your cart is empty');
+                return;
+            }
+            
+            // Calculate totals
+            const subtotal = getCartTotal();
+            const tax = Math.round(subtotal * 0.18);
+            const shipping = 100;
+            const total = subtotal + tax + shipping;
+            
+            // Prepare full address
+            const fullAddress = `${address}, ${city} - ${pincode}`;
+            
+            // Disable button
             const btn = document.getElementById('placeOrderBtn');
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            const fullAddress = `${address}, ${city} - ${pincode}`;
+            // Prepare order data
+            const orderData = {
+                name: name,
+                phone: phone,
+                email: email,
+                address: fullAddress,
+                items: JSON.stringify(cart),
+                total: total
+            };
+            
+            console.log('Sending order to Excel:', orderData);
+            
+            try {
+                // Send to Excel via Apps Script
+                const params = new URLSearchParams({
+                    action: 'placeOrder',
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    address: fullAddress,
+                    items: JSON.stringify(cart),
+                    total: total
+                });
+                
+                const response = await fetch(`${CONFIG.API_URL}?${params}`);
+                const result = await response.json();
+                
+                console.log('Excel response:', result);
+                
+                if (result.success) {
+                    // Save order locally as backup
+                    const localOrder = {
+                        orderId: result.orderId,
+                        name: name,
+                        phone: phone,
+                        email: email,
+                        address: fullAddress,
+                        items: cart,
+                        subtotal: subtotal,
+                        tax: tax,
+                        shipping: shipping,
+                        total: total,
+                        status: 'Pending',
+                        date: new Date().toISOString()
+                    };
+                    
+                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                    orders.push(localOrder);
+                    localStorage.setItem('orders', JSON.stringify(orders));
+                    
+                    // Clear cart
+                    localStorage.removeItem('cart');
+                    updateCartCount();
+                    
+                    // Show success
+                    alert(`✅ Order placed successfully! Order ID: ${result.orderId}`);
+                    
+                    // Redirect to tracking
+                    window.location.href = `track.html?order=${result.orderId}`;
+                } else {
+                    throw new Error(result.error || 'Failed to place order');
+                }
+            } catch (error) {
+                console.error('Order error:', error);
+                
+                // Fallback - save locally only
+                const fallbackOrderId = 'ORD' + Date.now();
+                
+                const fallbackOrder = {
+                    orderId: fallbackOrderId,
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    address: fullAddress,
+                    items: cart,
+                    subtotal: subtotal,
+                    tax: tax,
+                    shipping: shipping,
+                    total: total,
+                    status: 'Pending',
+                    date: new Date().toISOString()
+                };
+                
+                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+                orders.push(fallbackOrder);
+                localStorage.setItem('orders', JSON.stringify(orders));
+                
+                // Clear cart
+                localStorage.removeItem('cart');
+                updateCartCount();
+                
+                alert(`⚠️ Order placed locally (offline mode). Order ID: ${fallbackOrderId}`);
+                window.location.href = `track.html?order=${fallbackOrderId}`;
+            }
+        }
+
+        function updateCheckoutSummary() {
             const cart = getCart();
             const subtotal = getCartTotal();
             const tax = Math.round(subtotal * 0.18);
             const shipping = 100;
             const total = subtotal + tax + shipping;
             
-            const orderData = {
-                orderId: 'ORD' + Date.now(),
-                name: name,
-                phone: phone,
-                email: email,
-                address: fullAddress,
-                items: cart,
-                subtotal: subtotal,
-                tax: tax,
-                shipping: shipping,
-                total: total,
-                status: 'Pending',
-                date: new Date().toISOString()
-            };
+            // Update summary items
+            const summaryContainer = document.getElementById('cartSummary');
+            if (summaryContainer) {
+                if (cart.length === 0) {
+                    summaryContainer.innerHTML = '<p>Your cart is empty</p>';
+                } else {
+                    let itemsHtml = '';
+                    cart.forEach(item => {
+                        itemsHtml += `
+                            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                                <span>${item.name} x${item.quantity}</span>
+                                <span>₹${(item.price * item.quantity).toLocaleString()}</span>
+                            </div>
+                        `;
+                    });
+                    summaryContainer.innerHTML = itemsHtml;
+                }
+            }
             
-            // Save order locally
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            orders.push(orderData);
-            localStorage.setItem('orders', JSON.stringify(orders));
-            
-            // Clear cart
-            localStorage.removeItem('cart');
-            updateCartCount();
-            
-            alert(`Order placed successfully! Order ID: ${orderData.orderId}`);
-            window.location.href = `track.html?order=${orderData.orderId}`;
+            // Update totals
+            document.getElementById('orderSubtotal').textContent = subtotal.toLocaleString();
+            document.getElementById('orderTax').textContent = tax.toLocaleString();
+            document.getElementById('orderTotal').textContent = total.toLocaleString();
         }
     </script>
 </body>
