@@ -22,7 +22,7 @@
     <div class="admin-container">
         <h1 class="page-title">Admin Dashboard</h1>
         
-        <div class="stats-grid" id="dashboardStats">
+        <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">📦</div>
                 <div class="stat-info">
@@ -61,6 +61,7 @@
             <div class="action-buttons">
                 <a href="admin-products.html" class="action-btn">➕ Add New Product</a>
                 <a href="admin-orders.html" class="action-btn">📋 View All Orders</a>
+                <button onclick="forceSync()" class="action-btn">🔄 Sync with Excel</button>
             </div>
         </div>
     </div>
@@ -69,13 +70,12 @@
         <p>© 2026 Style Of Life Jewelry - Admin Panel</p>
     </footer>
 
+    <script src="js/sync.js"></script>
     <script>
-        // Check authentication
         if (!sessionStorage.getItem('adminLoggedIn')) {
             window.location.href = 'login.html';
         }
         
-        // Load dashboard data
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardStats();
         });
