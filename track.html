@@ -22,7 +22,7 @@
             <h1 class="page-title">Track Your Order</h1>
             
             <div class="track-form">
-                <input type="text" id="orderId" placeholder="Enter Order ID (e.g., ORD1234567890)" class="track-input">
+                <input type="text" id="orderId" placeholder="Enter Order ID (e.g., ORD1712345678901)" class="track-input">
                 <button onclick="trackOrder()" class="track-btn">Track Order</button>
             </div>
             
@@ -44,29 +44,37 @@
             }
             
             const resultDiv = document.getElementById('trackingResult');
-            resultDiv.innerHTML = '<p>Tracking your order...</p>';
+            resultDiv.innerHTML = '<p>🔍 Tracking your order...</p>';
             
-            // Try Excel first
             try {
-                const response = await fetch(`${CONFIG.API_URL}?action=track&id=${orderId}`);
+                const response = await fetch(`${CONFIG.API_URL}?action=track&id=${encodeURIComponent(orderId)}&t=${Date.now()}`);
                 const data = await response.json();
                 
-                if (data && !data.error) {
+                if (data.error) {
+                    checkLocalStorage(orderId);
+                } else {
                     displayOrder(data);
-                    return;
                 }
             } catch (error) {
-                console.log('Excel tracking failed, checking local...');
+                console.error('Tracking error:', error);
+                checkLocalStorage(orderId);
             }
+        }
+        
+        function checkLocalStorage(orderId) {
+            const resultDiv = document.getElementById('trackingResult');
             
-            // Then check local
-            const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const localOrder = localOrders.find(o => o.orderId === orderId);
-            
-            if (localOrder) {
-                displayOrder(localOrder);
-            } else {
-                resultDiv.innerHTML = '<p style="color: #f44336;">Order not found</p>';
+            try {
+                const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                const localOrder = localOrders.find(o => o.orderId === orderId);
+                
+                if (localOrder) {
+                    displayOrder(localOrder);
+                } else {
+                    resultDiv.innerHTML = '<p style="color: #f44336;">❌ Order not found</p>';
+                }
+            } catch (e) {
+                resultDiv.innerHTML = '<p style="color: #f44336;">❌ Order not found</p>';
             }
         }
         
@@ -81,40 +89,53 @@
                 'Cancelled': '#f44336'
             };
             
+            let items = order.items || [];
+            if (typeof items === 'string') {
+                try { items = JSON.parse(items); } catch (e) { items = []; }
+            }
+            
             let itemsHtml = '';
-            if (order.items && order.items.length > 0) {
-                itemsHtml = '<h4 style="margin-top: 15px;">Items:</h4>';
-                order.items.forEach(item => {
+            if (items.length > 0) {
+                itemsHtml = '<h4 style="margin-top: 20px; margin-bottom: 10px;">Items:</h4>';
+                items.forEach(item => {
                     itemsHtml += `
-                        <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #333;">
-                            <span>${item.name} x${item.quantity}</span>
-                            <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #333;">
+                            <span>${item.name || 'Product'} x${item.quantity || 1}</span>
+                            <span style="color: #d4af37;">₹${((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}</span>
                         </div>
                     `;
                 });
             }
             
             resultDiv.innerHTML = `
-                <div style="background: #1a1a1a; padding: 20px; border-radius: 10px;">
-                    <h3 style="color: #d4af37; margin-bottom: 15px;">Order Details</h3>
-                    <p><strong>Order ID:</strong> ${order.orderId}</p>
-                    <p><strong>Customer:</strong> ${order.name}</p>
-                    <p><strong>Phone:</strong> ${order.phone}</p>
-                    <p><strong>Address:</strong> ${order.address}</p>
-                    <p><strong>Status:</strong> <span style="color: ${statusColors[order.status] || '#d4af37'}; font-weight: bold;">${order.status || 'Pending'}</span></p>
-                    <p><strong>Total:</strong> ₹${(order.total || 0).toLocaleString('en-IN')}</p>
-                    <p><strong>Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
+                <div style="background: #1a1a1a; padding: 25px; border-radius: 10px;">
+                    <h3 style="color: #d4af37; margin-bottom: 20px;">✅ Order Found</h3>
+                    <div style="display: grid; gap: 10px;">
+                        <p><strong>Order ID:</strong> <span style="color: #d4af37;">${order.orderId}</span></p>
+                        <p><strong>Customer:</strong> ${order.name || 'N/A'}</p>
+                        <p><strong>Phone:</strong> ${order.phone || 'N/A'}</p>
+                        <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
+                        <p><strong>Status:</strong> 
+                            <span style="display: inline-block; padding: 5px 15px; background: ${statusColors[order.status] || '#d4af37'}; color: black; border-radius: 20px; font-weight: bold; margin-left: 10px;">
+                                ${order.status || 'Pending'}
+                            </span>
+                        </p>
+                        <p><strong>Total Amount:</strong> <span style="color: #d4af37; font-size: 20px;">₹${(order.total || 0).toLocaleString('en-IN')}</span></p>
+                        <p><strong>Order Date:</strong> ${order.date ? new Date(order.date).toLocaleString() : 'N/A'}</p>
+                    </div>
                     ${itemsHtml}
                 </div>
             `;
         }
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('order');
-        if (orderId) {
-            document.getElementById('orderId').value = orderId;
-            trackOrder();
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order');
+            if (orderId) {
+                document.getElementById('orderId').value = orderId;
+                trackOrder();
+            }
+        });
     </script>
 </body>
 </html>
