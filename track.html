@@ -34,6 +34,7 @@
         <p>© 2026 Style Of Life Jewelry</p>
     </footer>
 
+    <script src="js/sync.js"></script>
     <script>
         async function trackOrder() {
             const orderId = document.getElementById('orderId').value.trim();
@@ -45,7 +46,7 @@
             const resultDiv = document.getElementById('trackingResult');
             resultDiv.innerHTML = '<p>Tracking your order...</p>';
             
-            // First check Excel
+            // Try Excel first
             try {
                 const response = await fetch(`${CONFIG.API_URL}?action=track&id=${orderId}`);
                 const data = await response.json();
@@ -58,7 +59,7 @@
                 console.log('Excel tracking failed, checking local...');
             }
             
-            // Then check local storage
+            // Then check local
             const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
             const localOrder = localOrders.find(o => o.orderId === orderId);
             
@@ -82,12 +83,12 @@
             
             let itemsHtml = '';
             if (order.items && order.items.length > 0) {
-                itemsHtml = '<h4>Items:</h4>';
+                itemsHtml = '<h4 style="margin-top: 15px;">Items:</h4>';
                 order.items.forEach(item => {
                     itemsHtml += `
-                        <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #333;">
                             <span>${item.name} x${item.quantity}</span>
-                            <span>₹${(item.price * item.quantity).toLocaleString()}</span>
+                            <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
                         </div>
                     `;
                 });
@@ -101,14 +102,13 @@
                     <p><strong>Phone:</strong> ${order.phone}</p>
                     <p><strong>Address:</strong> ${order.address}</p>
                     <p><strong>Status:</strong> <span style="color: ${statusColors[order.status] || '#d4af37'}; font-weight: bold;">${order.status || 'Pending'}</span></p>
-                    <p><strong>Total:</strong> ₹${(order.total || 0).toLocaleString()}</p>
+                    <p><strong>Total:</strong> ₹${(order.total || 0).toLocaleString('en-IN')}</p>
                     <p><strong>Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
                     ${itemsHtml}
                 </div>
             `;
         }
         
-        // Check URL for order ID
         const urlParams = new URLSearchParams(window.location.search);
         const orderId = urlParams.get('order');
         if (orderId) {
