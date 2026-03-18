@@ -105,7 +105,6 @@
         });
 
         async function processOrder() {
-            // Get form values
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -113,7 +112,6 @@
             const city = document.getElementById('city').value.trim();
             const pincode = document.getElementById('pincode').value.trim();
             
-            // Validate
             if (!name || !phone || !address || !city || !pincode) {
                 alert('Please fill all required fields');
                 return;
@@ -129,29 +127,23 @@
                 return;
             }
             
-            // Get cart data
             const cart = getCart();
             if (cart.length === 0) {
                 alert('Your cart is empty');
                 return;
             }
             
-            // Calculate totals
             const subtotal = getCartTotal();
             const tax = Math.round(subtotal * 0.18);
             const shipping = 100;
             const total = subtotal + tax + shipping;
-            
-            // Full address
             const fullAddress = `${address}, ${city} - ${pincode}`;
             
-            // Disable button
             const btn = document.getElementById('placeOrderBtn');
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
             try {
-                // Send to Excel
                 const result = await placeOrderInExcel({
                     name: name,
                     phone: phone,
@@ -162,10 +154,8 @@
                 });
                 
                 if (result.success) {
-                    // Clear cart
                     localStorage.removeItem('cart');
                     updateCartCount();
-                    
                     alert(`✅ Order placed successfully! Order ID: ${result.orderId}`);
                     window.location.href = `track.html?order=${result.orderId}`;
                 } else {
@@ -174,7 +164,6 @@
             } catch (error) {
                 console.error('Order error:', error);
                 
-                // Fallback - save locally
                 const fallbackOrderId = 'ORD' + Date.now();
                 saveOrderLocally({
                     orderId: fallbackOrderId,
@@ -191,10 +180,8 @@
                     date: new Date().toISOString()
                 });
                 
-                // Clear cart
                 localStorage.removeItem('cart');
                 updateCartCount();
-                
                 alert(`⚠️ Order saved locally. Order ID: ${fallbackOrderId}`);
                 window.location.href = `track.html?order=${fallbackOrderId}`;
             }
