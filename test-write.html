@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Excel Write</title>
+</head>
+<body>
+    <h2>Test Writing to Excel</h2>
+    <div id="result"></div>
+    
+    <script>
+        // REPLACE WITH YOUR NEW URL
+        const API_URL = "https://script.google.com/macros/s/BRAND_NEW_ID/exec";
+        
+        async function testWrite() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing write permission...';
+            
+            try {
+                // Try to add a test order
+                const params = new URLSearchParams({
+                    action: 'placeOrder',
+                    name: 'Test Customer',
+                    phone: '9876543210',
+                    email: 'test@test.com',
+                    address: 'Test Address',
+                    items: JSON.stringify([{sku: 'TEST001', name: 'Test Product', price: 100, quantity: 1}]),
+                    total: 100
+                });
+                
+                const response = await fetch(`${API_URL}?${params}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <h3 style="color:green">✅ SUCCESS!</h3>
+                        <p>Order ID: ${data.orderId}</p>
+                        <p>Check your Excel sheet - a new order should appear!</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <h3 style="color:red">❌ FAILED</h3>
+                        <p>Error: ${data.error || 'Unknown error'}</p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3 style="color:red">❌ ERROR</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+        
+        testWrite();
+    </script>
+</body>
+</html>
