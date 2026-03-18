@@ -1,4 +1,4 @@
-// js/cart.js - Complete Cart System
+// js/cart.js - FIXED VERSION
 let cart = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -21,6 +21,7 @@ function loadCart() {
     try {
         const savedCart = localStorage.getItem('cart');
         cart = savedCart ? JSON.parse(savedCart) : [];
+        console.log('📦 Cart loaded:', cart);
     } catch (e) {
         console.error('Error loading cart:', e);
         cart = [];
@@ -31,76 +32,85 @@ function loadCart() {
 function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
+    console.log('💾 Cart saved:', cart);
 }
 
 // Get cart (for other scripts)
-function getCart() {
+window.getCart = function() {
     return [...cart];
-}
+};
 
 // Get cart count
-function getCartCount() {
+window.getCartCount = function() {
     return cart.reduce((total, item) => total + (item.quantity || 1), 0);
-}
+};
 
 // Get cart total
-function getCartTotal() {
+window.getCartTotal = function() {
     return cart.reduce((total, item) => total + (Number(item.price) * (item.quantity || 1)), 0);
-}
+};
 
 // Update cart count display
 function updateCartCount() {
-    const count = getCartCount();
+    const count = window.getCartCount();
     document.querySelectorAll('.cart-count').forEach(el => {
         el.textContent = count;
         el.style.display = count > 0 ? 'inline-block' : 'none';
     });
 }
 
-// Add to cart
+// FIXED: Add to cart function
 window.addToCart = function(sku, name, price, image) {
-    console.log('Adding to cart:', { sku, name, price });
+    console.log('➕ Adding to cart:', { sku, name, price, image });
     
-    // Validate
+    // Validate inputs
     if (!sku) {
+        console.error('SKU is required');
         alert('Error: Invalid product');
         return false;
     }
     
+    if (!name) name = 'Product';
+    
     price = Number(price);
     if (isNaN(price) || price <= 0) {
+        console.error('Invalid price:', price);
         alert('Error: Invalid price');
         return false;
     }
     
-    // Check if item exists
+    // Check if item exists in cart
     const existingIndex = cart.findIndex(item => item.sku === sku);
     
     if (existingIndex >= 0) {
         // Increment quantity
         cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
+        console.log(`✅ Increased quantity for ${name} to ${cart[existingIndex].quantity}`);
     } else {
         // Add new item
         cart.push({
             sku: sku,
-            name: name || 'Product',
+            name: name,
             price: price,
             image: image || CONFIG.PLACEHOLDER_IMAGE,
-            quantity: 1
+            quantity: 1,
+            addedAt: new Date().toISOString()
         });
+        console.log(`✅ Added new item: ${name}`);
     }
     
-    // Save
+    // Save cart
     saveCart();
     
     // Show notification
-    showNotification(`${name || 'Product'} added to cart!`);
+    showNotification(`${name} added to cart!`);
     
     return true;
 };
 
 // Remove from cart
 window.removeFromCart = function(sku) {
+    const removedItem = cart.find(item => item.sku === sku);
     cart = cart.filter(item => item.sku !== sku);
     saveCart();
     
@@ -108,7 +118,9 @@ window.removeFromCart = function(sku) {
         displayCart();
     }
     
-    showNotification('Item removed from cart');
+    if (removedItem) {
+        showNotification(`${removedItem.name} removed from cart`);
+    }
 };
 
 // Update quantity
@@ -122,6 +134,7 @@ window.updateQuantity = function(sku, newQuantity) {
     if (isNaN(newQuantity) || newQuantity < 1) {
         // Remove if invalid or less than 1
         cart.splice(itemIndex, 1);
+        showNotification('Item removed');
     } else {
         // Cap at 10
         if (newQuantity > 10) {
@@ -163,22 +176,26 @@ function displayCart() {
     const subtotalEl = document.getElementById('cartSubtotal');
     const taxEl = document.getElementById('cartTax');
     const totalEl = document.getElementById('cartTotal');
+    const checkoutBtn = document.getElementById('checkoutBtn');
     
     if (!container) return;
     
     if (cart.length === 0) {
         container.innerHTML = `
-            <div class="empty-cart">
-                <p>Your cart is empty</p>
-                <a href="index.html" class="continue-shopping">Continue Shopping</a>
+            <div class="empty-cart" style="text-align: center; padding: 60px; background: #1a1a1a; border-radius: 10px;">
+                <p style="font-size: 18px; color: #888; margin-bottom: 20px;">Your cart is empty</p>
+                <a href="index.html" style="display: inline-block; padding: 12px 30px; background: #d4af37; color: black; text-decoration: none; border-radius: 6px; font-weight: bold;">Continue Shopping</a>
             </div>
         `;
         
         if (subtotalEl) subtotalEl.textContent = '0';
         if (taxEl) taxEl.textContent = '0';
         if (totalEl) totalEl.textContent = '0';
+        if (checkoutBtn) checkoutBtn.style.display = 'none';
         return;
     }
+    
+    if (checkoutBtn) checkoutBtn.style.display = 'block';
     
     let html = '';
     let subtotal = 0;
@@ -188,23 +205,23 @@ function displayCart() {
         subtotal += itemTotal;
         
         html += `
-            <div class="cart-item">
-                <img src="${item.image}" alt="${item.name}" class="cart-item-image">
-                <div class="cart-item-details">
-                    <h4>${item.name}</h4>
-                    <p class="cart-item-sku">SKU: ${item.sku}</p>
+            <div class="cart-item" style="display: grid; grid-template-columns: 100px 2fr 1fr 100px 100px 50px; gap: 15px; align-items: center; background: #1a1a1a; padding: 20px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333;">
+                <img src="${item.image}" alt="${item.name}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;">
+                <div>
+                    <h4 style="margin-bottom: 5px;">${item.name}</h4>
+                    <p style="color: #888; font-size: 12px;">SKU: ${item.sku}</p>
                 </div>
-                <div class="cart-item-price">₹${item.price.toLocaleString()}</div>
-                <div class="cart-item-quantity">
+                <div style="color: #d4af37; font-weight: bold;">₹${item.price.toLocaleString()}</div>
+                <div>
                     <input type="number" 
                            value="${item.quantity}" 
                            min="1" 
                            max="10"
                            onchange="updateQuantity('${item.sku}', this.value)"
-                           class="quantity-input">
+                           style="width: 70px; padding: 8px; background: #333; border: 1px solid #444; color: white; border-radius: 4px; text-align: center;">
                 </div>
-                <div class="cart-item-total">₹${itemTotal.toLocaleString()}</div>
-                <button onclick="removeFromCart('${item.sku}')" class="remove-item">×</button>
+                <div style="font-weight: bold; color: #d4af37;">₹${itemTotal.toLocaleString()}</div>
+                <button onclick="removeFromCart('${item.sku}')" style="background: transparent; color: #f44336; border: 1px solid #f44336; padding: 5px 10px; width: auto; font-size: 12px;">Remove</button>
             </div>
         `;
     });
@@ -212,8 +229,8 @@ function displayCart() {
     container.innerHTML = html;
     
     // Calculate totals
-    const tax = Math.round(subtotal * CONFIG.TAX_RATE);
-    const shipping = subtotal >= CONFIG.FREE_SHIPPING_MIN ? 0 : CONFIG.SHIPPING_CHARGE;
+    const tax = Math.round(subtotal * (CONFIG.TAX_RATE || 0.18));
+    const shipping = subtotal >= (CONFIG.FREE_SHIPPING_MIN || 50000) ? 0 : (CONFIG.SHIPPING_CHARGE || 100);
     const total = subtotal + tax + shipping;
     
     if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString();
@@ -221,8 +238,8 @@ function displayCart() {
     if (totalEl) totalEl.textContent = total.toLocaleString();
 }
 
-// Update checkout summary
-function updateCheckoutSummary() {
+// Update checkout summary (for checkout page)
+window.updateCheckoutSummary = function() {
     const subtotalEl = document.getElementById('orderSubtotal');
     const taxEl = document.getElementById('orderTax');
     const totalEl = document.getElementById('orderTotal');
@@ -231,7 +248,7 @@ function updateCheckoutSummary() {
     if (!summaryContainer) return;
     
     if (cart.length === 0) {
-        summaryContainer.innerHTML = '<p>Your cart is empty</p>';
+        summaryContainer.innerHTML = '<p style="color: #f44336;">Your cart is empty</p>';
         return;
     }
     
@@ -243,28 +260,52 @@ function updateCheckoutSummary() {
         subtotal += itemTotal;
         
         itemsHtml += `
-            <div class="summary-item">
-                <span>${item.name} x${item.quantity}</span>
-                <span>₹${itemTotal.toLocaleString()}</span>
+            <div style="display: flex; justify-content: space-between; margin: 10px 0; padding: 5px 0; border-bottom: 1px solid #333;">
+                <span>${item.name} <span style="color: #888;">x${item.quantity}</span></span>
+                <span style="color: #d4af37;">₹${itemTotal.toLocaleString()}</span>
             </div>
         `;
     });
     
-    const tax = Math.round(subtotal * CONFIG.TAX_RATE);
-    const shipping = subtotal >= CONFIG.FREE_SHIPPING_MIN ? 0 : CONFIG.SHIPPING_CHARGE;
+    const tax = Math.round(subtotal * (CONFIG.TAX_RATE || 0.18));
+    const shipping = subtotal >= (CONFIG.FREE_SHIPPING_MIN || 50000) ? 0 : (CONFIG.SHIPPING_CHARGE || 100);
     const total = subtotal + tax + shipping;
     
-    summaryContainer.innerHTML = itemsHtml;
+    summaryContainer.innerHTML = `
+        <h3 style="color: #d4af37; margin-bottom: 15px;">Order Summary</h3>
+        ${itemsHtml}
+        <div style="margin-top: 15px;">
+            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                <span>Subtotal:</span>
+                <span>₹${subtotal.toLocaleString()}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                <span>Shipping:</span>
+                <span>${shipping === 0 ? 'Free' : '₹' + shipping}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                <span>GST (18%):</span>
+                <span>₹${tax.toLocaleString()}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 10px; border-top: 2px solid #d4af37; font-weight: bold;">
+                <span>Total:</span>
+                <span style="color: #d4af37; font-size: 20px;">₹${total.toLocaleString()}</span>
+            </div>
+        </div>
+    `;
     
     if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString();
     if (taxEl) taxEl.textContent = tax.toLocaleString();
     if (totalEl) totalEl.textContent = total.toLocaleString();
     
     return total;
-}
+};
 
 // Show notification
 function showNotification(message, type = 'success') {
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+    
     const notification = document.createElement('div');
     notification.className = 'notification';
     notification.textContent = message;
@@ -284,7 +325,7 @@ function showNotification(message, type = 'success') {
 }
 
 // Make functions globally available
-window.getCart = getCart;
-window.getCartCount = getCartCount;
-window.getCartTotal = getCartTotal;
-window.updateCheckoutSummary = updateCheckoutSummary;
+window.getCart = window.getCart;
+window.getCartCount = window.getCartCount;
+window.getCartTotal = window.getCartTotal;
+window.updateCheckoutSummary = window.updateCheckoutSummary;
