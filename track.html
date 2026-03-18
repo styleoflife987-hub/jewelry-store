@@ -9,26 +9,34 @@
 </head>
 <body>
     <header>
-        <div class="logo">STYLE OF LIFE</div>
+        <div class="logo">✨ STYLE OF LIFE</div>
         <nav>
             <a href="index.html">Home</a>
             <a href="cart.html">Cart <span class="cart-count">0</span></a>
-            <a href="track.html">Track Order</a>
-            <a href="login.html">Admin</a>
+            <a href="track.html" class="active">Track Order</a>
         </nav>
     </header>
 
-    <div style="max-width:500px; margin:100px auto; padding:40px; background:#1a1a1a; border-radius:15px; text-align:center">
-        <h2 style="color:#d4af37; margin-bottom:20px">Track Your Order</h2>
-        <input type="text" id="orderId" placeholder="Enter Order ID (e.g., ORD1234567890)" 
-               style="width:100%; padding:12px; background:#333; border:1px solid #444; border-radius:6px; color:white; margin-bottom:15px">
-        <button onclick="trackOrder()" style="padding:12px">Track Order</button>
-        
-        <div id="trackingResult" style="margin-top:30px"></div>
+    <div class="container">
+        <div class="track-container">
+            <h1 class="page-title">Track Your Order</h1>
+            
+            <div class="track-form">
+                <input type="text" id="orderId" placeholder="Enter Order ID (e.g., ORD1234567890)" class="track-input">
+                <button onclick="trackOrder()" class="track-btn">Track Order</button>
+            </div>
+            
+            <div id="trackingResult" class="tracking-result"></div>
+            
+            <div class="order-help">
+                <h4>Need Help?</h4>
+                <p>Contact us: support@styleoflife.com | +91 98765 43210</p>
+            </div>
+        </div>
     </div>
 
     <footer>
-        © 2026 Style Of Life Jewelry
+        <p>© 2026 Style Of Life Jewelry</p>
     </footer>
 
     <script>
@@ -40,48 +48,70 @@
             }
             
             const resultDiv = document.getElementById('trackingResult');
-            resultDiv.innerHTML = '<p>Tracking...</p>';
+            resultDiv.innerHTML = '<div class="loading">Tracking your order...</div>';
             
+            // First check local storage
+            const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const localOrder = localOrders.find(o => o.orderId === orderId);
+            
+            if (localOrder) {
+                displayOrderDetails(localOrder);
+                return;
+            }
+            
+            // Then try server
             try {
                 const response = await fetch(`${CONFIG.API_URL}?action=track&id=${orderId}`);
                 const data = await response.json();
                 
                 if (data.error) {
-                    resultDiv.innerHTML = `<p style="color:#f44336">Order not found</p>`;
+                    resultDiv.innerHTML = '<div class="error-message">Order not found</div>';
                 } else {
-                    let itemsHtml = '';
-                    if (data.items && data.items.length > 0) {
-                        itemsHtml = '<div style="margin:15px 0; text-align:left"><h4 style="color:#d4af37; margin-bottom:10px">Items:</h4>';
-                        data.items.forEach(item => {
-                            itemsHtml += `<p>${item.name} x${item.quantity || 1} - ₹${Number(item.price).toLocaleString('en-IN')}</p>`;
-                        });
-                        itemsHtml += '</div>';
-                    }
-                    
-                    const statusColors = {
-                        'Pending': '#ff9800',
-                        'Processing': '#2196f3',
-                        'Shipped': '#9c27b0',
-                        'Delivered': '#4caf50',
-                        'Cancelled': '#f44336'
-                    };
-                    
-                    resultDiv.innerHTML = `
-                        <div style="background:#222; padding:20px; border-radius:10px; text-align:left">
-                            <p><strong>Order ID:</strong> ${data.orderId}</p>
-                            <p><strong>Customer:</strong> ${data.name}</p>
-                            <p><strong>Status:</strong> <span style="color: ${statusColors[data.status] || '#d4af37'}; font-weight: bold;">${data.status}</span></p>
-                            <p><strong>Total:</strong> ₹${Number(data.total).toLocaleString('en-IN')}</p>
-                            <p><strong>Date:</strong> ${new Date(data.date).toLocaleDateString()}</p>
-                            ${itemsHtml}
-                        </div>
-                    `;
+                    displayOrderDetails(data);
                 }
             } catch (error) {
-                resultDiv.innerHTML = `<p style="color:#f44336">Error tracking order: ${error.message}</p>`;
+                resultDiv.innerHTML = '<div class="error-message">Error tracking order. Please try again.</div>';
             }
         }
         
+        function displayOrderDetails(order) {
+            const resultDiv = document.getElementById('trackingResult');
+            
+            const statusColors = {
+                'Pending': '#ff9800',
+                'Processing': '#2196f3',
+                'Shipped': '#9c27b0',
+                'Delivered': '#4caf50',
+                'Cancelled': '#f44336'
+            };
+            
+            let itemsHtml = '';
+            if (order.items && order.items.length > 0) {
+                itemsHtml = '<h4>Items:</h4>';
+                order.items.forEach(item => {
+                    itemsHtml += `
+                        <div class="track-item">
+                            <span>${item.name} x${item.quantity}</span>
+                            <span>₹${(item.price * item.quantity).toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+            }
+            
+            resultDiv.innerHTML = `
+                <div class="order-details">
+                    <h3>Order Details</h3>
+                    <p><strong>Order ID:</strong> ${order.orderId}</p>
+                    <p><strong>Customer:</strong> ${order.name}</p>
+                    <p><strong>Status:</strong> <span style="color: ${statusColors[order.status] || '#d4af37'}; font-weight: bold;">${order.status || 'Pending'}</span></p>
+                    <p><strong>Total:</strong> ₹${order.total?.toLocaleString() || 0}</p>
+                    <p><strong>Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
+                    ${itemsHtml}
+                </div>
+            `;
+        }
+        
+        // Check URL for order ID
         const urlParams = new URLSearchParams(window.location.search);
         const orderId = urlParams.get('order');
         if (orderId) {
