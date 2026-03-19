@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Diagnostic</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #0f0f0f; color: white; }
+        .card { background: #1a1a1a; padding: 20px; border-radius: 10px; margin: 10px 0; border: 1px solid #333; }
+        button { background: #d4af37; color: black; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        pre { background: #333; padding: 10px; border-radius: 5px; overflow: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Complete System Diagnostic</h1>
+    
+    <div class="card">
+        <h3>1. Apps Script URL</h3>
+        <p id="apiUrl">Loading...</p>
+        <button onclick="testApiUrl()">Test URL</button>
+        <div id="urlResult"></div>
+    </div>
+    
+    <div class="card">
+        <h3>2. Write Test Order to Excel</h3>
+        <button onclick="testWrite()">Write Test Order</button>
+        <div id="writeResult"></div>
+    </div>
+    
+    <div class="card">
+        <h3>3. Read Orders from Excel</h3>
+        <button onclick="testRead()">Read All Orders</button>
+        <div id="readResult"></div>
+    </div>
+    
+    <div class="card">
+        <h3>4. Local Storage</h3>
+        <button onclick="checkLocalStorage()">Check Local Storage</button>
+        <div id="localResult"></div>
+    </div>
+    
+    <div class="card">
+        <h3>5. Track Order Test</h3>
+        <input type="text" id="testOrderId" placeholder="Enter Order ID">
+        <button onclick="testTrack()">Test Track</button>
+        <div id="trackResult"></div>
+    </div>
+    
+    <div class="card">
+        <h3>6. Excel Sheet Structure</h3>
+        <button onclick="checkExcelStructure()">Check Excel Structure</button>
+        <div id="structureResult"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script>
+        document.getElementById('apiUrl').textContent = CONFIG.API_URL;
+        
+        async function testApiUrl() {
+            const result = document.getElementById('urlResult');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(CONFIG.API_URL + '?action=test');
+                const text = await response.text();
+                result.innerHTML = `<pre>${text}</pre>`;
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+        
+        async function testWrite() {
+            const result = document.getElementById('writeResult');
+            result.innerHTML = 'Writing...';
+            
+            const testOrder = {
+                action: 'placeOrder',
+                name: 'Diagnostic Test',
+                phone: '9999999999',
+                email: 'test@diag.com',
+                address: '123 Diagnostic St',
+                items: JSON.stringify([{sku: 'DIAG001', name: 'Test Product', price: 100, quantity: 1}]),
+                subtotal: 100,
+                tax: 18,
+                shipping: 100,
+                total: 218,
+                status: 'Pending',
+                date: new Date().toISOString()
+            };
+            
+            try {
+                const params = new URLSearchParams(testOrder);
+                const response = await fetch(`${CONFIG.API_URL}?${params}`);
+                const data = await response.json();
+                result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+        
+        async function testRead() {
+            const result = document.getElementById('readResult');
+            result.innerHTML = 'Reading...';
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=orders`);
+                const data = await response.json();
+                result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+        
+        function checkLocalStorage() {
+            const result = document.getElementById('localResult');
+            const products = localStorage.getItem('products');
+            const orders = localStorage.getItem('orders');
+            const cart = localStorage.getItem('cart');
+            
+            result.innerHTML = `
+                <p>Products: ${products ? JSON.parse(products).length : 0} items</p>
+                <p>Orders: ${orders ? JSON.parse(orders).length : 0} items</p>
+                <p>Cart: ${cart ? JSON.parse(cart).length : 0} items</p>
+                <pre>Products: ${products || '[]'}</pre>
+                <pre>Orders: ${orders || '[]'}</pre>
+                <pre>Cart: ${cart || '[]'}</pre>
+            `;
+        }
+        
+        async function testTrack() {
+            const orderId = document.getElementById('testOrderId').value;
+            if (!orderId) {
+                alert('Enter Order ID');
+                return;
+            }
+            
+            const result = document.getElementById('trackResult');
+            result.innerHTML = 'Tracking...';
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=track&id=${orderId}`);
+                const data = await response.json();
+                result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+        
+        async function checkExcelStructure() {
+            const result = document.getElementById('structureResult');
+            result.innerHTML = 'Checking...';
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=orders`);
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    const firstOrder = data[0];
+                    const columns = Object.keys(firstOrder);
+                    result.innerHTML = `
+                        <p class="success">✅ Excel has ${data.length} orders</p>
+                        <p>Columns found: ${columns.join(', ')}</p>
+                        <pre>Sample order: ${JSON.stringify(firstOrder, null, 2)}</pre>
+                    `;
+                } else {
+                    result.innerHTML = '<p class="warning">⚠️ No orders found in Excel</p>';
+                }
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

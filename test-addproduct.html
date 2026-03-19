@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Add Product</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #0f0f0f; color: white; }
+        .card { background: #1a1a1a; padding: 20px; border-radius: 10px; margin: 10px 0; }
+        button { background: #d4af37; color: black; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        pre { background: #333; padding: 10px; border-radius: 5px; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+    </style>
+    <script src="js/config.js"></script>
+</head>
+<body>
+    <h1>🧪 Test Add Product</h1>
+    
+    <div class="card">
+        <h3>Test Adding Product to Excel</h3>
+        <button onclick="testAddProduct()">Run Test</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function testAddProduct() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing...';
+            
+            const params = new URLSearchParams({
+                action: 'addProduct',
+                sku: 'TEST' + Date.now(),
+                name: 'Test Product',
+                category: 'Test Category',
+                price: '999',
+                stock: '10',
+                description: 'This is a test product'
+            });
+            
+            const url = `${CONFIG.API_URL}?${params.toString()}&t=${Date.now()}`;
+            console.log('Sending to:', url);
+            
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                console.log('Raw response:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        result.innerHTML = `
+                            <p class="success">✅ Product added successfully!</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        `;
+                    } else {
+                        result.innerHTML = `
+                            <p class="error">❌ Error: ${data.error || 'Unknown error'}</p>
+                            <pre>${text}</pre>
+                        `;
+                    }
+                } catch(e) {
+                    result.innerHTML = `
+                        <p class="error">❌ Invalid JSON response</p>
+                        <pre>${text.substring(0, 500)}</pre>
+                    `;
+                }
+            } catch(error) {
+                result.innerHTML = `<p class="error">❌ Network error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

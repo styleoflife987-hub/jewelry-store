@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Style Of Life</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/config.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">✨ STYLE OF LIFE</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="cart.html">Cart <span class="cart-count">0</span></a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">Checkout</h1>
+        
+        <div class="checkout-grid">
+            <div class="checkout-form">
+                <h3>Shipping Information</h3>
+                
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" placeholder="10 digit mobile number" maxlength="10" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="your@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Street Address *</label>
+                    <input type="text" id="address" placeholder="Street address" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="city">City *</label>
+                    <input type="text" id="city" placeholder="City" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pincode">Pincode *</label>
+                    <input type="text" id="pincode" placeholder="6 digit pincode" maxlength="6" required>
+                </div>
+            </div>
+            
+            <div class="order-summary">
+                <h3>Your Order</h3>
+                <div id="cartSummary" class="summary-items"></div>
+                
+                <div class="summary-totals">
+                    <div class="summary-row">
+                        <span>Subtotal:</span>
+                        <span>₹<span id="orderSubtotal">0</span></span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Shipping:</span>
+                        <span>₹100</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>GST (18%):</span>
+                        <span>₹<span id="orderTax">0</span></span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span>₹<span id="orderTotal">0</span></span>
+                    </div>
+                </div>
+                
+                <button onclick="processOrder()" class="place-order-btn" id="placeOrderBtn">
+                    Place Order
+                </button>
+                
+                <p class="secure-payment">
+                    🔒 Secure Payment | 100% Buyer Protection
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 Style Of Life Jewelry</p>
+    </footer>
+
+    <script src="js/cart.js"></script>
+    <script src="js/sync.js"></script>
+    <script src="js/payment.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCheckoutSummary();
+        });
+
+        async function processOrder() {
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const pincode = document.getElementById('pincode').value.trim();
+            
+            if (!name || !phone || !address || !city || !pincode) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            if (phone.length !== 10 || !/^\d+$/.test(phone)) {
+                alert('Please enter a valid 10-digit phone number');
+                return;
+            }
+            
+            if (pincode.length !== 6 || !/^\d+$/.test(pincode)) {
+                alert('Please enter a valid 6-digit pincode');
+                return;
+            }
+            
+            const cart = getCart();
+            if (cart.length === 0) {
+                alert('Your cart is empty');
+                return;
+            }
+            
+            const subtotal = getCartTotal();
+            const tax = Math.round(subtotal * 0.18);
+            const shipping = 100;
+            const total = subtotal + tax + shipping;
+            const fullAddress = `${address}, ${city} - ${pincode}`;
+            
+            const btn = document.getElementById('placeOrderBtn');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            
+            const localOrderId = 'ORD' + Date.now();
+            const localOrder = {
+                orderId: localOrderId,
+                name: name,
+                phone: phone,
+                email: email,
+                address: fullAddress,
+                items: cart,
+                subtotal: subtotal,
+                tax: tax,
+                shipping: shipping,
+                total: total,
+                status: 'Pending',
+                date: new Date().toISOString()
+            };
+            
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.push(localOrder);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            let excelSuccess = false;
+            let excelOrderId = localOrderId;
+            
+            try {
+                console.log('📤 Attempting to save order to Excel...');
+                
+                const params = new URLSearchParams({
+                    action: 'placeOrder',
+                    name: name,
+                    phone: phone,
+                    email: email || '',
+                    address: fullAddress,
+                    items: JSON.stringify(cart),
+                    subtotal: subtotal,
+                    tax: tax,
+                    shipping: shipping,
+                    total: total,
+                    status: 'Pending',
+                    date: new Date().toISOString()
+                });
+                
+                const url = `${CONFIG.API_URL}?${params}&t=${Date.now()}`;
+                console.log('Sending to:', url);
+                
+                const response = await fetch(url);
+                const text = await response.text();
+                console.log('Raw response:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        excelSuccess = true;
+                        excelOrderId = data.orderId;
+                        console.log('✅ Order saved to Excel with ID:', excelOrderId);
+                        
+                        const updatedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                        const orderIndex = updatedOrders.findIndex(o => o.orderId === localOrderId);
+                        if (orderIndex >= 0) {
+                            updatedOrders[orderIndex].orderId = excelOrderId;
+                            localStorage.setItem('orders', JSON.stringify(updatedOrders));
+                        }
+                    } else {
+                        console.error('❌ Excel error:', data.error);
+                    }
+                } catch(e) {
+                    console.error('❌ Failed to parse response:', e);
+                }
+            } catch (error) {
+                console.error('❌ Network error:', error);
+            }
+            
+            localStorage.removeItem('cart');
+            updateCartCount();
+            
+            if (excelSuccess) {
+                alert(`✅ Order placed successfully in Excel! Order ID: ${excelOrderId}`);
+                window.location.href = `track.html?order=${excelOrderId}`;
+            } else {
+                alert(`⚠️ Order saved locally. Order ID: ${localOrderId}\nYour order will sync to Excel when connection is restored.`);
+                window.location.href = `track.html?order=${localOrderId}`;
+            }
+        }
+
+        function updateCheckoutSummary() {
+            const cart = getCart();
+            const subtotal = getCartTotal();
+            const tax = Math.round(subtotal * 0.18);
+            const shipping = 100;
+            const total = subtotal + tax + shipping;
+            
+            const summaryContainer = document.getElementById('cartSummary');
+            if (summaryContainer) {
+                if (cart.length === 0) {
+                    summaryContainer.innerHTML = '<p>Your cart is empty</p>';
+                } else {
+                    let itemsHtml = '';
+                    cart.forEach(item => {
+                        itemsHtml += `
+                            <div style="display: flex; justify-content: space-between; margin: 5px 0;">
+                                <span>${item.name} x${item.quantity}</span>
+                                <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                            </div>
+                        `;
+                    });
+                    summaryContainer.innerHTML = itemsHtml;
+                }
+            }
+            
+            document.getElementById('orderSubtotal').textContent = subtotal.toLocaleString('en-IN');
+            document.getElementById('orderTax').textContent = tax.toLocaleString('en-IN');
+            document.getElementById('orderTotal').textContent = total.toLocaleString('en-IN');
+        }
+    </script>
+</body>
+</html>
