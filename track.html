@@ -46,38 +46,40 @@
             const resultDiv = document.getElementById('trackingResult');
             resultDiv.innerHTML = '<p>🔍 Tracking your order...</p>';
             
+            // First try Excel
             try {
                 const response = await fetch(`${CONFIG.API_URL}?action=track&id=${encodeURIComponent(orderId)}&t=${Date.now()}`);
-                const data = await response.json();
+                const text = await response.text();
                 
-                if (data.error) {
-                    checkLocalStorage(orderId);
-                } else {
-                    displayOrder(data);
+                try {
+                    const data = JSON.parse(text);
+                    if (!data.error) {
+                        displayOrder(data);
+                        return;
+                    }
+                } catch(e) {
+                    console.log('Excel response not JSON:', text);
                 }
             } catch (error) {
-                console.error('Tracking error:', error);
-                checkLocalStorage(orderId);
+                console.log('Excel tracking failed:', error);
             }
-        }
-        
-        function checkLocalStorage(orderId) {
-            const resultDiv = document.getElementById('trackingResult');
             
+            // Then try local storage
             try {
                 const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
                 const localOrder = localOrders.find(o => o.orderId === orderId);
                 
                 if (localOrder) {
                     displayOrder(localOrder);
-                } else {
-                    resultDiv.innerHTML = '<p style="color: #f44336;">❌ Order not found</p>';
+                    return;
                 }
             } catch (e) {
-                resultDiv.innerHTML = '<p style="color: #f44336;">❌ Order not found</p>';
+                console.log('Local storage error:', e);
             }
+            
+            resultDiv.innerHTML = '<p style="color: #f44336;">❌ Order not found</p>';
         }
-        
+
         function displayOrder(order) {
             const resultDiv = document.getElementById('trackingResult');
             
@@ -98,10 +100,11 @@
             if (items.length > 0) {
                 itemsHtml = '<h4 style="margin-top: 20px; margin-bottom: 10px;">Items:</h4>';
                 items.forEach(item => {
+                    const itemTotal = (item.price || 0) * (item.quantity || 1);
                     itemsHtml += `
                         <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #333;">
                             <span>${item.name || 'Product'} x${item.quantity || 1}</span>
-                            <span style="color: #d4af37;">₹${((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}</span>
+                            <span style="color: #d4af37;">₹${itemTotal.toLocaleString('en-IN')}</span>
                         </div>
                     `;
                 });
