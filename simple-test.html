@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple API Test</title>
+</head>
+<body>
+    <h2>Simple API Test</h2>
+    <div id="result"></div>
+    
+    <script>
+        // Use your exact Apps Script URL
+        const API_URL = "https://script.google.com/macros/s/AKfycby3wzak-aaQ66x5UKbC2_htO6H-qt9dp0eEsyUblO2_5X5t5b1Nd0FtZY4HCiaV6QBf_g/exec";
+        
+        async function runTests() {
+            const result = document.getElementById('result');
+            let output = '';
+            
+            // Test 1: Check if script is working
+            output += 'Test 1: Checking connection...\n';
+            try {
+                const response = await fetch(API_URL + '?action=test');
+                const data = await response.json();
+                output += '✅ Test 1 passed: ' + JSON.stringify(data) + '\n\n';
+            } catch(error) {
+                output += '❌ Test 1 failed: ' + error.message + '\n\n';
+            }
+            
+            // Test 2: Try to place a test order
+            output += 'Test 2: Placing test order...\n';
+            try {
+                const params = new URLSearchParams({
+                    action: 'placeOrder',
+                    name: 'Test Customer',
+                    phone: '9876543210',
+                    email: 'test@example.com',
+                    address: '123 Test St',
+                    items: JSON.stringify([{sku: 'TEST001', name: 'Test Product', price: 999, quantity: 1}]),
+                    subtotal: '999',
+                    tax: '180',
+                    shipping: '100',
+                    total: '1279',
+                    status: 'Pending',
+                    date: new Date().toISOString()
+                });
+                
+                const response = await fetch(API_URL + '?' + params);
+                const data = await response.json();
+                output += '✅ Test 2 passed: ' + JSON.stringify(data) + '\n\n';
+            } catch(error) {
+                output += '❌ Test 2 failed: ' + error.message + '\n\n';
+            }
+            
+            // Test 3: Read orders
+            output += 'Test 3: Reading orders...\n';
+            try {
+                const response = await fetch(API_URL + '?action=orders');
+                const data = await response.json();
+                output += '✅ Test 3 passed: Found ' + data.length + ' orders\n';
+                output += 'First order: ' + JSON.stringify(data[0]) + '\n';
+            } catch(error) {
+                output += '❌ Test 3 failed: ' + error.message + '\n';
+            }
+            
+            result.innerHTML = '<pre>' + output + '</pre>';
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>
