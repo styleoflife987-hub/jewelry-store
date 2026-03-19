@@ -147,7 +147,12 @@ async function placeOrderInExcel(orderData) {
         email: orderData.email || '',
         address: orderData.address,
         items: JSON.stringify(orderData.items),
-        total: orderData.total
+        subtotal: orderData.subtotal,
+        tax: orderData.tax,
+        shipping: orderData.shipping,
+        total: orderData.total,
+        status: 'Pending',
+        date: new Date().toISOString()
     });
 }
 
