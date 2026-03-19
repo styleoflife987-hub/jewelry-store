@@ -174,7 +174,12 @@
                     email: email || '',
                     address: fullAddress,
                     items: JSON.stringify(cart),
-                    total: total
+                    subtotal: subtotal,
+                    tax: tax,
+                    shipping: shipping,
+                    total: total,
+                    status: 'Pending',
+                    date: new Date().toISOString()
                 });
                 
                 const url = `${CONFIG.API_URL}?${params}&t=${Date.now()}`;
