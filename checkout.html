@@ -1,48 +1,44 @@
-<script>
-async function processOrder() {
-    const name = document.getElementById('name').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const address = document.getElementById('address').value.trim();
-    const city = document.getElementById('city').value.trim();
-    const pincode = document.getElementById('pincode').value.trim();
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout</title>
+</head>
+<body>
 
-    if (!name || !phone || !address || !city || !pincode) {
-        alert('Please fill all fields');
-        return;
-    }
+<h2>Checkout</h2>
+
+<input id="name" placeholder="Name"><br>
+<input id="phone" placeholder="Phone"><br>
+<button onclick="order()">Place Order</button>
+
+<script src="js/cart.js"></script>
+<script src="js/payment.js"></script>
+
+<script>
+function order() {
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
 
     const cart = getCart();
-    if (cart.length === 0) {
-        alert('Cart empty');
-        return;
-    }
+    if (cart.length === 0) return alert("Empty");
 
-    const subtotal = getCartTotal();
-    const tax = Math.round(subtotal * 0.18);
-    const shipping = 100;
-    const total = subtotal + tax + shipping;
-
+    const total = getTotal();
     const orderId = "ORD" + Date.now();
 
     const order = {
-        orderId,
-        name,
-        phone,
-        email,
-        address: `${address}, ${city} - ${pincode}`,
+        orderId, name, phone,
         items: cart,
         total,
-        status: "Pending",
-        date: new Date().toISOString()
+        status: "Pending"
     };
 
-    // ✅ SAVE ORDER
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    // ✅ PAYMENT
-    payNow(total, { name, phone, email, orderId });
+    payNow(total, { orderId });
 }
 </script>
+
+</body>
+</html>
