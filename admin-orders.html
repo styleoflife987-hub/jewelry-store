@@ -102,12 +102,12 @@
         
         async function updateOrderStatus(orderId, status) {
             try {
-                const response = await fetch(`${CONFIG.API_URL}?action=updateOrderStatus&orderId=${orderId}&status=${status}`);
+                const response = await fetch(`${CONFIG.API_URL}?action=updateOrderStatus&orderId=${orderId}&status=${status}&t=${Date.now()}`);
                 const data = await response.json();
                 if (data.success) {
                     alert(`✅ Order ${orderId} updated to ${status} in Excel`);
+                    await loadOrders();
                     await forceSync();
-                    loadOrders();
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -117,12 +117,12 @@
         async function deleteOrder(orderId) {
             if (!confirm('Delete this order from Excel?')) return;
             try {
-                const response = await fetch(`${CONFIG.API_URL}?action=deleteOrder&orderId=${orderId}`);
+                const response = await fetch(`${CONFIG.API_URL}?action=deleteOrder&orderId=${orderId}&t=${Date.now()}`);
                 const data = await response.json();
                 if (data.success) {
                     alert('✅ Order deleted from Excel');
+                    await loadOrders();
                     await forceSync();
-                    loadOrders();
                 }
             } catch (error) {
                 alert('Error: ' + error.message);
