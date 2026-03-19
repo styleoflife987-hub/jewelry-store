@@ -143,47 +143,88 @@
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
+            // ALWAYS save locally first
+            const localOrderId = 'ORD' + Date.now();
+            const localOrder = {
+                orderId: localOrderId,
+                name: name,
+                phone: phone,
+                email: email,
+                address: fullAddress,
+                items: cart,
+                subtotal: subtotal,
+                tax: tax,
+                shipping: shipping,
+                total: total,
+                status: 'Pending',
+                date: new Date().toISOString()
+            };
+            
+            // Save locally immediately
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            orders.push(localOrder);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            
+            // Try to save to Excel
+            let excelSuccess = false;
+            let excelOrderId = localOrderId;
+            
             try {
-                const result = await placeOrderInExcel({
+                console.log('📤 Attempting to save order to Excel...');
+                
+                const params = new URLSearchParams({
+                    action: 'placeOrder',
                     name: name,
                     phone: phone,
-                    email: email,
+                    email: email || '',
                     address: fullAddress,
-                    items: cart,
+                    items: JSON.stringify(cart),
                     total: total
                 });
                 
-                if (result.success) {
-                    localStorage.removeItem('cart');
-                    updateCartCount();
-                    alert(`✅ Order placed successfully! Order ID: ${result.orderId}`);
-                    window.location.href = `track.html?order=${result.orderId}`;
-                } else {
-                    throw new Error(result.error || 'Failed to place order');
+                const url = `${CONFIG.API_URL}?${params}&t=${Date.now()}`;
+                console.log('Sending to:', url);
+                
+                const response = await fetch(url);
+                const text = await response.text();
+                console.log('Raw response:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        excelSuccess = true;
+                        excelOrderId = data.orderId;
+                        console.log('✅ Order saved to Excel with ID:', excelOrderId);
+                        
+                        // Update local order with Excel ID
+                        const updatedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+                        const orderIndex = updatedOrders.findIndex(o => o.orderId === localOrderId);
+                        if (orderIndex >= 0) {
+                            updatedOrders[orderIndex].orderId = excelOrderId;
+                            localStorage.setItem('orders', JSON.stringify(updatedOrders));
+                        }
+                    } else {
+                        console.error('❌ Excel error:', data.error);
+                    }
+                } catch(e) {
+                    console.error('❌ Failed to parse response:', e);
+                    console.error('Response text:', text);
                 }
             } catch (error) {
-                console.error('Order error:', error);
-                
-                const fallbackOrderId = 'ORD' + Date.now();
-                saveOrderLocally({
-                    orderId: fallbackOrderId,
-                    name: name,
-                    phone: phone,
-                    email: email,
-                    address: fullAddress,
-                    items: cart,
-                    subtotal: subtotal,
-                    tax: tax,
-                    shipping: shipping,
-                    total: total,
-                    status: 'Pending',
-                    date: new Date().toISOString()
-                });
-                
-                localStorage.removeItem('cart');
-                updateCartCount();
-                alert(`⚠️ Order saved locally. Order ID: ${fallbackOrderId}`);
-                window.location.href = `track.html?order=${fallbackOrderId}`;
+                console.error('❌ Network error:', error);
+            }
+            
+            // Clear cart regardless
+            localStorage.removeItem('cart');
+            updateCartCount();
+            
+            // Show appropriate message
+            if (excelSuccess) {
+                alert(`✅ Order placed successfully in Excel! Order ID: ${excelOrderId}`);
+                window.location.href = `track.html?order=${excelOrderId}`;
+            } else {
+                alert(`⚠️ Order saved locally. Order ID: ${localOrderId}\nYour order will sync to Excel when connection is restored.`);
+                window.location.href = `track.html?order=${localOrderId}`;
             }
         }
 
