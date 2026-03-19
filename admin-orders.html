@@ -1,34 +1,21 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Orders</h2>
+<div id="orders"></div>
+
 <script>
-document.addEventListener('DOMContentLoaded', loadOrders);
+const orders = JSON.parse(localStorage.getItem('orders') || '[]');
 
-function loadOrders() {
-    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-    displayOrders(orders);
-}
+let html = '';
 
-function displayOrders(orders) {
-    const container = document.getElementById('ordersList');
+orders.forEach(o => {
+    html += `<p>${o.orderId} - ${o.name} - ₹${o.total}</p>`;
+});
 
-    if (orders.length === 0) {
-        container.innerHTML = '<p>No orders</p>';
-        return;
-    }
-
-    let html = "<table border='1' width='100%'>";
-    html += "<tr><th>ID</th><th>Name</th><th>Total</th><th>Status</th></tr>";
-
-    orders.forEach(o => {
-        html += `
-            <tr>
-                <td>${o.orderId}</td>
-                <td>${o.name}</td>
-                <td>₹${o.total}</td>
-                <td>${o.status}</td>
-            </tr>
-        `;
-    });
-
-    html += "</table>";
-    container.innerHTML = html;
-}
+document.getElementById('orders').innerHTML = html;
 </script>
+
+</body>
+</html>
