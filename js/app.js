@@ -1,4 +1,4 @@
-// js/app.js - Product Display
+// js/app.js - Product Display with Drive Images
 let products = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -33,7 +33,8 @@ function displayProducts(products) {
                     <img src="${image}" 
                          class="main-image"
                          alt="${product.name}"
-                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'"
+                         style="object-fit: contain;">
                 </div>
                 
                 <div class="product-info">
