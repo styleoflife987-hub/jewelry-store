@@ -52,6 +52,5 @@ function createImagePreview(file, containerId) {
     reader.readAsDataURL(file);
 }
 
-// Make functions globally available
 window.uploadImageToDrive = uploadImageToDrive;
 window.createImagePreview = createImagePreview;
