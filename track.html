@@ -46,7 +46,6 @@
             const resultDiv = document.getElementById('trackingResult');
             resultDiv.innerHTML = '<p>🔍 Tracking your order...</p>';
             
-            // First try Excel
             try {
                 const response = await fetch(`${CONFIG.API_URL}?action=track&id=${encodeURIComponent(orderId)}&t=${Date.now()}`);
                 const text = await response.text();
@@ -64,7 +63,6 @@
                 console.log('Excel tracking failed:', error);
             }
             
-            // Then try local storage
             try {
                 const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
                 const localOrder = localOrders.find(o => o.orderId === orderId);
