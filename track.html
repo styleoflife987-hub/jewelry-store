@@ -1,33 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Track Order</h2>
+
+<input id="id">
+<button onclick="track()">Track</button>
+
+<div id="result"></div>
+
 <script>
-function trackOrder() {
-    const orderId = document.getElementById('orderId').value.trim();
+function track() {
+    const id = document.getElementById('id').value;
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
 
-    const order = orders.find(o => o.orderId === orderId);
+    const o = orders.find(x => x.orderId === id);
 
-    const resultDiv = document.getElementById('trackingResult');
+    if (!o) return alert("Not found");
 
-    if (!order) {
-        resultDiv.innerHTML = '<p style="color:red">Order not found</p>';
-        return;
-    }
-
-    let itemsHtml = '';
-    order.items.forEach(item => {
-        itemsHtml += `
-            <div>
-                ${item.name} x${item.quantity} - ₹${item.price * item.quantity}
-            </div>
-        `;
-    });
-
-    resultDiv.innerHTML = `
-        <h3>Order Details</h3>
-        <p><b>ID:</b> ${order.orderId}</p>
-        <p><b>Name:</b> ${order.name}</p>
-        <p><b>Status:</b> ${order.status}</p>
-        <p><b>Total:</b> ₹${order.total}</p>
-        <div>${itemsHtml}</div>
-    `;
+    document.getElementById('result').innerHTML =
+        `<p>${o.name} - ₹${o.total} - ${o.status}</p>`;
 }
 </script>
+
+</body>
+</html>
