@@ -1,6 +1,6 @@
 // js/config.js
 const CONFIG = {
-    API_URL: "https://script.google.com/macros/s/AKfycby3wzak-aaQ66x5UKbC2_htO6H-qt9dp0eEsyUblO2_5X5t5b1Nd0FtZY4HCiaV6QBf_g/exec",
+    API_URL: "https://script.google.com/macros/s/AKfycbwCSWHfY18rKz_lNrZ7030S8OHJ-cjhEcTgW8MDYefpvqYJUzzl5rusDALMSOgkBmME/exec",
     RAZORPAY_KEY: "rzp_test_SRYMp6P150uD4M",
     SITE_NAME: "Style Of Life Jewelry",
     CURRENCY: "₹",
