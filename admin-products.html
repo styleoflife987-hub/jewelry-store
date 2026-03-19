@@ -23,6 +23,62 @@
     <div class="admin-container">
         <h1 class="page-title">Product Management</h1>
         
+        <!-- Edit Product Modal -->
+        <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; overflow-y: auto;">
+            <div style="background: #1a1a1a; max-width: 600px; margin: 50px auto; padding: 30px; border-radius: 15px; border: 2px solid #d4af37;">
+                <h2 style="color: #d4af37; margin-bottom: 20px;">Edit Product</h2>
+                
+                <input type="hidden" id="editProductId">
+                
+                <div class="form-group">
+                    <label>SKU</label>
+                    <input type="text" id="editSku" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="editName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" id="editCategory" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Price (₹)</label>
+                    <input type="number" id="editPrice" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Stock</label>
+                    <input type="number" id="editStock" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="editDescription" rows="2"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Current Image</label>
+                    <img id="editCurrentImage" src="" style="max-width: 200px; max-height: 200px; display: block; margin: 10px 0; border-radius: 8px;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Upload New Image (optional)</label>
+                    <input type="file" id="editImage" accept="image/*">
+                    <div id="editImagePreview"></div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button onclick="saveEdit()" class="submit-btn" style="flex: 1;">💾 Save Changes</button>
+                    <button onclick="closeEditModal()" class="submit-btn" style="flex: 1; background: #666;">❌ Cancel</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Product Form -->
         <div class="add-product-form">
             <h2>Add New Product</h2>
             
@@ -77,6 +133,7 @@
             </div>
         </div>
         
+        <!-- Products List -->
         <div class="products-list-section">
             <h2>Current Products</h2>
             <div id="productsList" class="products-grid-admin">
@@ -97,10 +154,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadProducts();
             
-            // File input preview
             document.getElementById('productImage').addEventListener('change', function(e) {
                 if (e.target.files[0]) {
                     createImagePreview(e.target.files[0], 'imagePreview');
+                }
+            });
+            
+            document.getElementById('editImage').addEventListener('change', function(e) {
+                if (e.target.files[0]) {
+                    createImagePreview(e.target.files[0], 'editImagePreview');
                 }
             });
         });
@@ -135,7 +197,8 @@
                                 ${product.image ? '<p style="color: #4CAF50; font-size: 12px;">✅ Image in Drive</p>' : ''}
                             </div>
                             <div class="product-card-actions">
-                                <button onclick="deleteProduct('${product.id}')" class="delete-btn">🗑️ Delete</button>
+                                <button onclick="editProduct('${product.id}')" class="edit-btn" style="background: #2196f3; width: auto; padding: 8px 15px; margin-bottom: 5px;">✏️ Edit</button>
+                                <button onclick="deleteProduct('${product.id}')" class="delete-btn" style="width: auto; padding: 8px 15px;">🗑️ Delete</button>
                             </div>
                         </div>
                     </div>
@@ -154,6 +217,85 @@
             document.getElementById('description').value = '';
             document.getElementById('productImage').value = '';
             document.getElementById('imagePreview').innerHTML = '';
+        }
+        
+        // Edit Product Functions
+        function editProduct(id) {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            const product = products.find(p => p.id == id);
+            
+            if (!product) return;
+            
+            document.getElementById('editProductId').value = product.id;
+            document.getElementById('editSku').value = product.sku || '';
+            document.getElementById('editName').value = product.name || '';
+            document.getElementById('editCategory').value = product.category || '';
+            document.getElementById('editPrice').value = product.price || '';
+            document.getElementById('editStock').value = product.stock || '';
+            document.getElementById('editDescription').value = product.description || '';
+            document.getElementById('editCurrentImage').src = product.image || CONFIG.PLACEHOLDER_IMAGE;
+            document.getElementById('editImagePreview').innerHTML = '';
+            document.getElementById('editImage').value = '';
+            
+            document.getElementById('editModal').style.display = 'block';
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        async function saveEdit() {
+            const id = document.getElementById('editProductId').value;
+            const sku = document.getElementById('editSku').value.trim();
+            const name = document.getElementById('editName').value.trim();
+            const category = document.getElementById('editCategory').value.trim();
+            const price = document.getElementById('editPrice').value.trim();
+            const stock = document.getElementById('editStock').value.trim();
+            const description = document.getElementById('editDescription').value.trim();
+            const imageFile = document.getElementById('editImage').files[0];
+            
+            if (!sku || !name || !category || !price || !stock) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            const index = products.findIndex(p => p.id == id);
+            
+            if (index === -1) return;
+            
+            let imageUrl = products[index].image;
+            
+            // Upload new image if selected
+            if (imageFile) {
+                try {
+                    const uploadResult = await uploadImageToDrive(imageFile);
+                    if (uploadResult.success) {
+                        imageUrl = uploadResult.directUrl;
+                    }
+                } catch (error) {
+                    console.error('Image upload failed:', error);
+                    alert('Image upload failed, but product will be updated without new image');
+                }
+            }
+            
+            // Update product
+            products[index] = {
+                ...products[index],
+                sku: sku,
+                name: name,
+                category: category,
+                price: Number(price),
+                stock: Number(stock),
+                description: description || '',
+                image: imageUrl
+            };
+            
+            localStorage.setItem('products', JSON.stringify(products));
+            
+            alert('✅ Product updated successfully!');
+            closeEditModal();
+            loadProducts();
         }
         
         async function addProduct() {
@@ -181,7 +323,6 @@
             btn.textContent = 'Uploading image to Drive...';
             
             try {
-                // Upload image to Google Drive
                 const uploadResult = await uploadImageToDrive(imageFile);
                 
                 if (!uploadResult.success) {
@@ -190,7 +331,6 @@
                 
                 btn.textContent = 'Saving product...';
                 
-                // Create product with Drive image URL
                 const newProduct = {
                     id: Date.now(),
                     sku: sku,
@@ -199,12 +339,11 @@
                     price: Number(price),
                     stock: Number(stock),
                     description: description || '',
-                    image: uploadResult.directUrl, // Direct Drive image URL
+                    image: uploadResult.directUrl,
                     driveFileId: uploadResult.fileId,
                     driveUrl: uploadResult.fileUrl
                 };
                 
-                // Save to localStorage
                 const products = JSON.parse(localStorage.getItem('products') || '[]');
                 products.push(newProduct);
                 localStorage.setItem('products', JSON.stringify(products));
