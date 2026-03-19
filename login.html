@@ -8,16 +8,17 @@
 </head>
 <body>
     <header>
-        <div class="logo">✨ STYLE OF LIFE</div>
+        <div class="logo">✨ STYLE OF LIFE - ADMIN</div>
         <nav>
             <a href="index.html">Home</a>
-            <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+            <a href="cart.html">Cart</a>
         </nav>
     </header>
 
     <div class="login-container">
         <div class="login-box">
             <h2>Admin Login</h2>
+            <p style="color: #888; margin-bottom: 20px;">This area is for administrators only</p>
             
             <div class="form-group">
                 <label for="username">Username</label>
@@ -41,9 +42,6 @@
         <p>© 2026 Style Of Life Jewelry</p>
     </footer>
 
-    <script src="js/config.js"></script>
-    <script src="js/data.js"></script>
-    
     <script>
         function login() {
             const username = document.getElementById('username').value;
