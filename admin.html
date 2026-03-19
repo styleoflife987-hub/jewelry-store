@@ -64,6 +64,13 @@
                 <button onclick="forceSync()" class="action-btn">🔄 Sync with Excel</button>
             </div>
         </div>
+        
+        <div class="recent-orders" style="margin-top: 30px; background: #1a1a1a; padding: 20px; border-radius: 10px;">
+            <h2>Recent Orders</h2>
+            <div id="recentOrdersList">
+                <p>Loading recent orders...</p>
+            </div>
+        </div>
     </div>
 
     <footer>
@@ -78,6 +85,7 @@
         
         document.addEventListener('DOMContentLoaded', function() {
             loadDashboardStats();
+            loadRecentOrders();
         });
         
         function loadDashboardStats() {
@@ -92,6 +100,33 @@
             
             const pending = orders.filter(o => o.status === 'Pending').length;
             document.getElementById('pendingOrders').textContent = pending;
+        }
+        
+        function loadRecentOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const recentOrders = orders.slice(-5).reverse();
+            
+            const container = document.getElementById('recentOrdersList');
+            
+            if (recentOrders.length === 0) {
+                container.innerHTML = '<p>No recent orders</p>';
+                return;
+            }
+            
+            let html = '<div style="display: grid; gap: 10px;">';
+            recentOrders.forEach(order => {
+                html += `
+                    <div style="background: #333; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${order.orderId}</strong><br>
+                            <small>${order.name} - ₹${(order.total || 0).toLocaleString('en-IN')}</small>
+                        </div>
+                        <span style="background: ${order.status === 'Pending' ? '#ff9800' : '#4CAF50'}; color: black; padding: 5px 10px; border-radius: 20px; font-size: 12px;">${order.status}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
         }
         
         function logout() {
