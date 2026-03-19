@@ -12,10 +12,12 @@ function payNow(amount, customerDetails = {}) {
         name: CONFIG.SITE_NAME,
         description: "Jewelry Purchase",
         handler: function(response) {
-            alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}`);
+            alert(`Payment Successful! ID: ${response.razorpay_payment_id}`);
+    
             localStorage.removeItem('cart');
-            window.location.href = `track.html?order=${customerDetails.orderId || response.razorpay_payment_id}`;
-        },
+
+            window.location.href = `track.html?order=${customerDetails.orderId}`;
+        }
         prefill: {
             name: customerDetails.name || "",
             contact: customerDetails.phone || "",
