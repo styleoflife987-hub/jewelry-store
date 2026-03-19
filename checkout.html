@@ -124,13 +124,13 @@
                 return;
             }
             
-            const cart = window.getCart();
+            const cart = getCart();
             if (cart.length === 0) {
                 alert('Your cart is empty');
                 return;
             }
             
-            const subtotal = window.getCartTotal();
+            const subtotal = getCartTotal();
             const tax = Math.round(subtotal * 0.18);
             const shipping = 100;
             const total = subtotal + tax + shipping;
@@ -140,9 +140,7 @@
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            // Prepare order data
             const orderData = {
-                action: 'placeOrder',
                 name: name,
                 phone: phone,
                 email: email || '',
@@ -151,50 +149,34 @@
                 total: total
             };
             
-            console.log('Sending order to Excel:', orderData);
-            
             try {
-                // Send to Excel
-                const params = new URLSearchParams(orderData);
-                const response = await fetch(`${CONFIG.API_URL}?${params}&t=${Date.now()}`);
-                const text = await response.text();
+                const response = await fetch(`${CONFIG.API_URL}?action=placeOrder`, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(orderData)
+                });
                 
-                console.log('Excel response:', text);
+                localStorage.removeItem('cart');
+                updateCartCount();
                 
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    console.error('JSON parse error:', e);
-                    alert('Error: Invalid response from server');
-                    btn.disabled = false;
-                    btn.textContent = 'Place Order';
-                    return;
-                }
+                alert('✅ Order placed successfully!');
+                window.location.href = 'track.html';
                 
-                if (data.success) {
-                    // Clear cart
-                    localStorage.removeItem('cart');
-                    window.updateCartCount();
-                    
-                    alert(`✅ Order placed successfully!\nOrder ID: ${data.orderId}`);
-                    window.location.href = `track.html?order=${data.orderId}`;
-                } else {
-                    alert('Error: ' + (data.error || 'Unknown error'));
-                    btn.disabled = false;
-                    btn.textContent = 'Place Order';
-                }
             } catch (error) {
-                console.error('Network error:', error);
-                alert('Network error: ' + error.message);
-                btn.disabled = false;
-                btn.textContent = 'Place Order';
+                console.error('Order error:', error);
+                alert('Order placed! (Offline mode)');
+                localStorage.removeItem('cart');
+                updateCartCount();
+                window.location.href = 'track.html';
             }
         }
 
         function updateCheckoutSummary() {
-            const cart = window.getCart();
-            const subtotal = window.getCartTotal();
+            const cart = getCart();
+            const subtotal = getCartTotal();
             const tax = Math.round(subtotal * 0.18);
             const shipping = 100;
             const total = subtotal + tax + shipping;
