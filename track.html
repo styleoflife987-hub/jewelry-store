@@ -115,12 +115,16 @@
                         <p><strong>Order ID:</strong> <span style="color: #d4af37;">${order.orderId}</span></p>
                         <p><strong>Customer:</strong> ${order.name || 'N/A'}</p>
                         <p><strong>Phone:</strong> ${order.phone || 'N/A'}</p>
+                        <p><strong>Email:</strong> ${order.email || 'N/A'}</p>
                         <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
                         <p><strong>Status:</strong> 
                             <span style="display: inline-block; padding: 5px 15px; background: ${statusColors[order.status] || '#d4af37'}; color: black; border-radius: 20px; font-weight: bold; margin-left: 10px;">
                                 ${order.status || 'Pending'}
                             </span>
                         </p>
+                        <p><strong>Subtotal:</strong> ₹${(order.subtotal || 0).toLocaleString('en-IN')}</p>
+                        <p><strong>Tax (18%):</strong> ₹${(order.tax || 0).toLocaleString('en-IN')}</p>
+                        <p><strong>Shipping:</strong> ₹${(order.shipping || 0).toLocaleString('en-IN')}</p>
                         <p><strong>Total Amount:</strong> <span style="color: #d4af37; font-size: 20px;">₹${(order.total || 0).toLocaleString('en-IN')}</span></p>
                         <p><strong>Order Date:</strong> ${order.date ? new Date(order.date).toLocaleString() : 'N/A'}</p>
                     </div>
