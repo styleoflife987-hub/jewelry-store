@@ -1,4 +1,4 @@
-// js/payment.js - Razorpay Integration
+// js/payment.js
 function payNow(amount, customerDetails = {}) {
     if (!amount || amount <= 0) {
         alert('Invalid amount');
