@@ -49,7 +49,9 @@
             
             if (order) {
                 let itemsHtml = '';
-                order.items.forEach(item => {
+                const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+
+                items.forEach(item => {
                     itemsHtml += `
                         <div style="display: flex; justify-content: space-between; padding: 5px 0;">
                             <span>${item.name} x${item.quantity}</span>
