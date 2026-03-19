@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Write Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #0f0f0f; color: white; }
+        .card { background: #1a1a1a; padding: 20px; border-radius: 10px; margin: 10px 0; border: 1px solid #333; }
+        button { background: #d4af37; color: black; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0; background: #333; border: 1px solid #444; color: white; border-radius: 5px; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        pre { background: #333; padding: 10px; border-radius: 5px; overflow: auto; }
+    </style>
+    <script src="js/config.js"></script>
+</head>
+<body>
+    <h1>⚡ Force Write to Excel Test</h1>
+    
+    <div class="card">
+        <h3>Step 1: Check Connection</h3>
+        <button onclick="testConnection()">Test Connection</button>
+        <div id="connectionResult"></div>
+    </div>
+    
+    <div class="card">
+        <h3>Step 2: Force Write Order</h3>
+        <input type="text" id="testName" placeholder="Customer Name" value="Test Customer">
+        <input type="text" id="testPhone" placeholder="Phone" value="9876543210">
+        <input type="text" id="testEmail" placeholder="Email" value="test@example.com">
+        <textarea id="testAddress" placeholder="Address">123 Test St, Test City - 123456</textarea>
+        <button onclick="forceWriteOrder()">🚀 FORCE WRITE ORDER TO EXCEL</button>
+        <div id="writeResult"></div>
+    </div>
+    
+    <div class="card">
+        <h3>Step 3: Read Orders from Excel</h3>
+        <button onclick="readOrders()">Read Orders</button>
+        <div id="readResult"></div>
+    </div>
+
+    <script>
+        async function testConnection() {
+            const result = document.getElementById('connectionResult');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=test&t=${Date.now()}`);
+                const text = await response.text();
+                
+                try {
+                    const data = JSON.parse(text);
+                    result.innerHTML = `<p class="success">✅ Connection successful!</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } catch(e) {
+                    result.innerHTML = `<p class="error">❌ Invalid JSON:</p><pre>${text.substring(0, 500)}</pre>`;
+                }
+            } catch(error) {
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function forceWriteOrder() {
+            const result = document.getElementById('writeResult');
+            result.innerHTML = '⏳ Force writing to Excel...';
+            
+            const name = document.getElementById('testName').value;
+            const phone = document.getElementById('testPhone').value;
+            const email = document.getElementById('testEmail').value;
+            const address = document.getElementById('testAddress').value;
+            
+            const testOrder = {
+                action: 'placeOrder',
+                name: name,
+                phone: phone,
+                email: email,
+                address: address,
+                items: JSON.stringify([{
+                    sku: 'TEST001',
+                    name: 'Test Product',
+                    price: 999,
+                    quantity: 1
+                }]),
+                subtotal: 999,
+                tax: 180,
+                shipping: 100,
+                total: 1279,
+                status: 'Pending',
+                date: new Date().toISOString()
+            };
+            
+            try {
+                const params = new URLSearchParams(testOrder);
+                const url = `${CONFIG.API_URL}?${params}&t=${Date.now()}`;
+                console.log('Sending to:', url);
+                
+                const response = await fetch(url);
+                const text = await response.text();
+                console.log('Raw response:', text);
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        result.innerHTML = `
+                            <p class="success">✅✅✅ ORDER WRITTEN TO EXCEL!</p>
+                            <p>Order ID: <strong>${data.orderId}</strong></p>
+                            <p>Check your Google Sheet - the order should appear in the "Orders" tab.</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        `;
+                    } else {
+                        result.innerHTML = `<p class="error">❌ Failed: ${data.error}</p><pre>${text}</pre>`;
+                    }
+                } catch(e) {
+                    result.innerHTML = `<p class="error">❌ Invalid response:</p><pre>${text}</pre>`;
+                }
+            } catch(error) {
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function readOrders() {
+            const result = document.getElementById('readResult');
+            result.innerHTML = 'Reading orders...';
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=orders&t=${Date.now()}`);
+                const text = await response.text();
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (Array.isArray(data)) {
+                        if (data.length === 0) {
+                            result.innerHTML = '<p class="error">❌ No orders in Excel</p>';
+                        } else {
+                            let html = `<p class="success">✅ Found ${data.length} orders in Excel:</p>`;
+                            html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                            result.innerHTML = html;
+                        }
+                    } else {
+                        result.innerHTML = `<p class="error">❌ Invalid data:</p><pre>${text}</pre>`;
+                    }
+                } catch(e) {
+                    result.innerHTML = `<p class="error">❌ Invalid JSON:</p><pre>${text.substring(0, 500)}</pre>`;
+                }
+            } catch(error) {
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
