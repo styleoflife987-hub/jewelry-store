@@ -144,53 +144,72 @@
             }
             
             const btn = document.getElementById('addProductBtn');
+            const originalText = btn.textContent;
             btn.disabled = true;
             btn.textContent = 'Adding to Excel...';
             
+            const params = new URLSearchParams({
+                action: 'addProduct',
+                sku: sku,
+                name: name,
+                category: category,
+                price: price,
+                stock: stock,
+                description: description || ''
+            });
+            
+            const fullUrl = `${CONFIG.API_URL}?${params.toString()}&t=${Date.now()}`;
+            console.log('Sending request to:', fullUrl);
+            
             try {
-                const params = new URLSearchParams({
-                    action: 'addProduct',
-                    sku: sku,
-                    name: name,
-                    category: category,
-                    price: price,
-                    stock: stock,
-                    description: description || ''
-                });
+                const response = await fetch(fullUrl);
+                const text = await response.text();
+                console.log('Raw response:', text);
                 
-                const response = await fetch(`${CONFIG.API_URL}?${params}`);
-                const data = await response.json();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('JSON parse error:', e);
+                    alert('Server returned invalid JSON. Check console for details.');
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                    return;
+                }
                 
                 if (data.success) {
                     alert('✅ Product added to Excel successfully!');
+                    
                     document.getElementById('sku').value = '';
                     document.getElementById('name').value = '';
                     document.getElementById('category').value = '';
                     document.getElementById('price').value = '';
                     document.getElementById('stock').value = '450';
                     document.getElementById('description').value = '';
+                    
+                    await loadProducts();
                     await forceSync();
-                    loadProducts();
                 } else {
                     alert('Error: ' + (data.error || 'Unknown error'));
                 }
             } catch (error) {
-                alert('Error adding product: ' + error.message);
+                console.error('Fetch error:', error);
+                alert('Network error: ' + error.message);
             } finally {
                 btn.disabled = false;
-                btn.textContent = '➕ Add Product to Excel';
+                btn.textContent = originalText;
             }
         }
         
         async function deleteProduct(id) {
             if (!confirm('Delete this product from Excel?')) return;
             try {
-                const response = await fetch(`${CONFIG.API_URL}?action=deleteProduct&id=${id}`);
+                const response = await fetch(`${CONFIG.API_URL}?action=deleteProduct&id=${id}&t=${Date.now()}`);
                 const data = await response.json();
                 if (data.success) {
                     alert('✅ Product deleted from Excel');
+                    await loadProducts();
                     await forceSync();
-                    loadProducts();
                 } else {
                     alert('Error deleting product');
                 }
