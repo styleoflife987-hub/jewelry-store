@@ -20,7 +20,6 @@
         <h1 class="page-title">Checkout</h1>
         
         <div class="checkout-grid">
-            <!-- Customer Details Form -->
             <div class="checkout-form">
                 <h3>Shipping Information</h3>
                 
@@ -55,7 +54,6 @@
                 </div>
             </div>
             
-            <!-- Order Summary -->
             <div class="order-summary">
                 <h3>Your Order</h3>
                 <div id="cartSummary" class="summary-items"></div>
@@ -143,7 +141,6 @@
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            // ALWAYS save locally first
             const localOrderId = 'ORD' + Date.now();
             const localOrder = {
                 orderId: localOrderId,
@@ -160,12 +157,10 @@
                 date: new Date().toISOString()
             };
             
-            // Save locally immediately
             const orders = JSON.parse(localStorage.getItem('orders') || '[]');
             orders.push(localOrder);
             localStorage.setItem('orders', JSON.stringify(orders));
             
-            // Try to save to Excel
             let excelSuccess = false;
             let excelOrderId = localOrderId;
             
@@ -196,7 +191,6 @@
                         excelOrderId = data.orderId;
                         console.log('✅ Order saved to Excel with ID:', excelOrderId);
                         
-                        // Update local order with Excel ID
                         const updatedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
                         const orderIndex = updatedOrders.findIndex(o => o.orderId === localOrderId);
                         if (orderIndex >= 0) {
@@ -208,17 +202,14 @@
                     }
                 } catch(e) {
                     console.error('❌ Failed to parse response:', e);
-                    console.error('Response text:', text);
                 }
             } catch (error) {
                 console.error('❌ Network error:', error);
             }
             
-            // Clear cart regardless
             localStorage.removeItem('cart');
             updateCartCount();
             
-            // Show appropriate message
             if (excelSuccess) {
                 alert(`✅ Order placed successfully in Excel! Order ID: ${excelOrderId}`);
                 window.location.href = `track.html?order=${excelOrderId}`;
