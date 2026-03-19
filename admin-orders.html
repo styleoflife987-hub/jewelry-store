@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Orders - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/config.js"></script>
-    <script src="js/live-sync.js"></script>
 </head>
 <body>
     <header>
@@ -22,12 +20,6 @@
 
     <div class="admin-container">
         <h1 class="page-title">Order Management</h1>
-        
-        <div class="sync-status" style="background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
-            <span class="status-indicator" style="color: #4CAF50;">🟢</span>
-            <span>Live sync with Excel - Delete an order and it disappears instantly</span>
-            <button onclick="forceSync()" style="width: auto; padding: 8px 20px; margin-left: auto;">🔄 Sync Now</button>
-        </div>
         
         <div class="stats-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
             <div style="background: #1a1a1a; padding: 20px; border-radius: 10px; text-align: center;">
@@ -45,7 +37,7 @@
         </div>
         
         <div class="orders-table-container">
-            <h2>All Orders from Excel</h2>
+            <h2>All Orders</h2>
             <div id="ordersList" class="orders-list">
                 <p>Loading orders...</p>
             </div>
@@ -53,9 +45,12 @@
     </div>
 
     <footer>
-        <p>© 2026 Style Of Life Jewelry - Live Sync Active</p>
+        <p>© 2026 Style Of Life Jewelry - Order Management</p>
     </footer>
 
+    <script src="js/config.js"></script>
+    <script src="js/data.js"></script>
+    
     <script>
         if (!sessionStorage.getItem('adminLoggedIn')) {
             window.location.href = 'login.html';
@@ -63,24 +58,12 @@
         
         document.addEventListener('DOMContentLoaded', function() {
             loadOrders();
-            
-            window.addEventListener('syncComplete', function() {
-                loadOrders();
-            });
         });
         
-        async function loadOrders() {
-            try {
-                const response = await fetch(`${CONFIG.API_URL}?action=orders&t=${Date.now()}`);
-                const orders = await response.json();
-                displayOrders(orders);
-                updateStats(orders);
-                localStorage.setItem('orders', JSON.stringify(orders));
-            } catch (error) {
-                const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-                displayOrders(localOrders);
-                updateStats(localOrders);
-            }
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            displayOrders(orders);
+            updateStats(orders);
         }
         
         function updateStats(orders) {
@@ -96,8 +79,8 @@
         function displayOrders(orders) {
             const container = document.getElementById('ordersList');
             
-            if (!orders || orders.length === 0) {
-                container.innerHTML = '<p>No orders found in Excel</p>';
+            if (orders.length === 0) {
+                container.innerHTML = '<p>No orders found</p>';
                 return;
             }
             
@@ -153,38 +136,27 @@
             container.innerHTML = html;
         }
         
-        async function updateOrderStatus(orderId, status) {
-            try {
-                const result = await updateOrderStatusInExcel(orderId, status);
-                
-                if (result.success) {
-                    alert(`✅ Order ${orderId} updated to ${status} in Excel`);
-                    await forceSync();
-                    loadOrders();
-                } else {
-                    alert('Error updating order');
-                }
-            } catch (error) {
-                alert('Error: ' + error.message);
+        function updateOrderStatus(orderId, status) {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const orderIndex = orders.findIndex(o => o.orderId === orderId);
+            
+            if (orderIndex >= 0) {
+                orders[orderIndex].status = status;
+                localStorage.setItem('orders', JSON.stringify(orders));
+                alert(`✅ Order ${orderId} updated to ${status}`);
+                loadOrders();
             }
         }
         
-        async function deleteOrder(orderId) {
-            if (!confirm('Delete this order from Excel? This will remove it for all users.')) return;
+        function deleteOrder(orderId) {
+            if (!confirm('Delete this order?')) return;
             
-            try {
-                const result = await deleteOrderFromExcel(orderId);
-                
-                if (result.success) {
-                    alert('✅ Order deleted from Excel');
-                    await forceSync();
-                    loadOrders();
-                } else {
-                    alert('Error: ' + (result.error || 'Unknown error'));
-                }
-            } catch (error) {
-                alert('Error: ' + error.message);
-            }
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const updatedOrders = orders.filter(o => o.orderId !== orderId);
+            localStorage.setItem('orders', JSON.stringify(updatedOrders));
+            
+            alert('✅ Order deleted');
+            loadOrders();
         }
         
         function logout() {
