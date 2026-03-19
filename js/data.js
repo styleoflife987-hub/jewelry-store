@@ -1,5 +1,14 @@
-// js/data.js - Initialize data if not exists
+// js/data.js - Initialize data with sample images
 (function() {
+    // Sample Drive image URLs (using Unsplash as fallback)
+    const sampleImages = [
+        'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338',
+        'https://images.unsplash.com/photo-1605100804763-247f67b3557e',
+        'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908',
+        'https://images.unsplash.com/photo-1611591437281-460bfbe1220a',
+        'https://images.unsplash.com/photo-1573408301185-9146fe634ad0'
+    ];
+    
     // Initialize products if not exists
     if (!localStorage.getItem('products')) {
         const sampleProducts = [
@@ -11,7 +20,7 @@
                 price: 25000,
                 stock: 10,
                 description: '22k Gold Necklace with traditional design',
-                image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338'
+                image: sampleImages[0]
             },
             {
                 id: 2,
@@ -21,7 +30,7 @@
                 price: 45000,
                 stock: 5,
                 description: 'Solitaire Diamond Ring in 18k Gold',
-                image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e'
+                image: sampleImages[1]
             },
             {
                 id: 3,
@@ -31,7 +40,7 @@
                 price: 15000,
                 stock: 8,
                 description: 'Freshwater Pearl Earrings with Gold',
-                image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908'
+                image: sampleImages[2]
             },
             {
                 id: 4,
@@ -41,7 +50,7 @@
                 price: 12000,
                 stock: 15,
                 description: 'Sterling Silver Bracelet with design',
-                image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a'
+                image: sampleImages[3]
             },
             {
                 id: 5,
@@ -51,7 +60,7 @@
                 price: 35000,
                 stock: 7,
                 description: 'Set of 2 Traditional Gold Bangles',
-                image: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0'
+                image: sampleImages[4]
             }
         ];
         localStorage.setItem('products', JSON.stringify(sampleProducts));
