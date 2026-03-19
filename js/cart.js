@@ -1,4 +1,4 @@
-// js/cart.js - Cart System
+// js/cart.js - Cart System (unchanged)
 let cart = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -152,7 +152,7 @@ function displayCart() {
         
         html += `
             <div class="cart-item">
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${item.image}" alt="${item.name}" style="object-fit: contain;">
                 <div>
                     <h4>${item.name}</h4>
                     <p style="color: #888;">SKU: ${item.sku}</p>
