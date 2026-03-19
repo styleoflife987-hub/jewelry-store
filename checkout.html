@@ -1,3 +1,4 @@
+<script>
 async function processOrder() {
     const name = document.getElementById('name').value.trim();
     const phone = document.getElementById('phone').value.trim();
@@ -7,7 +8,7 @@ async function processOrder() {
     const pincode = document.getElementById('pincode').value.trim();
 
     if (!name || !phone || !address || !city || !pincode) {
-        alert('Please fill all required fields');
+        alert('Please fill all fields');
         return;
     }
 
@@ -22,7 +23,6 @@ async function processOrder() {
     const shipping = 100;
     const total = subtotal + tax + shipping;
 
-    // ✅ Generate Order ID
     const orderId = "ORD" + Date.now();
 
     const order = {
@@ -37,16 +37,12 @@ async function processOrder() {
         date: new Date().toISOString()
     };
 
-    // ✅ SAVE IN LOCALSTORAGE (IMPORTANT)
+    // ✅ SAVE ORDER
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
     orders.push(order);
     localStorage.setItem('orders', JSON.stringify(orders));
 
-    // ✅ PAYMENT (Razorpay)
-    payNow(total, {
-        name,
-        phone,
-        email,
-        orderId
-    });
+    // ✅ PAYMENT
+    payNow(total, { name, phone, email, orderId });
 }
+</script>
