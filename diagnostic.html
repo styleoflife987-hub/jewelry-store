@@ -23,13 +23,13 @@
     </div>
     
     <div class="card">
-        <h3>2. Write to Excel Test</h3>
+        <h3>2. Write Test Order to Excel</h3>
         <button onclick="testWrite()">Write Test Order</button>
         <div id="writeResult"></div>
     </div>
     
     <div class="card">
-        <h3>3. Read from Excel Test</h3>
+        <h3>3. Read Orders from Excel</h3>
         <button onclick="testRead()">Read All Orders</button>
         <div id="readResult"></div>
     </div>
@@ -45,6 +45,12 @@
         <input type="text" id="testOrderId" placeholder="Enter Order ID">
         <button onclick="testTrack()">Test Track</button>
         <div id="trackResult"></div>
+    </div>
+    
+    <div class="card">
+        <h3>6. Excel Sheet Structure</h3>
+        <button onclick="checkExcelStructure()">Check Excel Structure</button>
+        <div id="structureResult"></div>
     </div>
 
     <script src="js/config.js"></script>
@@ -75,7 +81,12 @@
                 email: 'test@diag.com',
                 address: '123 Diagnostic St',
                 items: JSON.stringify([{sku: 'DIAG001', name: 'Test Product', price: 100, quantity: 1}]),
-                total: 100
+                subtotal: 100,
+                tax: 18,
+                shipping: 100,
+                total: 218,
+                status: 'Pending',
+                date: new Date().toISOString()
             };
             
             try {
@@ -133,6 +144,30 @@
                 result.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
             } catch (error) {
                 result.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+        
+        async function checkExcelStructure() {
+            const result = document.getElementById('structureResult');
+            result.innerHTML = 'Checking...';
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=orders`);
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    const firstOrder = data[0];
+                    const columns = Object.keys(firstOrder);
+                    result.innerHTML = `
+                        <p class="success">✅ Excel has ${data.length} orders</p>
+                        <p>Columns found: ${columns.join(', ')}</p>
+                        <pre>Sample order: ${JSON.stringify(firstOrder, null, 2)}</pre>
+                    `;
+                } else {
+                    result.innerHTML = '<p class="warning">⚠️ No orders found in Excel</p>';
+                }
+            } catch (error) {
+                result.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
             }
         }
     </script>
