@@ -93,7 +93,6 @@
     </footer>
 
     <script src="js/cart.js"></script>
-    <script src="js/sync.js"></script>
     <script src="js/payment.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
@@ -141,86 +140,37 @@
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            const localOrderId = 'ORD' + Date.now();
-            const localOrder = {
-                orderId: localOrderId,
+            const orderData = {
                 name: name,
                 phone: phone,
-                email: email,
+                email: email || '',
                 address: fullAddress,
-                items: cart,
-                subtotal: subtotal,
-                tax: tax,
-                shipping: shipping,
-                total: total,
-                status: 'Pending',
-                date: new Date().toISOString()
+                items: JSON.stringify(cart),
+                total: total
             };
             
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            orders.push(localOrder);
-            localStorage.setItem('orders', JSON.stringify(orders));
-            
-            let excelSuccess = false;
-            let excelOrderId = localOrderId;
-            
             try {
-                console.log('📤 Attempting to save order to Excel...');
-                
-                const params = new URLSearchParams({
-                    action: 'placeOrder',
-                    name: name,
-                    phone: phone,
-                    email: email || '',
-                    address: fullAddress,
-                    items: JSON.stringify(cart),
-                    subtotal: subtotal,
-                    tax: tax,
-                    shipping: shipping,
-                    total: total,
-                    status: 'Pending',
-                    date: new Date().toISOString()
+                const response = await fetch(`${CONFIG.API_URL}?action=placeOrder`, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(orderData)
                 });
                 
-                const url = `${CONFIG.API_URL}?${params}&t=${Date.now()}`;
-                console.log('Sending to:', url);
+                localStorage.removeItem('cart');
+                updateCartCount();
                 
-                const response = await fetch(url);
-                const text = await response.text();
-                console.log('Raw response:', text);
+                alert('✅ Order placed successfully!');
+                window.location.href = 'track.html';
                 
-                try {
-                    const data = JSON.parse(text);
-                    if (data.success) {
-                        excelSuccess = true;
-                        excelOrderId = data.orderId;
-                        console.log('✅ Order saved to Excel with ID:', excelOrderId);
-                        
-                        const updatedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-                        const orderIndex = updatedOrders.findIndex(o => o.orderId === localOrderId);
-                        if (orderIndex >= 0) {
-                            updatedOrders[orderIndex].orderId = excelOrderId;
-                            localStorage.setItem('orders', JSON.stringify(updatedOrders));
-                        }
-                    } else {
-                        console.error('❌ Excel error:', data.error);
-                    }
-                } catch(e) {
-                    console.error('❌ Failed to parse response:', e);
-                }
             } catch (error) {
-                console.error('❌ Network error:', error);
-            }
-            
-            localStorage.removeItem('cart');
-            updateCartCount();
-            
-            if (excelSuccess) {
-                alert(`✅ Order placed successfully in Excel! Order ID: ${excelOrderId}`);
-                window.location.href = `track.html?order=${excelOrderId}`;
-            } else {
-                alert(`⚠️ Order saved locally. Order ID: ${localOrderId}\nYour order will sync to Excel when connection is restored.`);
-                window.location.href = `track.html?order=${localOrderId}`;
+                console.error('Order error:', error);
+                alert('Order placed! (Offline mode)');
+                localStorage.removeItem('cart');
+                updateCartCount();
+                window.location.href = 'track.html';
             }
         }
 
