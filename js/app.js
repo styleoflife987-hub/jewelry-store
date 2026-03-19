@@ -1,4 +1,4 @@
-// js/app.js
+// js/app.js - Product Display
 let products = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -6,37 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadProducts() {
-    const sampleProducts = [
-        {
-            id: 1,
-            sku: 'SKU001',
-            name: 'Gold Necklace',
-            category: 'Necklaces',
-            price: 25000,
-            stock: 10,
-            mainImage: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338'
-        },
-        {
-            id: 2,
-            sku: 'SKU002',
-            name: 'Diamond Ring',
-            category: 'Rings',
-            price: 45000,
-            stock: 5,
-            mainImage: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e'
-        },
-        {
-            id: 3,
-            sku: 'SKU003',
-            name: 'Pearl Earrings',
-            category: 'Earrings',
-            price: 15000,
-            stock: 8,
-            mainImage: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908'
-        }
-    ];
-    
-    products = JSON.parse(localStorage.getItem('products')) || sampleProducts;
+    products = JSON.parse(localStorage.getItem('products') || '[]');
     displayProducts(products);
 }
 
@@ -44,21 +14,39 @@ function displayProducts(products) {
     const container = document.getElementById('products');
     if (!container) return;
     
+    if (products.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 60px;">No products available</div>';
+        return;
+    }
+    
     let html = '';
     
     products.forEach(product => {
+        const price = Number(product.price) || 0;
+        const stock = Number(product.stock) || 0;
+        const image = product.image || CONFIG.PLACEHOLDER_IMAGE;
+        const sku = product.sku || `SKU${product.id}`;
+        
         html += `
-            <div class="card">
+            <div class="card" data-sku="${sku}">
                 <div class="product-images">
-                    <img src="${product.mainImage}" class="main-image" alt="${product.name}">
+                    <img src="${image}" 
+                         class="main-image"
+                         alt="${product.name}"
+                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
                 </div>
+                
                 <div class="product-info">
-                    <p class="sku">SKU: ${product.sku}</p>
+                    <p class="sku">SKU: <span class="sku-value">${sku}</span></p>
                     <h3>${product.name}</h3>
-                    <p class="category">${product.category}</p>
-                    <div class="price">₹${product.price.toLocaleString('en-IN')}</div>
-                    <p class="stock in-stock">In Stock (${product.stock})</p>
-                    <button onclick="addToCart('${product.sku}', '${product.name}', ${product.price}, '${product.mainImage}')" class="add-to-cart-btn">
+                    <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
+                    <div class="price">${CONFIG.CURRENCY}${price.toLocaleString('en-IN')}</div>
+                    <p class="stock ${stock > 0 ? 'in-stock' : 'out-of-stock'}">
+                        ${stock > 0 ? `In Stock (${stock})` : 'Out of Stock'}
+                    </p>
+                    <button onclick="addToCart('${sku}', '${product.name.replace(/'/g, "\\'")}', ${price}, '${image}')" 
+                            class="add-to-cart-btn"
+                            ${stock <= 0 ? 'disabled' : ''}>
                         Add to Cart
                     </button>
                 </div>
