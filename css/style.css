@@ -646,7 +646,7 @@ button:disabled {
 .orders-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px;
+    min-width: 1200px;
 }
 
 .orders-table th {
@@ -654,19 +654,21 @@ button:disabled {
     color: var(--black);
     padding: 12px;
     text-align: left;
+    font-size: 14px;
 }
 
 .orders-table td {
     padding: 15px 12px;
     border-bottom: 1px solid var(--gray);
+    font-size: 13px;
 }
 
 .status-select {
     padding: 5px 10px;
     border-radius: 4px;
-    border: 1px solid var(--light-gray);
-    background: var(--gray);
-    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .loading-spinner {
