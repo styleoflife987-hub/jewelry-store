@@ -93,7 +93,6 @@
     </footer>
 
     <script src="js/cart.js"></script>
-    <script src="js/sync.js"></script>
     <script src="js/payment.js"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
@@ -125,13 +124,13 @@
                 return;
             }
             
-            const cart = getCart();
+            const cart = window.getCart();
             if (cart.length === 0) {
                 alert('Your cart is empty');
                 return;
             }
             
-            const subtotal = getCartTotal();
+            const subtotal = window.getCartTotal();
             const tax = Math.round(subtotal * 0.18);
             const shipping = 100;
             const total = subtotal + tax + shipping;
@@ -141,92 +140,61 @@
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            const localOrderId = 'ORD' + Date.now();
-            const localOrder = {
-                orderId: localOrderId,
+            // Prepare order data
+            const orderData = {
+                action: 'placeOrder',
                 name: name,
                 phone: phone,
-                email: email,
+                email: email || '',
                 address: fullAddress,
-                items: cart,
-                subtotal: subtotal,
-                tax: tax,
-                shipping: shipping,
-                total: total,
-                status: 'Pending',
-                date: new Date().toISOString()
+                items: JSON.stringify(cart),
+                total: total
             };
             
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            orders.push(localOrder);
-            localStorage.setItem('orders', JSON.stringify(orders));
-            
-            let excelSuccess = false;
-            let excelOrderId = localOrderId;
+            console.log('Sending order to Excel:', orderData);
             
             try {
-                console.log('📤 Attempting to save order to Excel...');
-                
-                const params = new URLSearchParams({
-                    action: 'placeOrder',
-                    name: name,
-                    phone: phone,
-                    email: email || '',
-                    address: fullAddress,
-                    items: JSON.stringify(cart),
-                    subtotal: subtotal,
-                    tax: tax,
-                    shipping: shipping,
-                    total: total,
-                    status: 'Pending',
-                    date: new Date().toISOString()
-                });
-                
-                const url = `${CONFIG.API_URL}?${params}&t=${Date.now()}`;
-                console.log('Sending to:', url);
-                
-                const response = await fetch(url);
+                // Send to Excel
+                const params = new URLSearchParams(orderData);
+                const response = await fetch(`${CONFIG.API_URL}?${params}&t=${Date.now()}`);
                 const text = await response.text();
-                console.log('Raw response:', text);
                 
+                console.log('Excel response:', text);
+                
+                let data;
                 try {
-                    const data = JSON.parse(text);
-                    if (data.success) {
-                        excelSuccess = true;
-                        excelOrderId = data.orderId;
-                        console.log('✅ Order saved to Excel with ID:', excelOrderId);
-                        
-                        const updatedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-                        const orderIndex = updatedOrders.findIndex(o => o.orderId === localOrderId);
-                        if (orderIndex >= 0) {
-                            updatedOrders[orderIndex].orderId = excelOrderId;
-                            localStorage.setItem('orders', JSON.stringify(updatedOrders));
-                        }
-                    } else {
-                        console.error('❌ Excel error:', data.error);
-                    }
-                } catch(e) {
-                    console.error('❌ Failed to parse response:', e);
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('JSON parse error:', e);
+                    alert('Error: Invalid response from server');
+                    btn.disabled = false;
+                    btn.textContent = 'Place Order';
+                    return;
+                }
+                
+                if (data.success) {
+                    // Clear cart
+                    localStorage.removeItem('cart');
+                    window.updateCartCount();
+                    
+                    alert(`✅ Order placed successfully!\nOrder ID: ${data.orderId}`);
+                    window.location.href = `track.html?order=${data.orderId}`;
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                    btn.disabled = false;
+                    btn.textContent = 'Place Order';
                 }
             } catch (error) {
-                console.error('❌ Network error:', error);
-            }
-            
-            localStorage.removeItem('cart');
-            updateCartCount();
-            
-            if (excelSuccess) {
-                alert(`✅ Order placed successfully in Excel! Order ID: ${excelOrderId}`);
-                window.location.href = `track.html?order=${excelOrderId}`;
-            } else {
-                alert(`⚠️ Order saved locally. Order ID: ${localOrderId}\nYour order will sync to Excel when connection is restored.`);
-                window.location.href = `track.html?order=${localOrderId}`;
+                console.error('Network error:', error);
+                alert('Network error: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = 'Place Order';
             }
         }
 
         function updateCheckoutSummary() {
-            const cart = getCart();
-            const subtotal = getCartTotal();
+            const cart = window.getCart();
+            const subtotal = window.getCartTotal();
             const tax = Math.round(subtotal * 0.18);
             const shipping = 100;
             const total = subtotal + tax + shipping;
