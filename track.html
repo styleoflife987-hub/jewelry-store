@@ -1,89 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Order - Style Of Life</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/config.js"></script>
-</head>
-<body>
-    <header>
-        <div class="logo">✨ STYLE OF LIFE</div>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="cart.html">Cart <span class="cart-count">0</span></a>
-            <a href="track.html" class="active">Track Order</a>
-        </nav>
-    </header>
+<script>
+function trackOrder() {
+    const orderId = document.getElementById('orderId').value.trim();
+    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
 
-    <div class="container">
-        <div class="track-container">
-            <h1 class="page-title">Track Your Order</h1>
-            
-            <div class="track-form">
-                <input type="text" id="orderId" placeholder="Enter Order ID" class="track-input">
-                <button onclick="trackOrder()" class="track-btn">Track Order</button>
+    const order = orders.find(o => o.orderId === orderId);
+
+    const resultDiv = document.getElementById('trackingResult');
+
+    if (!order) {
+        resultDiv.innerHTML = '<p style="color:red">Order not found</p>';
+        return;
+    }
+
+    let itemsHtml = '';
+    order.items.forEach(item => {
+        itemsHtml += `
+            <div>
+                ${item.name} x${item.quantity} - ₹${item.price * item.quantity}
             </div>
-            
-            <div id="trackingResult" class="tracking-result"></div>
-        </div>
-    </div>
+        `;
+    });
 
-    <footer>
-        <p>© 2026 Style Of Life Jewelry</p>
-    </footer>
-
-    <script>
-        function trackOrder() {
-            const orderId = document.getElementById('orderId').value.trim();
-            if (!orderId) {
-                alert('Please enter order ID');
-                return;
-            }
-            
-            const resultDiv = document.getElementById('trackingResult');
-            
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const order = orders.find(o => o.orderId === orderId);
-            
-            if (order) {
-                let itemsHtml = '';
-                const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
-
-                items.forEach(item => {
-                    itemsHtml += `
-                        <div style="display: flex; justify-content: space-between; padding: 5px 0;">
-                            <span>${item.name} x${item.quantity}</span>
-                            <span>₹${(item.price * item.quantity).toLocaleString()}</span>
-                        </div>
-                    `;
-                });
-                
-                resultDiv.innerHTML = `
-                    <div style="background: #1a1a1a; padding: 20px; border-radius: 10px;">
-                        <h3 style="color: #d4af37;">Order Details</h3>
-                        <p><strong>Order ID:</strong> ${order.orderId}</p>
-                        <p><strong>Customer:</strong> ${order.name}</p>
-                        <p><strong>Phone:</strong> ${order.phone}</p>
-                        <p><strong>Address:</strong> ${order.address}</p>
-                        <p><strong>Status:</strong> <span style="color: #4CAF50;">${order.status}</span></p>
-                        <p><strong>Total:</strong> ₹${order.total.toLocaleString()}</p>
-                        <h4>Items:</h4>
-                        ${itemsHtml}
-                    </div>
-                `;
-            } else {
-                resultDiv.innerHTML = '<p style="color: #f44336;">Order not found</p>';
-            }
-        }
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('order');
-        if (orderId) {
-            document.getElementById('orderId').value = orderId;
-            trackOrder();
-        }
-    </script>
-</body>
-</html>
+    resultDiv.innerHTML = `
+        <h3>Order Details</h3>
+        <p><b>ID:</b> ${order.orderId}</p>
+        <p><b>Name:</b> ${order.name}</p>
+        <p><b>Status:</b> ${order.status}</p>
+        <p><b>Total:</b> ₹${order.total}</p>
+        <div>${itemsHtml}</div>
+    `;
+}
+</script>
