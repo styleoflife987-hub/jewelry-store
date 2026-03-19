@@ -1,4 +1,4 @@
-// js/admin.js - Admin Functions
+// js/admin.js
 function checkAdminAuth() {
     if (!sessionStorage.getItem('adminLoggedIn')) {
         window.location.href = 'login.html';
