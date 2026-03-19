@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Order - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/config.js"></script>
 </head>
 <body>
     <header>
         <div class="logo">✨ STYLE OF LIFE</div>
         <nav>
             <a href="index.html">Home</a>
-            <a href="cart.html">Cart <span class="cart-count">0</span></a>
+            <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
             <a href="track.html" class="active">Track Order</a>
         </nav>
     </header>
@@ -22,7 +21,7 @@
             <h1 class="page-title">Track Your Order</h1>
             
             <div class="track-form">
-                <input type="text" id="orderId" placeholder="Enter Order ID" class="track-input">
+                <input type="text" id="orderId" placeholder="Enter Order ID (e.g., ORD1234567890)" class="track-input">
                 <button onclick="trackOrder()" class="track-btn">Track Order</button>
             </div>
             
@@ -34,6 +33,10 @@
         <p>© 2026 Style Of Life Jewelry</p>
     </footer>
 
+    <script src="js/config.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/cart.js"></script>
+    
     <script>
         function trackOrder() {
             const orderId = document.getElementById('orderId').value.trim();
@@ -48,40 +51,65 @@
             const order = orders.find(o => o.orderId === orderId);
             
             if (order) {
-                let itemsHtml = '';
+                displayOrder(order);
+            } else {
+                resultDiv.innerHTML = '<p style="color: #f44336;">❌ Order not found</p>';
+            }
+        }
+
+        function displayOrder(order) {
+            const resultDiv = document.getElementById('trackingResult');
+            
+            const statusColors = {
+                'Pending': '#ff9800',
+                'Processing': '#2196f3',
+                'Shipped': '#9c27b0',
+                'Delivered': '#4caf50',
+                'Cancelled': '#f44336'
+            };
+            
+            let itemsHtml = '';
+            if (order.items && order.items.length > 0) {
+                itemsHtml = '<h4 style="margin-top: 20px; margin-bottom: 10px;">Items:</h4>';
                 order.items.forEach(item => {
                     itemsHtml += `
-                        <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #333;">
                             <span>${item.name} x${item.quantity}</span>
-                            <span>₹${(item.price * item.quantity).toLocaleString()}</span>
+                            <span style="color: #d4af37;">₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
                         </div>
                     `;
                 });
-                
-                resultDiv.innerHTML = `
-                    <div style="background: #1a1a1a; padding: 20px; border-radius: 10px;">
-                        <h3 style="color: #d4af37;">Order Details</h3>
-                        <p><strong>Order ID:</strong> ${order.orderId}</p>
-                        <p><strong>Customer:</strong> ${order.name}</p>
-                        <p><strong>Phone:</strong> ${order.phone}</p>
-                        <p><strong>Address:</strong> ${order.address}</p>
-                        <p><strong>Status:</strong> <span style="color: #4CAF50;">${order.status}</span></p>
-                        <p><strong>Total:</strong> ₹${order.total.toLocaleString()}</p>
-                        <h4>Items:</h4>
-                        ${itemsHtml}
-                    </div>
-                `;
-            } else {
-                resultDiv.innerHTML = '<p style="color: #f44336;">Order not found</p>';
             }
+            
+            resultDiv.innerHTML = `
+                <div style="background: #1a1a1a; padding: 25px; border-radius: 10px;">
+                    <h3 style="color: #d4af37; margin-bottom: 20px;">✅ Order Found</h3>
+                    <div style="display: grid; gap: 10px;">
+                        <p><strong>Order ID:</strong> <span style="color: #d4af37;">${order.orderId}</span></p>
+                        <p><strong>Customer:</strong> ${order.name || 'N/A'}</p>
+                        <p><strong>Phone:</strong> ${order.phone || 'N/A'}</p>
+                        <p><strong>Address:</strong> ${order.address || 'N/A'}</p>
+                        <p><strong>Status:</strong> 
+                            <span style="display: inline-block; padding: 5px 15px; background: ${statusColors[order.status] || '#d4af37'}; color: black; border-radius: 20px; font-weight: bold; margin-left: 10px;">
+                                ${order.status || 'Pending'}
+                            </span>
+                        </p>
+                        <p><strong>Total Amount:</strong> <span style="color: #d4af37; font-size: 20px;">₹${(order.total || 0).toLocaleString('en-IN')}</span></p>
+                        <p><strong>Order Date:</strong> ${order.date ? new Date(order.date).toLocaleString() : 'N/A'}</p>
+                    </div>
+                    ${itemsHtml}
+                </div>
+            `;
         }
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get('order');
-        if (orderId) {
-            document.getElementById('orderId').value = orderId;
-            trackOrder();
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order');
+            if (orderId) {
+                document.getElementById('orderId').value = orderId;
+                trackOrder();
+            }
+        });
     </script>
 </body>
 </html>
