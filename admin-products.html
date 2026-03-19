@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Products - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/config.js"></script>
+    <script src="js/drive-upload.js"></script>
 </head>
 <body>
     <header>
@@ -56,14 +58,23 @@
                 </div>
                 
                 <div class="form-group full-width">
-                    <label for="image">Image URL</label>
-                    <input type="url" id="image" placeholder="https://example.com/image.jpg" value="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338">
+                    <label>Product Image *</label>
+                    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                        <input type="file" id="productImage" accept="image/*" style="width: auto; background: transparent; border: none;">
+                        <div id="imagePreview"></div>
+                    </div>
+                    <p style="color: #888; font-size: 12px; margin-top: 5px;">Upload image to Google Drive (JPG, PNG, GIF)</p>
                 </div>
             </div>
             
-            <button onclick="addProduct()" class="submit-btn" id="addProductBtn">
-                ➕ Add Product
-            </button>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="addProduct()" class="submit-btn" id="addProductBtn">
+                    ➕ Add Product
+                </button>
+                <button onclick="clearForm()" class="submit-btn" style="background: #666;">
+                    🗑️ Clear Form
+                </button>
+            </div>
         </div>
         
         <div class="products-list-section">
@@ -78,15 +89,21 @@
         <p>© 2026 Style Of Life Jewelry - Product Management</p>
     </footer>
 
-    <script src="js/config.js"></script>
-    <script src="js/data.js"></script>
-    
     <script>
         if (!sessionStorage.getItem('adminLoggedIn')) {
             window.location.href = 'login.html';
         }
         
-        document.addEventListener('DOMContentLoaded', loadProducts);
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProducts();
+            
+            // File input preview
+            document.getElementById('productImage').addEventListener('change', function(e) {
+                if (e.target.files[0]) {
+                    createImagePreview(e.target.files[0], 'imagePreview');
+                }
+            });
+        });
         
         function loadProducts() {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -105,16 +122,17 @@
             products.forEach(product => {
                 html += `
                     <div class="product-card-admin" data-product-id="${product.id}">
-                        <div style="display: flex; gap: 15px; width: 100%;">
-                            <img src="${product.image || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338'}" 
-                                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"
-                                 onerror="this.src='https://via.placeholder.com/80'">
+                        <div style="display: flex; gap: 20px; width: 100%;">
+                            <img src="${product.image || CONFIG.PLACEHOLDER_IMAGE}" 
+                                 style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #d4af37;"
+                                 onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
                             <div class="product-card-info" style="flex: 1;">
                                 <h4>${product.name}</h4>
                                 <p class="product-sku">SKU: ${product.sku}</p>
                                 <p class="product-category">${product.category}</p>
                                 <p class="product-price">₹${Number(product.price).toLocaleString('en-IN')}</p>
                                 <p class="product-stock">Stock: ${product.stock}</p>
+                                ${product.image ? '<p style="color: #4CAF50; font-size: 12px;">✅ Image in Drive</p>' : ''}
                             </div>
                             <div class="product-card-actions">
                                 <button onclick="deleteProduct('${product.id}')" class="delete-btn">🗑️ Delete</button>
@@ -127,45 +145,81 @@
             container.innerHTML = html;
         }
         
-        function addProduct() {
-            const sku = document.getElementById('sku').value.trim();
-            const name = document.getElementById('name').value.trim();
-            const category = document.getElementById('category').value.trim();
-            const price = document.getElementById('price').value.trim();
-            const stock = document.getElementById('stock').value.trim();
-            const description = document.getElementById('description').value.trim();
-            const image = document.getElementById('image').value.trim();
-            
-            if (!sku || !name || !category || !price || !stock) {
-                alert('Please fill all required fields');
-                return;
-            }
-            
-            const newProduct = {
-                id: Date.now(),
-                sku: sku,
-                name: name,
-                category: category,
-                price: Number(price),
-                stock: Number(stock),
-                description: description || '',
-                image: image || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338'
-            };
-            
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            products.push(newProduct);
-            localStorage.setItem('products', JSON.stringify(products));
-            
-            alert('✅ Product added successfully!');
-            
+        function clearForm() {
             document.getElementById('sku').value = '';
             document.getElementById('name').value = '';
             document.getElementById('category').value = '';
             document.getElementById('price').value = '';
             document.getElementById('stock').value = '10';
             document.getElementById('description').value = '';
+            document.getElementById('productImage').value = '';
+            document.getElementById('imagePreview').innerHTML = '';
+        }
+        
+        async function addProduct() {
+            const sku = document.getElementById('sku').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const category = document.getElementById('category').value.trim();
+            const price = document.getElementById('price').value.trim();
+            const stock = document.getElementById('stock').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const imageFile = document.getElementById('productImage').files[0];
             
-            loadProducts();
+            if (!sku || !name || !category || !price || !stock) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            if (!imageFile) {
+                alert('Please select an image to upload');
+                return;
+            }
+            
+            const btn = document.getElementById('addProductBtn');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Uploading image to Drive...';
+            
+            try {
+                // Upload image to Google Drive
+                const uploadResult = await uploadImageToDrive(imageFile);
+                
+                if (!uploadResult.success) {
+                    throw new Error('Image upload failed');
+                }
+                
+                btn.textContent = 'Saving product...';
+                
+                // Create product with Drive image URL
+                const newProduct = {
+                    id: Date.now(),
+                    sku: sku,
+                    name: name,
+                    category: category,
+                    price: Number(price),
+                    stock: Number(stock),
+                    description: description || '',
+                    image: uploadResult.directUrl, // Direct Drive image URL
+                    driveFileId: uploadResult.fileId,
+                    driveUrl: uploadResult.fileUrl
+                };
+                
+                // Save to localStorage
+                const products = JSON.parse(localStorage.getItem('products') || '[]');
+                products.push(newProduct);
+                localStorage.setItem('products', JSON.stringify(products));
+                
+                alert('✅ Product added successfully! Image saved to Google Drive.');
+                clearForm();
+                loadProducts();
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                alert('Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
         }
         
         function deleteProduct(id) {
