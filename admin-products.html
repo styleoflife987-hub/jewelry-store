@@ -45,7 +45,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
-            min-width: 1800px;
+            min-width: 1600px;
         }
         
         .excel-table th {
@@ -77,27 +77,19 @@
             width: 40px;
         }
         
-        .image-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            min-width: 400px;
-        }
-        
-        .image-slot {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 6px;
+        .url-input {
+            width: 100%;
             padding: 8px;
-            text-align: center;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
         }
         
-        .image-slot label {
-            display: block;
-            font-size: 11px;
-            color: #d4af37;
-            margin-bottom: 5px;
-            font-weight: bold;
+        .url-input:focus {
+            outline: none;
+            border-color: #d4af37;
         }
         
         .image-preview {
@@ -105,43 +97,33 @@
             height: 50px;
             object-fit: cover;
             border-radius: 4px;
-            border: 2px solid #d4af37;
-            margin: 5px auto;
+            border: 1px solid #d4af37;
+            margin: 5px 0;
             cursor: pointer;
-            display: block;
         }
         
-        .image-input {
-            width: 100%;
-            padding: 6px;
+        .image-preview:hover {
+            transform: scale(2);
+            transition: transform 0.2s;
+            z-index: 100;
+            position: relative;
+        }
+        
+        .image-slot {
+            text-align: center;
+        }
+        
+        .image-label {
             font-size: 11px;
-            background: #333;
-            border: 1px solid #555;
-            color: white;
-            border-radius: 4px;
-            margin-top: 5px;
-        }
-        
-        .main-badge {
-            background: #d4af37;
-            color: black;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            display: inline-block;
-            margin-top: 5px;
-        }
-        
-        .excel-actions {
-            display: flex;
-            gap: 5px;
-            flex-direction: column;
+            color: #888;
+            margin-bottom: 3px;
         }
         
         .excel-actions button {
             width: 100%;
             padding: 6px 10px;
             font-size: 12px;
+            margin: 2px 0;
         }
         
         .excel-status-bar {
@@ -153,22 +135,57 @@
             display: flex;
             justify-content: space-between;
         }
+        
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border: 3px solid #d4af37;
+            border-radius: 10px;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <div id="imageModal" class="image-modal" onclick="this.style.display='none'">
+        <span class="close-modal">&times;</span>
+        <img id="modalImage" src="">
+    </div>
+
     <header>
-        <div class="logo">✨ STYLE OF LIFE - ADMIN</div>
+        <div class="logo">✨ STYLE OF LIFE - PRODUCTS</div>
         <nav>
             <a href="index.html">Home</a>
             <a href="admin.html">Dashboard</a>
             <a href="admin-products.html" class="active">Products</a>
             <a href="admin-orders.html">Orders</a>
+            <a href="admin-design.html">Design</a>
             <a href="#" onclick="logout()">Logout</a>
         </nav>
     </header>
 
     <div class="admin-container">
-        <h1 class="page-title">📸 Product Management - 5 Images per Product</h1>
+        <h1 class="page-title">📝 Product Management - Enter Image URLs</h1>
         
         <div class="excel-container">
             <div class="excel-toolbar">
@@ -187,16 +204,16 @@
                             <th rowspan="2">Category</th>
                             <th rowspan="2">Price</th>
                             <th rowspan="2">Stock</th>
-                            <th colspan="5">5 IMAGE URLS</th>
+                            <th colspan="5">Image URLs (Paste your links)</th>
                             <th rowspan="2">Description</th>
                             <th rowspan="2">Actions</th>
                         </tr>
                         <tr>
-                            <th>Img 1</th>
-                            <th>Img 2</th>
-                            <th>Img 3</th>
-                            <th>Img 4</th>
-                            <th>Img 5</th>
+                            <th>Image 1 URL</th>
+                            <th>Image 2 URL</th>
+                            <th>Image 3 URL</th>
+                            <th>Image 4 URL</th>
+                            <th>Image 5 URL</th>
                         </tr>
                     </thead>
                     <tbody id="productTableBody"></tbody>
@@ -205,7 +222,7 @@
             
             <div class="excel-status-bar">
                 <span id="recordCount">0 records</span>
-                <span>✏️ Click any field to edit | Paste image URLs in the boxes</span>
+                <span>✏️ Paste your image URLs in the boxes above</span>
             </div>
         </div>
     </div>
@@ -231,44 +248,47 @@
             document.getElementById('recordCount').textContent = `${products.length} records`;
         }
         
+        function showImage(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').style.display = 'block';
+        }
+        
         function displayProducts(products) {
             const tbody = document.getElementById('productTableBody');
             let html = '';
             
             products.forEach((product, index) => {
                 const rowId = product.id;
-                const images = product.images || Array(5).fill('');
+                const images = product.images || ['', '', '', '', ''];
                 
                 html += `
                     <tr id="row-${rowId}" data-id="${rowId}">
                         <td class="excel-row-number">${index + 1}</td>
-                        <td><input type="text" value="${product.sku || ''}" class="image-input" onchange="updateField('${rowId}', 'sku', this.value)"></td>
-                        <td><input type="text" value="${product.name || ''}" class="image-input" onchange="updateField('${rowId}', 'name', this.value)"></td>
-                        <td><input type="text" value="${product.category || ''}" class="image-input" onchange="updateField('${rowId}', 'category', this.value)"></td>
-                        <td><input type="number" value="${product.price || 0}" class="image-input" onchange="updateField('${rowId}', 'price', this.value)"></td>
-                        <td><input type="number" value="${product.stock || 0}" class="image-input" onchange="updateField('${rowId}', 'stock', this.value)"></td>
+                        <td><input type="text" value="${product.sku || ''}" class="url-input" onchange="updateField('${rowId}', 'sku', this.value)"></td>
+                        <td><input type="text" value="${product.name || ''}" class="url-input" onchange="updateField('${rowId}', 'name', this.value)"></td>
+                        <td><input type="text" value="${product.category || ''}" class="url-input" onchange="updateField('${rowId}', 'category', this.value)"></td>
+                        <td><input type="number" value="${product.price || 0}" class="url-input" onchange="updateField('${rowId}', 'price', this.value)"></td>
+                        <td><input type="number" value="${product.stock || 0}" class="url-input" onchange="updateField('${rowId}', 'stock', this.value)"></td>
                 `;
                 
                 for (let i = 0; i < 5; i++) {
-                    const imgUrl = images[i] || '';
                     html += `
                         <td>
                             <div class="image-slot">
-                                <label>Image ${i + 1} ${i === 0 ? '(Main)' : ''}</label>
-                                ${imgUrl ? `<img src="${imgUrl}" class="image-preview" onerror="this.style.display='none'">` : ''}
-                                <input type="text" 
-                                       class="image-input" 
-                                       value="${imgUrl}" 
-                                       placeholder="Paste URL..."
-                                       onchange="updateImageUrl('${rowId}', ${i}, this.value)"
-                                       onkeyup="previewOnType('${rowId}', ${i}, this.value)">
+                                <div class="image-label">Image ${i + 1} ${i === 0 ? '(Main)' : ''}</div>
+                                ${images[i] ? `<img src="${images[i]}" class="image-preview" onclick="showImage('${images[i]}')">` : ''}
+                                <input type="url" 
+                                       class="url-input" 
+                                       value="${images[i] || ''}" 
+                                       placeholder="https://..."
+                                       onchange="updateImageUrl('${rowId}', ${i}, this.value)">
                             </div>
                         </td>
                     `;
                 }
                 
                 html += `
-                        <td><input type="text" value="${product.description || ''}" class="image-input" onchange="updateField('${rowId}', 'description', this.value)"></td>
+                        <td><input type="text" value="${product.description || ''}" class="url-input" onchange="updateField('${rowId}', 'description', this.value)"></td>
                         <td>
                             <div class="excel-actions">
                                 <button onclick="deleteProduct('${rowId}')" style="background: #f44336;">🗑️ Delete</button>
@@ -300,31 +320,13 @@
             
             if (index !== -1) {
                 if (!products[index].images) {
-                    products[index].images = Array(5).fill('');
+                    products[index].images = ['', '', '', '', ''];
                 }
                 products[index].images[slot] = url.trim();
                 localStorage.setItem('products', JSON.stringify(products));
-            }
-        }
-        
-        function previewOnType(rowId, slot, url) {
-            const slotElement = document.querySelector(`#row-${rowId} td:nth-child(${7 + slot}) .image-slot`);
-            if (slotElement) {
-                let preview = slotElement.querySelector('.image-preview');
-                const cleanUrl = url.trim();
                 
-                if (cleanUrl) {
-                    if (!preview) {
-                        preview = document.createElement('img');
-                        preview.className = 'image-preview';
-                        preview.onerror = function() { this.style.display = 'none'; };
-                        slotElement.insertBefore(preview, slotElement.querySelector('.image-input'));
-                    }
-                    preview.src = cleanUrl;
-                    preview.style.display = 'block';
-                } else if (preview) {
-                    preview.remove();
-                }
+                // Refresh display to show preview
+                loadProducts();
             }
         }
         
@@ -334,11 +336,11 @@
                 id: Date.now(),
                 sku: 'NEW' + Date.now().toString().slice(-4),
                 name: 'New Product',
-                category: 'Necklaces',
+                category: '',
                 price: 0,
                 stock: 0,
                 description: '',
-                images: Array(5).fill('')
+                images: ['', '', '', '', '']
             };
             products.push(newProduct);
             localStorage.setItem('products', JSON.stringify(products));
