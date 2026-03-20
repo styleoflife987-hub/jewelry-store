@@ -1,4 +1,4 @@
-// js/app.js - Product Display with 5-Image Gallery
+// js/app.js - Customer Display with 5 Images
 let products = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -26,12 +26,15 @@ function displayProducts(products) {
         const stock = Number(product.stock) || 0;
         const sku = product.sku || `SKU${product.id}`;
         
-        // Get images array (ensure it has 5 items)
-        const images = product.images || Array(5).fill(CONFIG.PLACEHOLDER_IMAGE);
+        // Get images array (ensure 5 slots)
+        const images = product.images || Array(5).fill('');
         
-        // Filter out empty images
-        const validImages = images.filter(img => img && img !== CONFIG.PLACEHOLDER_IMAGE);
+        // Filter out empty URLs
+        const validImages = images.filter(url => url && url.trim() !== '');
         const hasImages = validImages.length > 0;
+        
+        // Use first valid image or placeholder
+        const mainImage = validImages[0] || CONFIG.PLACEHOLDER_IMAGE;
         
         html += `
             <div class="card" data-product-id="${product.id}">
@@ -40,31 +43,29 @@ function displayProducts(products) {
                         <button class="nav-arrow left" onclick="changeImage('${product.id}', -1)">←</button>
                         <button class="nav-arrow right" onclick="changeImage('${product.id}', 1)">→</button>
                         
-                        <div class="gallery-container">
-                            <img src="${images[0] || CONFIG.PLACEHOLDER_IMAGE}" 
-                                 class="gallery-main" 
-                                 id="main-${product.id}"
-                                 alt="${product.name}"
-                                 onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
-                            
-                            <div class="image-counter" id="counter-${product.id}">
-                                1 / ${validImages.length}
-                            </div>
+                        <img src="${mainImage}" 
+                             class="gallery-main" 
+                             id="main-${product.id}"
+                             alt="${product.name}"
+                             onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+                        
+                        <div class="image-counter" id="counter-${product.id}">
+                            1 / ${validImages.length}
                         </div>
                         
                         <div class="gallery-thumbnails">
-                            ${images.map((img, idx) => 
-                                img && img !== CONFIG.PLACEHOLDER_IMAGE ? 
-                                `<img src="${img}" 
-                                      class="thumbnail ${idx === 0 ? 'active' : ''}" 
-                                      onclick="setMainImage('${product.id}', ${idx})"
-                                      onerror="this.style.display='none'">` : ''
-                            ).join('')}
+                            ${validImages.map((img, idx) => `
+                                <img src="${img}" 
+                                     class="thumbnail ${idx === 0 ? 'active' : ''}" 
+                                     onclick="setMainImage('${product.id}', ${idx})"
+                                     onerror="this.style.display='none'">
+                            `).join('')}
                         </div>
                     ` : `
-                        <div class="no-images">
-                            <img src="${CONFIG.PLACEHOLDER_IMAGE}" alt="${product.name}">
-                        </div>
+                        <img src="${CONFIG.PLACEHOLDER_IMAGE}" 
+                             class="gallery-main"
+                             alt="${product.name}">
+                        <div class="no-images">No images available</div>
                     `}
                 </div>
                 
@@ -76,9 +77,8 @@ function displayProducts(products) {
                     <p class="stock ${stock > 0 ? 'in-stock' : 'out-of-stock'}">
                         ${stock > 0 ? `In Stock (${stock})` : 'Out of Stock'}
                     </p>
-                    <button onclick="addToCart('${sku}', '${product.name.replace(/'/g, "\\'")}', ${price}, this.getAttribute('data-main-image'))" 
+                    <button onclick="addToCart('${sku}', '${product.name.replace(/'/g, "\\'")}', ${price}, '${mainImage}')" 
                             class="add-to-cart-btn"
-                            data-main-image="${images[0] || CONFIG.PLACEHOLDER_IMAGE}"
                             ${stock <= 0 ? 'disabled' : ''}>
                         Add to Cart
                     </button>
@@ -89,12 +89,12 @@ function displayProducts(products) {
     
     container.innerHTML = html;
     
-    // Initialize gallery data for each product
+    // Initialize gallery data
     products.forEach(product => {
         if (!window.galleryData) window.galleryData = {};
         window.galleryData[product.id] = {
             currentIndex: 0,
-            images: product.images || []
+            images: (product.images || []).filter(url => url && url.trim() !== '')
         };
     });
 }
@@ -104,13 +104,11 @@ window.changeImage = function(productId, direction) {
     if (!window.galleryData || !window.galleryData[productId]) return;
     
     const gallery = window.galleryData[productId];
-    const images = gallery.images.filter(img => img && img !== CONFIG.PLACEHOLDER_IMAGE);
-    
-    if (images.length === 0) return;
+    if (gallery.images.length === 0) return;
     
     let newIndex = gallery.currentIndex + direction;
-    if (newIndex < 0) newIndex = images.length - 1;
-    if (newIndex >= images.length) newIndex = 0;
+    if (newIndex < 0) newIndex = gallery.images.length - 1;
+    if (newIndex >= gallery.images.length) newIndex = 0;
     
     setMainImage(productId, newIndex);
 };
@@ -119,19 +117,18 @@ window.setMainImage = function(productId, index) {
     if (!window.galleryData || !window.galleryData[productId]) return;
     
     const gallery = window.galleryData[productId];
-    const images = gallery.images;
-    const validImages = images.filter(img => img && img !== CONFIG.PLACEHOLDER_IMAGE);
+    if (!gallery.images[index]) return;
     
     // Update main image
     const mainImg = document.getElementById(`main-${productId}`);
-    if (mainImg && images[index]) {
-        mainImg.src = images[index];
+    if (mainImg) {
+        mainImg.src = gallery.images[index];
     }
     
     // Update counter
     const counter = document.getElementById(`counter-${productId}`);
     if (counter) {
-        counter.textContent = `${index + 1} / ${validImages.length}`;
+        counter.textContent = `${index + 1} / ${gallery.images.length}`;
     }
     
     // Update thumbnails
@@ -146,10 +143,4 @@ window.setMainImage = function(productId, index) {
     
     // Update current index
     gallery.currentIndex = index;
-    
-    // Update add to cart button's main image
-    const addBtn = document.querySelector(`[data-product-id="${productId}"] .add-to-cart-btn`);
-    if (addBtn) {
-        addBtn.setAttribute('data-main-image', images[index] || CONFIG.PLACEHOLDER_IMAGE);
-    }
 };
