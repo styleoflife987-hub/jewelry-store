@@ -1,4 +1,4 @@
-// js/cart.js - Cart System (unchanged)
+// js/cart.js - Cart System
 let cart = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -79,7 +79,6 @@ window.addToCart = function(sku, name, price, image) {
 window.removeFromCart = function(sku) {
     cart = cart.filter(item => item.sku !== sku);
     saveCart();
-    
     if (window.location.pathname.includes('cart.html')) {
         displayCart();
     }
@@ -98,7 +97,6 @@ window.updateQuantity = function(sku, newQuantity) {
     }
     
     saveCart();
-    
     if (window.location.pathname.includes('cart.html')) {
         displayCart();
     }
@@ -113,11 +111,9 @@ window.clearCart = function() {
     if (confirm('Clear your cart?')) {
         cart = [];
         saveCart();
-        
         if (window.location.pathname.includes('cart.html')) {
             displayCart();
         }
-        
         alert('Cart cleared');
     }
 };
@@ -131,12 +127,7 @@ function displayCart() {
     if (!container) return;
     
     if (cart.length === 0) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 60px; background: #1a1a1a; border-radius: 10px;">
-                <p style="font-size: 18px; color: #888;">Your cart is empty</p>
-                <a href="index.html" style="display: inline-block; margin-top: 20px; padding: 12px 30px; background: #d4af37; color: black; text-decoration: none; border-radius: 6px;">Continue Shopping</a>
-            </div>
-        `;
+        container.innerHTML = '<div style="text-align: center; padding: 60px;">Your cart is empty</div>';
         if (subtotalEl) subtotalEl.textContent = '0';
         if (taxEl) taxEl.textContent = '0';
         if (totalEl) totalEl.textContent = '0';
@@ -152,19 +143,19 @@ function displayCart() {
         
         html += `
             <div class="cart-item">
-                <img src="${item.image}" alt="${item.name}" style="object-fit: contain;">
+                <img src="${item.image}" alt="${item.name}">
                 <div>
                     <h4>${item.name}</h4>
-                    <p style="color: #888;">SKU: ${item.sku}</p>
+                    <p>SKU: ${item.sku}</p>
                 </div>
-                <div style="color: #d4af37;">₹${item.price.toLocaleString('en-IN')}</div>
+                <div>₹${item.price.toLocaleString()}</div>
                 <div>
                     <input type="number" value="${item.quantity}" min="1" max="10" 
                            onchange="updateQuantity('${item.sku}', this.value)"
-                           style="width: 60px; padding: 5px; background: #333; color: white; border: 1px solid #444; border-radius: 4px; text-align: center;">
+                           style="width: 60px; padding: 5px;">
                 </div>
-                <div style="font-weight: bold;">₹${itemTotal.toLocaleString('en-IN')}</div>
-                <button onclick="removeFromCart('${item.sku}')" style="background: transparent; color: #f44336; border: 1px solid #f44336; padding: 5px 10px; width: auto;">Remove</button>
+                <div>₹${itemTotal.toLocaleString()}</div>
+                <button onclick="removeFromCart('${item.sku}')">Remove</button>
             </div>
         `;
     });
@@ -175,9 +166,9 @@ function displayCart() {
     const shipping = 100;
     const total = subtotal + tax + shipping;
     
-    if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('en-IN');
-    if (taxEl) taxEl.textContent = tax.toLocaleString('en-IN');
-    if (totalEl) totalEl.textContent = total.toLocaleString('en-IN');
+    if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString();
+    if (taxEl) taxEl.textContent = tax.toLocaleString();
+    if (totalEl) totalEl.textContent = total.toLocaleString();
 }
 
 // Make functions globally available
@@ -185,4 +176,3 @@ window.getCart = getCart;
 window.getCartCount = getCartCount;
 window.getCartTotal = getCartTotal;
 window.updateCartCount = updateCartCount;
-window.displayCart = displayCart;
