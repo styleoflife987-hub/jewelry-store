@@ -7,25 +7,20 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Product Gallery Styles */
+        /* Gallery Styles */
         .product-gallery {
             position: relative;
             width: 100%;
             height: 300px;
             overflow: hidden;
-        }
-        
-        .gallery-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
+            background: #2a2a2a;
         }
         
         .gallery-main {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s;
         }
         
         .gallery-thumbnails {
@@ -38,7 +33,7 @@
             left: 0;
             right: 0;
             justify-content: center;
-            z-index: 10;
+            flex-wrap: wrap;
         }
         
         .thumbnail {
@@ -49,7 +44,7 @@
             border: 2px solid transparent;
             cursor: pointer;
             opacity: 0.7;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
         
         .thumbnail:hover {
@@ -91,7 +86,7 @@
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s;
         }
         
         .product-gallery:hover .nav-arrow {
@@ -99,7 +94,8 @@
         }
         
         .nav-arrow:hover {
-            background: rgba(212, 175, 55, 0.8);
+            background: #d4af37;
+            color: black;
         }
         
         .nav-arrow.left {
@@ -116,9 +112,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #2a2a2a;
             color: #888;
-            font-size: 14px;
         }
     </style>
 </head>
@@ -144,7 +138,6 @@
     </footer>
 
     <script src="js/config.js"></script>
-    <script src="js/data.js"></script>
     <script src="js/cart.js"></script>
     <script src="js/app.js"></script>
 </body>
