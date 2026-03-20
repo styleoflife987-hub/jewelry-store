@@ -5,48 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Order - Style Of Life</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
     <style>
-        .order-details { background: white; border-radius: 12px; padding: 20px; margin-top: 20px; text-align: left; }
-        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-        .status-pending { background: #ffc107; color: #856404; }
-        .status-processing { background: #17a2b8; color: white; }
-        .status-shipped { background: #28a745; color: white; }
-        .status-delivered { background: #20c997; color: white; }
-        .status-cancelled { background: #dc3545; color: white; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #d4af37; --dark: #1a1a1a; --darker: #0a0a0a; --light: #ffffff; --gray-200: #e9ecef; --success: #28a745; --danger: #dc3545; }
+        body { font-family: 'Inter', sans-serif; background: var(--light); }
+        header { background: white; padding: 20px 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 28px; font-weight: 600; color: var(--primary); }
+        nav a { color: #6c757d; text-decoration: none; margin-left: 30px; }
+        nav a.active { color: var(--primary); }
+        .container { max-width: 600px; margin: 100px auto; padding: 0 20px; text-align: center; }
+        .track-box { background: white; padding: 40px; border-radius: 12px; border: 1px solid var(--gray-200); }
+        .track-form { display: flex; gap: 10px; margin: 30px 0; }
+        .track-input { flex: 1; padding: 15px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 16px; }
+        .track-btn { padding: 15px 30px; background: var(--primary); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; }
+        .order-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px; text-align: left; }
+        .status-pending { background: #ffc107; color: #856404; display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        footer { background: var(--darker); color: white; text-align: center; padding: 40px; margin-top: 60px; }
     </style>
 </head>
-<body class="customer">
-    <header class="customer-header">
-        <div class="customer-logo">STYLE OF LIFE</div>
-        <nav class="customer-nav">
+<body>
+    <header>
+        <div class="logo">STYLE OF LIFE</div>
+        <nav>
             <a href="index.html">Home</a>
-            <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+            <a href="cart.html">Cart</a>
             <a href="track.html" class="active">Track Order</a>
         </nav>
     </header>
 
-    <div class="track-container">
-        <h1 style="color: var(--primary); margin-bottom: 20px;">Track Your Order</h1>
-        <div class="track-form">
-            <input type="text" id="orderId" class="track-input" placeholder="Enter Order ID (e.g., ORD1234567890)">
-            <button class="track-btn" onclick="trackOrder()">Track</button>
+    <div class="container">
+        <div class="track-box">
+            <h1 style="color: var(--primary); margin-bottom: 20px;">Track Your Order</h1>
+            <div class="track-form">
+                <input type="text" id="orderId" class="track-input" placeholder="Enter Order ID (e.g., ORD1234567890)">
+                <button class="track-btn" onclick="trackOrder()">Track</button>
+            </div>
+            <div id="result"></div>
         </div>
-        <div id="trackingResult"></div>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
+    <footer><p>© 2026 STYLE OF LIFE. All rights reserved.</p></footer>
+
     <script>
-        async function trackOrder() {
+        function trackOrder() {
             const orderId = document.getElementById('orderId').value.trim();
-            if (!orderId) return alert('Enter order ID');
+            if (!orderId) {
+                alert('Enter order ID');
+                return;
+            }
             
-            const resultDiv = document.getElementById('trackingResult');
-            resultDiv.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Searching...</p></div>';
-            
-            const orders = await getOrders();
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
             const order = orders.find(o => o.orderId === orderId);
+            const resultDiv = document.getElementById('result');
             
             if (!order) {
                 resultDiv.innerHTML = '<p style="color: var(--danger);">Order not found</p>';
@@ -54,8 +64,8 @@
             }
             
             let itemsHtml = '';
-            order.items.forEach(i => {
-                itemsHtml += `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #e9ecef;"><span>${i.name} x${i.quantity}</span><span>₹${(i.price * i.quantity).toLocaleString()}</span></div>`;
+            order.items.forEach(item => {
+                itemsHtml += `<div style="display:flex; justify-content:space-between; padding:5px 0;"><span>${item.name} x${item.quantity}</span><span>₹${(item.price * item.quantity).toLocaleString()}</span></div>`;
             });
             
             resultDiv.innerHTML = `
@@ -65,14 +75,15 @@
                     <p><strong>Customer:</strong> ${order.name}</p>
                     <p><strong>Phone:</strong> ${order.phone}</p>
                     <p><strong>Address:</strong> ${order.address}</p>
-                    <p><strong>Status:</strong> <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></p>
+                    <p><strong>Status:</strong> <span class="status-pending">${order.status}</span></p>
                     <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
-                    <h4 style="margin:15px 0 10px;">Items:</h4>
+                    <h4 style="margin: 15px 0 10px;">Items:</h4>
                     ${itemsHtml}
-                    <div style="margin-top:15px; padding-top:10px; border-top:2px solid #e9ecef;">
+                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;">
                         <p><strong>Total:</strong> ₹${order.total.toLocaleString()}</p>
                     </div>
-                </div>`;
+                </div>
+            `;
         }
         
         const urlParams = new URLSearchParams(window.location.search);
