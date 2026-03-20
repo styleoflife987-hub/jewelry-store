@@ -6,124 +6,21 @@
     <title>Admin Login - Style Of Life</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-        }
-        
-        .login-card {
-            background: #1a1a1a;
-            padding: 60px;
-            border-radius: 20px;
-            border: 1px solid #d4af37;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .login-card h2 {
-            color: #d4af37;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-            position: relative;
-        }
-        
-        .login-card .form-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        .login-card label {
-            display: block;
-            color: #888;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        
-        .login-card input {
-            width: 100%;
-            padding: 15px;
-            background: #2d2d2d;
-            border: 1px solid #3d3d3d;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .login-card input:focus {
-            outline: none;
-            border-color: #d4af37;
-            box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 15px;
-            background: #d4af37;
-            border: none;
-            border-radius: 8px;
-            color: #0a0a0a;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-        }
-        
-        .login-btn:hover {
-            background: #b8962e;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(212,175,55,0.3);
-        }
-        
-        .login-hint {
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #2d2d2d;
-        }
-    </style>
 </head>
 <body class="admin">
-    <div class="login-container">
-        <div class="login-card">
+    <div class="admin-login-container">
+        <div class="admin-login-card">
             <h2>ADMIN LOGIN</h2>
             <div class="form-group">
                 <label>Username</label>
-                <input type="text" id="username" placeholder="Enter username">
+                <input type="text" id="username" class="admin-input">
             </div>
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" id="password" placeholder="Enter password">
+                <input type="password" id="password" class="admin-input">
             </div>
-            <button class="login-btn" onclick="login()">LOGIN</button>
-            <p class="login-hint">Default: admin / 1234</p>
+            <button class="admin-btn admin-btn-primary" style="width: 100%;" onclick="login()">Login</button>
+            <p style="text-align: center; margin-top: 20px; color: var(--gray-600);">Default: admin / 1234</p>
         </div>
     </div>
 
