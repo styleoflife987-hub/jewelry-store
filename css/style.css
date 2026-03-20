@@ -1,4 +1,3 @@
-/* css/style.css - Complete Styling */
 * {
     margin: 0;
     padding: 0;
@@ -44,15 +43,13 @@ header {
     font-size: 24px;
     font-weight: bold;
     color: var(--gold);
-    letter-spacing: 1px;
 }
 
 nav a {
     color: white;
     margin: 0 15px;
     text-decoration: none;
-    transition: all 0.3s;
-    font-weight: 500;
+    transition: 0.3s;
 }
 
 nav a:hover, nav a.active {
@@ -66,8 +63,7 @@ nav a:hover, nav a.active {
     border-radius: 50%;
     font-size: 12px;
     margin-left: 5px;
-    display: inline-block;
-    font-weight: bold;
+    display: none;
 }
 
 .container {
@@ -94,7 +90,6 @@ nav a:hover, nav a.active {
 .hero h1 {
     font-size: 48px;
     color: var(--gold);
-    margin-bottom: 15px;
 }
 
 .hero p {
@@ -106,18 +101,6 @@ nav a:hover, nav a.active {
     color: var(--gold);
     margin-bottom: 30px;
     font-size: 32px;
-    position: relative;
-    padding-bottom: 10px;
-}
-
-.page-title::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 60px;
-    height: 3px;
-    background: var(--gold);
 }
 
 .products {
@@ -125,37 +108,19 @@ nav a:hover, nav a.active {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 30px;
     padding: 20px;
-    max-width: 1400px;
-    margin: 0 auto;
 }
 
 .card {
     background: var(--darker);
     border-radius: 12px;
     overflow: hidden;
-    transition: all 0.3s;
+    transition: 0.3s;
     border: 1px solid var(--gray);
 }
 
 .card:hover {
     transform: translateY(-5px);
     border-color: var(--gold);
-}
-
-.product-images {
-    width: 100%;
-    height: 250px;
-    background: #2a2a2a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.main-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 20px;
 }
 
 .product-info {
@@ -170,7 +135,6 @@ nav a:hover, nav a.active {
 .sku {
     font-size: 12px;
     color: var(--text-light);
-    margin-bottom: 5px;
 }
 
 .category {
@@ -191,13 +155,8 @@ nav a:hover, nav a.active {
     margin-bottom: 15px;
 }
 
-.in-stock {
-    color: var(--success);
-}
-
-.out-of-stock {
-    color: var(--danger);
-}
+.in-stock { color: var(--success); }
+.out-of-stock { color: var(--danger); }
 
 button {
     width: 100%;
@@ -208,7 +167,7 @@ button {
     color: var(--black);
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: 0.3s;
     font-size: 14px;
     text-transform: uppercase;
 }
@@ -262,12 +221,10 @@ button:disabled {
 .summary-row.total {
     border-bottom: none;
     font-size: 20px;
-    font-weight: bold;
     color: var(--gold);
-    padding-top: 15px;
 }
 
-.checkout-btn {
+.checkout-btn, .place-order-btn {
     display: block;
     width: 100%;
     padding: 15px;
@@ -276,12 +233,7 @@ button:disabled {
     text-align: center;
     text-decoration: none;
     border-radius: 8px;
-    font-weight: bold;
     margin: 20px 0 10px;
-}
-
-.checkout-btn:hover {
-    background: var(--gold-dark);
 }
 
 .clear-cart-btn {
@@ -308,12 +260,6 @@ button:disabled {
     border: 1px solid var(--gray);
 }
 
-.order-summary {
-    height: fit-content;
-    position: sticky;
-    top: 100px;
-}
-
 .form-group {
     margin-bottom: 20px;
 }
@@ -322,7 +268,6 @@ button:disabled {
     display: block;
     color: var(--gold);
     margin-bottom: 8px;
-    font-size: 14px;
 }
 
 .form-group input,
@@ -333,13 +278,6 @@ button:disabled {
     border: 1px solid var(--light-gray);
     border-radius: 6px;
     color: white;
-    font-size: 14px;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: none;
-    border-color: var(--gold);
 }
 
 .track-container {
@@ -348,7 +286,6 @@ button:disabled {
     background: var(--darker);
     padding: 40px;
     border-radius: 15px;
-    border: 1px solid var(--gray);
 }
 
 .track-form {
@@ -364,7 +301,6 @@ button:disabled {
     border: 1px solid var(--light-gray);
     border-radius: 8px;
     color: white;
-    font-size: 16px;
 }
 
 .track-btn {
@@ -372,19 +308,11 @@ button:disabled {
     padding: 15px 30px;
 }
 
-.tracking-result {
-    margin-top: 30px;
-    padding: 20px;
-    background: var(--gray);
-    border-radius: 8px;
-}
-
 .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 60vh;
-    padding: 20px;
 }
 
 .login-box {
@@ -393,7 +321,6 @@ button:disabled {
     border-radius: 15px;
     width: 100%;
     max-width: 400px;
-    border: 1px solid var(--gray);
 }
 
 .login-box h2 {
@@ -405,7 +332,6 @@ button:disabled {
 .login-btn {
     width: 100%;
     padding: 15px;
-    font-size: 16px;
     margin: 20px 0 10px;
 }
 
@@ -440,7 +366,6 @@ button:disabled {
 .stat-info h3 {
     color: var(--text-light);
     font-size: 14px;
-    margin-bottom: 5px;
 }
 
 .stat-number {
@@ -450,17 +375,9 @@ button:disabled {
 }
 
 .quick-actions {
-    background: var(--darker);
-    padding: 30px;
-    border-radius: 12px;
-    margin-bottom: 40px;
-    border: 1px solid var(--gray);
-}
-
-.action-buttons {
     display: flex;
     gap: 15px;
-    flex-wrap: wrap;
+    margin-top: 30px;
 }
 
 .action-btn {
@@ -469,77 +386,12 @@ button:disabled {
     color: white;
     text-decoration: none;
     border-radius: 6px;
-    transition: all 0.3s;
     border: 1px solid var(--light-gray);
 }
 
 .action-btn:hover {
     background: var(--gold);
     color: var(--black);
-}
-
-.add-product-form {
-    background: var(--darker);
-    padding: 30px;
-    border-radius: 12px;
-    margin-bottom: 40px;
-    border: 1px solid var(--gray);
-}
-
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-.full-width {
-    grid-column: span 2;
-}
-
-.submit-btn {
-    width: auto;
-    padding: 15px 40px;
-    font-size: 16px;
-}
-
-.products-grid-admin {
-    display: grid;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.product-card-admin {
-    background: var(--gray);
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid var(--light-gray);
-}
-
-.orders-table-container {
-    background: var(--darker);
-    padding: 30px;
-    border-radius: 12px;
-    border: 1px solid var(--gray);
-    overflow-x: auto;
-}
-
-.orders-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 800px;
-}
-
-.orders-table th {
-    background: var(--gold);
-    color: var(--black);
-    padding: 12px;
-    text-align: left;
-}
-
-.orders-table td {
-    padding: 15px 12px;
-    border-bottom: 1px solid var(--gray);
 }
 
 footer {
@@ -558,28 +410,7 @@ footer {
         padding: 15px;
     }
     
-    .cart-item {
-        grid-template-columns: 80px 1fr;
-        gap: 10px;
-    }
-    
     .checkout-grid {
         grid-template-columns: 1fr;
-    }
-    
-    .order-summary {
-        position: static;
-    }
-    
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .track-form {
-        flex-direction: column;
-    }
-    
-    .track-btn {
-        width: 100%;
     }
 }
