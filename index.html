@@ -4,45 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Style Of Life - Luxury Jewelry</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        .loading-spinner {
-            text-align: center;
-            padding: 100px;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #c5a059;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .error-message {
-            text-align: center;
-            padding: 100px;
-            color: #dc3545;
-        }
-        
-        .retry-btn {
-            background: #c5a059;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-    </style>
 </head>
 <body class="customer">
     <header class="customer-header">
@@ -54,23 +17,17 @@
         </nav>
     </header>
 
-    <div class="customer-hero" style="background-image: linear-gradient(135deg, rgba(44,44,44,0.7) 0%, rgba(139,115,85,0.7) 100%), url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=2000');">
+    <div class="customer-hero" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=2000');">
         <div class="customer-hero-content">
             <h1>Luxury Jewelry</h1>
             <p>Discover exquisite handcrafted pieces for the discerning collector</p>
         </div>
     </div>
 
-    <div class="customer-products" id="products">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Loading products from cloud...</p>
-        </div>
-    </div>
+    <div class="customer-products" id="products"></div>
 
-    <footer style="text-align: center; padding: 60px; background: var(--customer-charcoal); color: var(--customer-cream); margin-top: 60px;">
-        <p style="font-size: 14px; letter-spacing: 2px;">© 2026 STYLE OF LIFE. ALL RIGHTS RESERVED.</p>
-        <p style="font-size: 12px; margin-top: 20px; color: #888;">HANDCRAFTED LUXURY</p>
+    <footer style="background: var(--darker); color: white; text-align: center; padding: 60px; margin-top: 60px;">
+        <p>© 2026 STYLE OF LIFE. All rights reserved.</p>
     </footer>
 
     <script src="js/config.js"></script>
@@ -79,53 +36,21 @@
         let products = [];
 
         document.addEventListener('DOMContentLoaded', function() {
-            loadProductsFromCloud();
+            loadProducts();
             updateCartCount();
-            
-            // Refresh every 30 seconds
-            setInterval(loadProductsFromCloud, 30000);
         });
 
-        async function loadProductsFromCloud() {
-            const container = document.getElementById('products');
-            
-            try {
-                const response = await fetch(`${CONFIG.API_URL}?action=getProducts&t=${Date.now()}`);
-                const data = await response.json();
-                
-                if (Array.isArray(data)) {
-                    products = data;
-                    // Save to localStorage as backup
-                    localStorage.setItem('products', JSON.stringify(products));
-                    displayProducts(products);
-                } else {
-                    throw new Error('Invalid data from cloud');
-                }
-            } catch (error) {
-                console.error('Cloud fetch failed, using local backup:', error);
-                
-                // Fallback to localStorage
-                const storedProducts = localStorage.getItem('products');
-                if (storedProducts) {
-                    products = JSON.parse(storedProducts);
-                    displayProducts(products);
-                } else {
-                    container.innerHTML = `
-                        <div class="error-message">
-                            <p>Unable to load products. Please check your connection.</p>
-                            <button class="retry-btn" onclick="loadProductsFromCloud()">Retry</button>
-                        </div>
-                    `;
-                }
-            }
+        function loadProducts() {
+            const storedProducts = localStorage.getItem('products');
+            products = storedProducts ? JSON.parse(storedProducts) : [];
+            displayProducts(products);
         }
 
         function displayProducts(products) {
             const container = document.getElementById('products');
-            if (!container) return;
             
             if (!products || products.length === 0) {
-                container.innerHTML = '<div style="text-align: center; padding: 100px; color: #888;">No products available</div>';
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 100px; color: #6c757d;">No products available</div>';
                 return;
             }
             
@@ -140,7 +65,7 @@
                 const mainImage = images[0] || 'https://via.placeholder.com/400x500?text=No+Image';
                 
                 html += `
-                    <div class="customer-card" data-product-id="${product.id}">
+                    <div class="customer-card">
                         <div class="customer-card-image">
                             <img src="${mainImage}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/400x500?text=No+Image'">
                         </div>
