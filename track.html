@@ -6,6 +6,14 @@
     <title>Track Order - Style Of Life</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .status-pending { background: #ffc107; color: #856404; }
+        .status-processing { background: #17a2b8; color: white; }
+        .status-shipped { background: #28a745; color: white; }
+        .status-delivered { background: #20c997; color: white; }
+        .status-cancelled { background: #dc3545; color: white; }
+        .order-details { background: white; border-radius: 12px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
 </head>
 <body class="customer">
     <header class="customer-header">
@@ -26,36 +34,48 @@
         <div id="trackingResult"></div>
     </div>
 
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
     <script>
-        function trackOrder() {
+        async function trackOrder() {
             const orderId = document.getElementById('orderId').value.trim();
             if (!orderId) return alert('Enter order ID');
             
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const resultDiv = document.getElementById('trackingResult');
+            resultDiv.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Searching...</p></div>';
+            
+            const orders = await getOrders();
             const order = orders.find(o => o.orderId === orderId);
             
-            const resultDiv = document.getElementById('trackingResult');
-            
-            if (order) {
-                let itemsHtml = '';
-                order.items.forEach(item => {
-                    itemsHtml += `<div>${item.name} x${item.quantity} - ₹${item.price * item.quantity}</div>`;
-                });
-                
-                resultDiv.innerHTML = `
-                    <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px;">
-                        <h3 style="color: var(--primary);">Order Found</h3>
-                        <p><strong>ID:</strong> ${order.orderId}</p>
-                        <p><strong>Customer:</strong> ${order.name}</p>
-                        <p><strong>Status:</strong> <span class="admin-badge admin-badge-${order.status.toLowerCase()}">${order.status}</span></p>
-                        <p><strong>Total:</strong> ₹${order.total}</p>
-                        <h4>Items:</h4>
-                        ${itemsHtml}
-                    </div>
-                `;
-            } else {
+            if (!order) {
                 resultDiv.innerHTML = '<p style="color: var(--danger);">Order not found</p>';
+                return;
             }
+            
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                itemsHtml += `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #e9ecef;"><span>${item.name} x${item.quantity}</span><span>₹${(item.price * item.quantity).toLocaleString()}</span></div>`;
+            });
+            
+            resultDiv.innerHTML = `
+                <div class="order-details">
+                    <h3 style="color: var(--primary);">Order Found</h3>
+                    <p><strong>Order ID:</strong> ${order.orderId}</p>
+                    <p><strong>Customer:</strong> ${order.name}</p>
+                    <p><strong>Phone:</strong> ${order.phone}</p>
+                    <p><strong>Address:</strong> ${order.address}</p>
+                    <p><strong>Status:</strong> <span class="admin-badge status-${order.status.toLowerCase()}">${order.status}</span></p>
+                    <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
+                    <h4 style="margin:15px 0 10px;">Items:</h4>
+                    ${itemsHtml}
+                    <div style="margin-top:15px; padding-top:10px; border-top:2px solid #e9ecef;">
+                        <p><strong>Subtotal:</strong> ₹${order.subtotal.toLocaleString()}</p>
+                        <p><strong>Tax (18%):</strong> ₹${order.tax.toLocaleString()}</p>
+                        <p><strong>Shipping:</strong> ₹${order.shipping}</p>
+                        <p style="font-size:20px; color:var(--primary);"><strong>Total:</strong> ₹${order.total.toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
         }
         
         const urlParams = new URLSearchParams(window.location.search);
