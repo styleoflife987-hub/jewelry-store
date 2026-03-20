@@ -4,6 +4,6 @@ const CONFIG = {
     CURRENCY: "₹",
     DEFAULT_CATEGORY: "Jewelry",
     
-    // IMPORTANT: Replace with your Google Apps Script URL
+    // IMPORTANT: Replace with your Google Apps Script URL after deployment
     API_URL: "https://script.google.com/macros/s/AKfycbwCSWHfY18rKz_lNrZ7030S8OHJ-cjhEcTgW8MDYefpvqYJUzzl5rusDALMSOgkBmME/exec"
 };
