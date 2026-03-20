@@ -7,82 +7,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .image-upload-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin: 15px 0;
-        }
-        .image-slot {
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-        }
-        .url-input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        .sync-status {
-            background: #e8f5e9;
-            color: #2e7d32;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .sync-status.offline {
-            background: #ffebee;
-            color: #c62828;
-        }
-        .admin-product-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid #e9ecef;
-            transition: all 0.3s;
-        }
-        .admin-product-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .admin-product-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .admin-product-info {
-            padding: 16px;
-        }
-        .admin-product-info h4 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .admin-product-sku {
-            font-size: 12px;
-            color: #6c757d;
-            margin-bottom: 4px;
-        }
-        .admin-product-price {
-            font-size: 18px;
-            font-weight: 700;
-            color: #d4af37;
-            margin: 8px 0;
-        }
-        .admin-product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-            margin-top: 24px;
-        }
+        .image-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0; }
+        .image-slot { background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 8px; padding: 10px; text-align: center; }
+        .url-input { width: 100%; padding: 8px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 12px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; margin-top: 24px; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #e9ecef; }
+        .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .product-image { width: 100%; height: 200px; object-fit: cover; }
+        .product-info { padding: 16px; }
+        .product-info h4 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .product-price { font-size: 18px; font-weight: 700; color: #d4af37; margin: 8px 0; }
+        .sync-status { background: #e8f5e9; color: #2e7d32; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body class="admin">
@@ -97,10 +32,7 @@
     </header>
 
     <div class="admin-container">
-        <div class="sync-status" id="syncStatus">
-            <span>🟢 Connected to Cloud</span>
-            <button class="admin-btn admin-btn-primary" onclick="syncNow()" style="padding: 5px 15px;">Sync Now</button>
-        </div>
+        <div class="sync-status" id="syncStatus"><span>🟢 Connected to Cloud</span><button class="admin-btn admin-btn-primary" onclick="refreshProducts()">Refresh</button></div>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <h1 style="color: var(--primary);">Product Management</h1>
@@ -118,42 +50,39 @@
                 <input type="number" id="newPrice" class="admin-input" placeholder="Price *">
                 <input type="number" id="newStock" class="admin-input" placeholder="Stock *">
             </div>
-            <div style="margin-bottom: 15px;">
-                <textarea id="newDescription" class="admin-input" placeholder="Description" rows="3"></textarea>
-            </div>
-            <h3 style="color: var(--primary); margin: 20px 0 10px;">Image URLs (5 images)</h3>
-            <div class="image-upload-grid">
-                <div class="image-slot"><label>Image 1 (Main)</label><input type="url" id="newImg1" class="url-input" placeholder="https://..."></div>
+            <textarea id="newDescription" class="admin-input" placeholder="Description" rows="3"></textarea>
+            <h3 style="margin: 20px 0 10px;">Image URLs (5 images)</h3>
+            <div class="image-grid">
+                <div class="image-slot"><label>Image 1</label><input type="url" id="newImg1" class="url-input" placeholder="https://..."></div>
                 <div class="image-slot"><label>Image 2</label><input type="url" id="newImg2" class="url-input" placeholder="https://..."></div>
                 <div class="image-slot"><label>Image 3</label><input type="url" id="newImg3" class="url-input" placeholder="https://..."></div>
                 <div class="image-slot"><label>Image 4</label><input type="url" id="newImg4" class="url-input" placeholder="https://..."></div>
                 <div class="image-slot"><label>Image 5</label><input type="url" id="newImg5" class="url-input" placeholder="https://..."></div>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button class="admin-btn admin-btn-primary" onclick="saveNewProduct()">Save Product</button>
+                <button class="admin-btn admin-btn-primary" onclick="saveNewProduct()">Save</button>
                 <button class="admin-btn admin-btn-danger" onclick="hideAddForm()">Cancel</button>
             </div>
         </div>
 
-        <div id="productsGrid" class="admin-product-grid"></div>
+        <div id="productsGrid" class="product-grid"></div>
     </div>
 
     <script src="js/config.js"></script>
-    <script src="js/cloud-sync.js"></script>
+    <script src="js/api.js"></script>
     <script>
         if (!sessionStorage.getItem('adminLoggedIn')) window.location.href = 'login.html';
-
-        document.addEventListener('DOMContentLoaded', async () => await loadProducts());
-
+        
+        document.addEventListener('DOMContentLoaded', loadProducts);
+        
         async function loadProducts() {
-            const products = await loadProductsFromCloud();
-            if (products) displayProducts(products);
-            else displayProducts(JSON.parse(localStorage.getItem('products') || '[]'));
+            const products = await getProducts();
+            displayProducts(products);
         }
-
+        
         function displayProducts(products) {
             const grid = document.getElementById('productsGrid');
-            if (!products.length) {
+            if (!products || products.length === 0) {
                 grid.innerHTML = '<div style="text-align: center; padding: 100px;">No products found. Click "Add New Product" to get started.</div>';
                 return;
             }
@@ -162,13 +91,13 @@
             products.forEach(p => {
                 const mainImage = (p.images?.[0]) || 'https://via.placeholder.com/300x300?text=No+Image';
                 html += `
-                    <div class="admin-product-card">
-                        <img src="${mainImage}" class="admin-product-image" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
-                        <div class="admin-product-info">
+                    <div class="product-card">
+                        <img src="${mainImage}" class="product-image" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
+                        <div class="product-info">
                             <h4>${p.name}</h4>
-                            <div class="admin-product-sku">SKU: ${p.sku}</div>
+                            <div style="color:#6c757d;">SKU: ${p.sku}</div>
                             <div style="color:#6c757d;">${p.category}</div>
-                            <div class="admin-product-price">₹${Number(p.price).toLocaleString()}</div>
+                            <div class="product-price">₹${Number(p.price).toLocaleString()}</div>
                             <div style="margin:10px 0; color:${p.stock>0?'#28a745':'#dc3545'}">Stock: ${p.stock}</div>
                             <div style="display:flex; gap:10px;">
                                 <button class="admin-btn admin-btn-primary" onclick="editProduct('${p.id}')" style="flex:1;">Edit</button>
@@ -179,15 +108,15 @@
             });
             grid.innerHTML = html;
         }
-
-        function showAddForm() { document.getElementById('addForm').style.display = 'block'; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        
+        function showAddForm() { document.getElementById('addForm').style.display = 'block'; }
         function hideAddForm() {
             document.getElementById('addForm').style.display = 'none';
             ['newSku','newName','newCategory','newPrice','newStock','newDescription','newImg1','newImg2','newImg3','newImg4','newImg5'].forEach(id => {
-                const el = document.getElementById(id); if (el) el.value = '';
+                const el = document.getElementById(id); if(el) el.value = '';
             });
         }
-
+        
         async function saveNewProduct() {
             const sku = document.getElementById('newSku').value.trim();
             const name = document.getElementById('newName').value.trim();
@@ -196,41 +125,34 @@
             const stock = document.getElementById('newStock').value.trim();
             if (!sku || !name || !category || !price || !stock) return alert('Please fill all required fields');
             
-            const images = [1,2,3,4,5].map(i => document.getElementById(`newImg${i}`).value.trim());
-            const newProduct = {
-                id: Date.now(), sku, name, category, price: Number(price), stock: Number(stock),
-                description: document.getElementById('newDescription').value.trim() || '', images
+            const product = {
+                sku, name, category, price: Number(price), stock: Number(stock),
+                description: document.getElementById('newDescription').value.trim() || '',
+                images: [1,2,3,4,5].map(i => document.getElementById(`newImg${i}`).value.trim())
             };
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            products.push(newProduct);
-            localStorage.setItem('products', JSON.stringify(products));
             
-            const saved = await saveProductsToCloud();
-            if (saved) { alert('✅ Product added to cloud!'); hideAddForm(); await loadProducts(); }
-            else alert('⚠️ Product saved locally only. Cloud sync failed.');
-        }
-
-        async function deleteProduct(id) {
-            if (!confirm('Delete this product?')) return;
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            localStorage.setItem('products', JSON.stringify(products.filter(p => p.id != id)));
-            if (await saveProductsToCloud()) { alert('✅ Product deleted'); await loadProducts(); }
-            else alert('⚠️ Product deleted locally only.');
-        }
-
-        async function syncNow() {
-            const statusDiv = document.getElementById('syncStatus');
-            statusDiv.innerHTML = '<span>🔄 Syncing...</span><button disabled>Syncing...</button>';
-            if (await saveProductsToCloud()) {
-                statusDiv.innerHTML = '<span>🟢 Connected to Cloud</span><button class="admin-btn admin-btn-primary" onclick="syncNow()">Sync Now</button>';
+            const result = await addProduct(product);
+            if (result.success) {
+                alert('✅ Product added!');
+                hideAddForm();
                 await loadProducts();
-                showNotification('✅ Products synced to cloud!', 'success');
             } else {
-                statusDiv.innerHTML = '<span>🔴 Cloud connection failed</span><button class="admin-btn admin-btn-primary" onclick="syncNow()">Retry Sync</button>';
-                showNotification('⚠️ Cloud sync failed. Check internet.', 'error');
+                alert('❌ Failed: ' + result.error);
             }
         }
-
+        
+        async function deleteProduct(id) {
+            if (!confirm('Delete this product?')) return;
+            const result = await deleteProduct(id);
+            if (result.success) {
+                alert('✅ Product deleted');
+                await loadProducts();
+            } else {
+                alert('❌ Failed: ' + result.error);
+            }
+        }
+        
+        async function refreshProducts() { await loadProducts(); showNotification('Products refreshed', 'success'); }
         function editProduct(id) { alert('Edit functionality - would open edit modal in production'); }
         function logout() { sessionStorage.removeItem('adminLoggedIn'); window.location.href = 'login.html'; }
     </script>
