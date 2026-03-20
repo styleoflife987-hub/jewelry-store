@@ -43,14 +43,15 @@ function createImagePreview(file, containerId) {
     const reader = new FileReader();
     reader.onload = function(e) {
         container.innerHTML = `
-            <div style="position: relative; display: inline-block;">
+            <div style="position: relative; display: inline-block; margin-top: 10px;">
                 <img src="${e.target.result}" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #d4af37;">
-                <button onclick="this.parentElement.remove()" style="position: absolute; top: -10px; right: -10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer;">×</button>
+                <button onclick="this.parentElement.remove()" style="position: absolute; top: -10px; right: -10px; background: #f44336; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-size: 16px; line-height: 1;">×</button>
             </div>
         `;
     };
     reader.readAsDataURL(file);
 }
 
+// Make functions globally available
 window.uploadImageToDrive = uploadImageToDrive;
 window.createImagePreview = createImagePreview;
