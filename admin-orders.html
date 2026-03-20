@@ -27,11 +27,6 @@
     </header>
 
     <div class="admin-container">
-        <div class="sync-status" style="background:#e8f5e9; margin-bottom:20px;">
-            <span>🟢 Orders synced with cloud</span>
-            <button class="admin-btn admin-btn-primary" onclick="refreshOrders()">Refresh</button>
-        </div>
-        
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <h1 style="color: var(--primary);">Order Management</h1>
             <div style="display: flex; gap: 15px;">
@@ -60,10 +55,10 @@
         async function loadOrders() {
             const orders = await getOrders();
             displayOrders(orders);
-            const total = orders.reduce((s,o)=>s+(o.total||0),0);
+            const total = orders.reduce((s,o) => s + (o.total || 0), 0);
             document.getElementById('totalOrders').textContent = orders.length;
             document.getElementById('totalRevenue').textContent = `₹${total.toLocaleString()}`;
-            document.getElementById('pendingOrders').textContent = orders.filter(o=>o.status==='Pending').length;
+            document.getElementById('pendingOrders').textContent = orders.filter(o => o.status === 'Pending').length;
         }
         
         function displayOrders(orders) {
@@ -74,25 +69,25 @@
             }
             
             let html = '';
-            orders.forEach(order => {
-                const itemsList = order.items.map(i => `${i.name} x${i.quantity}`).join('<br>');
+            orders.forEach(o => {
+                const items = o.items.map(i => `${i.name} x${i.quantity}`).join('<br>');
                 html += `
                     <tr>
-                        <td><strong>${order.orderId}</strong></td>
-                        <td>${order.name}<br><small>${order.phone}</small></td>
-                        <td><small>${itemsList}</small></td>
-                        <td>₹${order.total.toLocaleString()}</td>
+                        <td><strong>${o.orderId}</strong></td>
+                        <td>${o.name}<br><small>${o.phone}</small></td>
+                        <td><small>${items}</small></td>
+                        <td>₹${o.total.toLocaleString()}</td>
                         <td>
-                            <select class="status-select status-${order.status.toLowerCase()}" onchange="updateStatus('${order.orderId}', this.value)">
-                                <option value="Pending" ${order.status==='Pending'?'selected':''}>Pending</option>
-                                <option value="Processing" ${order.status==='Processing'?'selected':''}>Processing</option>
-                                <option value="Shipped" ${order.status==='Shipped'?'selected':''}>Shipped</option>
-                                <option value="Delivered" ${order.status==='Delivered'?'selected':''}>Delivered</option>
-                                <option value="Cancelled" ${order.status==='Cancelled'?'selected':''}>Cancelled</option>
+                            <select class="status-select status-${o.status.toLowerCase()}" onchange="updateStatus('${o.orderId}', this.value)">
+                                <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
                             </select>
                         </td>
-                        <td>${new Date(order.date).toLocaleDateString()}</td>
-                        <td><button class="admin-btn admin-btn-danger" onclick="deleteOrder('${order.orderId}')">Delete</button></td>
+                        <td>${new Date(o.date).toLocaleDateString()}</td>
+                        <td><button class="admin-btn admin-btn-danger" onclick="deleteOrder('${o.orderId}')">Delete</button></td>
                     </tr>`;
             });
             tbody.innerHTML = html;
@@ -101,10 +96,10 @@
         async function updateStatus(orderId, status) {
             const result = await updateOrderStatus(orderId, status);
             if (result.success) {
-                showNotification(`✅ Order ${orderId} updated to ${status}`, 'success');
+                showNotification(`✅ Order ${orderId} updated to ${status}`);
                 await loadOrders();
             } else {
-                showNotification(`❌ Failed to update: ${result.error}`, 'error');
+                showNotification(`❌ Failed: ${result.error}`, 'error');
             }
         }
         
@@ -112,14 +107,11 @@
             if (!confirm('Delete this order?')) return;
             const result = await deleteOrder(orderId);
             if (result.success) {
-                showNotification(`✅ Order ${orderId} deleted`, 'success');
+                showNotification(`✅ Order ${orderId} deleted`);
                 await loadOrders();
-            } else {
-                showNotification(`❌ Failed to delete: ${result.error}`, 'error');
             }
         }
         
-        async function refreshOrders() { await loadOrders(); showNotification('Orders refreshed', 'success'); }
         function logout() { sessionStorage.removeItem('adminLoggedIn'); window.location.href = 'login.html'; }
     </script>
 </body>
