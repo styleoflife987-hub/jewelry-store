@@ -1,3 +1,4 @@
+// js/cart.js
 let cart = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -50,7 +51,7 @@ window.addToCart = function(sku, name, price, image) {
     if (index >= 0) {
         cart[index].quantity = (cart[index].quantity || 1) + 1;
     } else {
-        cart.push({ sku, name, price, image: image || CONFIG.PLACEHOLDER_IMAGE, quantity: 1 });
+        cart.push({ sku, name, price, image: image || '', quantity: 1 });
     }
     
     saveCart();
@@ -114,12 +115,19 @@ function displayCart() {
         
         html += `
             <div class="cart-item">
-                <img src="${item.image}" alt="${item.name}">
-                <div><h4>${item.name}</h4><p>SKU: ${item.sku}</p></div>
-                <div>₹${item.price.toLocaleString()}</div>
-                <div><input type="number" value="${item.quantity}" min="1" max="10" onchange="updateQuantity('${item.sku}', this.value)"></div>
-                <div>₹${itemTotal.toLocaleString()}</div>
-                <button onclick="removeFromCart('${item.sku}')">Remove</button>
+                ${item.image ? `<img src="${item.image}" alt="${item.name}">` : '<div style="width:100px; height:100px; background:#f8f9fa;"></div>'}
+                <div>
+                    <h4>${item.name}</h4>
+                    <p style="color: #6c757d;">SKU: ${item.sku}</p>
+                </div>
+                <div style="color: var(--primary); font-weight: 600;">₹${item.price.toLocaleString()}</div>
+                <div>
+                    <input type="number" value="${item.quantity}" min="1" max="10" 
+                           onchange="updateQuantity('${item.sku}', this.value)"
+                           style="width: 60px; padding: 5px; border: 1px solid #dee2e6; border-radius: 4px;">
+                </div>
+                <div style="font-weight: 600;">₹${itemTotal.toLocaleString()}</div>
+                <button onclick="removeFromCart('${item.sku}')" style="background: none; border: none; color: var(--danger); cursor: pointer;">✕</button>
             </div>
         `;
     });
