@@ -1,515 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Products - Style Of Life</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/config.js"></script>
-    <script src="js/drive-upload.js"></script>
-    <style>
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            overflow-y: auto;
-            animation: fadeIn 0.3s ease;
-        }
+async function saveEdit() {
+    const id = document.getElementById('editProductId').value;
+    const sku = document.getElementById('editSku').value.trim();
+    const name = document.getElementById('editName').value.trim();
+    const category = document.getElementById('editCategory').value.trim();
+    const price = document.getElementById('editPrice').value.trim();
+    const stock = document.getElementById('editStock').value.trim();
+    const description = document.getElementById('editDescription').value.trim();
+    const imageFile = document.getElementById('editImage').files[0];
+    
+    if (!sku || !name || !category || !price || !stock) {
+        alert('Please fill all required fields');
+        return;
+    }
+    
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
+    const index = products.findIndex(p => p.id == id);
+    
+    if (index === -1) {
+        alert('Product not found');
+        closeEditModal();
+        return;
+    }
+    
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    
+    try {
+        let imageUrl = products[index].image;
         
-        .modal-content {
-            background: #1a1a1a;
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 30px;
-            border-radius: 15px;
-            border: 2px solid #d4af37;
-            position: relative;
-            animation: slideUp 0.3s ease;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #333;
-        }
-        
-        .modal-header h2 {
-            color: #d4af37;
-            margin: 0;
-        }
-        
-        .close-btn {
-            background: transparent;
-            color: #888;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            width: auto;
-            padding: 0 10px;
-        }
-        
-        .close-btn:hover {
-            color: #f44336;
-        }
-        
-        .current-image {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 8px;
-            border: 2px solid #d4af37;
-            margin: 10px 0;
-        }
-        
-        .image-preview {
-            margin-top: 10px;
-        }
-        
-        .image-preview img {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 8px;
-            border: 2px solid #d4af37;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .modal-actions button {
-            flex: 1;
-            padding: 12px;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="logo">✨ STYLE OF LIFE - PRODUCTS</div>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="admin.html">Dashboard</a>
-            <a href="admin-products.html" class="active">Products</a>
-            <a href="admin-orders.html">Orders</a>
-            <a href="#" onclick="logout()">Logout</a>
-        </nav>
-    </header>
-
-    <div class="admin-container">
-        <h1 class="page-title">Product Management</h1>
-        
-        <!-- Edit Product Modal -->
-        <div id="editModal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>✏️ Edit Product</h2>
-                    <button class="close-btn" onclick="closeEditModal()">&times;</button>
-                </div>
-                
-                <input type="hidden" id="editProductId">
-                
-                <div class="form-group">
-                    <label for="editSku">SKU *</label>
-                    <input type="text" id="editSku" placeholder="e.g., SKU001" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editName">Product Name *</label>
-                    <input type="text" id="editName" placeholder="e.g., Gold Necklace" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editCategory">Category *</label>
-                    <input type="text" id="editCategory" placeholder="e.g., Necklaces" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editPrice">Price (₹) *</label>
-                    <input type="number" id="editPrice" placeholder="e.g., 25000" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editStock">Stock Quantity *</label>
-                    <input type="number" id="editStock" placeholder="e.g., 10" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editDescription">Description</label>
-                    <textarea id="editDescription" rows="2" placeholder="Product description"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Current Image</label>
-                    <img id="editCurrentImage" class="current-image" src="" alt="Current product image">
-                </div>
-                
-                <div class="form-group">
-                    <label for="editImage">Upload New Image (optional)</label>
-                    <input type="file" id="editImage" accept="image/*" style="background: transparent; border: none; padding: 0;">
-                    <div id="editImagePreview" class="image-preview"></div>
-                </div>
-                
-                <div class="modal-actions">
-                    <button onclick="saveEdit()" class="submit-btn" style="background: #4CAF50;">💾 Save Changes</button>
-                    <button onclick="closeEditModal()" class="submit-btn" style="background: #666;">❌ Cancel</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Add Product Form -->
-        <div class="add-product-form">
-            <h2>Add New Product</h2>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="sku">SKU *</label>
-                    <input type="text" id="sku" placeholder="e.g., SKU001" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="name">Product Name *</label>
-                    <input type="text" id="name" placeholder="e.g., Gold Necklace" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="category">Category *</label>
-                    <input type="text" id="category" placeholder="e.g., Necklaces" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="price">Price (₹) *</label>
-                    <input type="number" id="price" placeholder="e.g., 25000" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="stock">Stock Quantity *</label>
-                    <input type="number" id="stock" placeholder="e.g., 10" value="10" required>
-                </div>
-                
-                <div class="form-group full-width">
-                    <label for="description">Description</label>
-                    <textarea id="description" rows="2" placeholder="Product description"></textarea>
-                </div>
-                
-                <div class="form-group full-width">
-                    <label>Product Image *</label>
-                    <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-                        <input type="file" id="productImage" accept="image/*" style="width: auto; background: transparent; border: none;" required>
-                        <div id="imagePreview" class="image-preview"></div>
-                    </div>
-                    <p style="color: #888; font-size: 12px; margin-top: 5px;">Upload image to Google Drive (JPG, PNG, GIF)</p>
-                </div>
-            </div>
-            
-            <div style="display: flex; gap: 10px;">
-                <button onclick="addProduct()" class="submit-btn" id="addProductBtn">
-                    ➕ Add Product
-                </button>
-                <button onclick="clearForm()" class="submit-btn" style="background: #666;">
-                    🗑️ Clear Form
-                </button>
-            </div>
-        </div>
-        
-        <!-- Products List -->
-        <div class="products-list-section">
-            <h2>Current Products</h2>
-            <div id="productsList" class="products-grid-admin">
-                <p>Loading products...</p>
-            </div>
-        </div>
-    </div>
-
-    <footer>
-        <p>© 2026 Style Of Life Jewelry - Product Management</p>
-    </footer>
-
-    <script>
-        if (!sessionStorage.getItem('adminLoggedIn')) {
-            window.location.href = 'login.html';
-        }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProducts();
-            
-            // File input preview for add form
-            document.getElementById('productImage').addEventListener('change', function(e) {
-                if (e.target.files[0]) {
-                    createImagePreview(e.target.files[0], 'imagePreview');
-                }
-            });
-            
-            // File input preview for edit form
-            document.getElementById('editImage').addEventListener('change', function(e) {
-                if (e.target.files[0]) {
-                    createImagePreview(e.target.files[0], 'editImagePreview');
-                }
-            });
-        });
-        
-        function loadProducts() {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            displayProducts(products);
-        }
-        
-        function displayProducts(products) {
-            const container = document.getElementById('productsList');
-            
-            if (products.length === 0) {
-                container.innerHTML = '<p>No products found. Add your first product above.</p>';
-                return;
-            }
-            
-            let html = '';
-            products.forEach(product => {
-                html += `
-                    <div class="product-card-admin" data-product-id="${product.id}">
-                        <div style="display: flex; gap: 20px; width: 100%;">
-                            <img src="${product.image || CONFIG.PLACEHOLDER_IMAGE}" 
-                                 style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #d4af37;"
-                                 onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
-                            <div class="product-card-info" style="flex: 1;">
-                                <h4>${product.name}</h4>
-                                <p class="product-sku">SKU: ${product.sku}</p>
-                                <p class="product-category">${product.category}</p>
-                                <p class="product-price">₹${Number(product.price).toLocaleString('en-IN')}</p>
-                                <p class="product-stock">Stock: ${product.stock}</p>
-                                ${product.image ? '<p style="color: #4CAF50; font-size: 12px;">✅ Image in Drive</p>' : ''}
-                            </div>
-                            <div class="product-card-actions">
-                                <button onclick="editProduct('${product.id}')" class="edit-btn" style="background: #2196f3; width: auto; padding: 8px 15px; margin-bottom: 5px;">✏️ Edit</button>
-                                <button onclick="deleteProduct('${product.id}')" class="delete-btn" style="width: auto; padding: 8px 15px;">🗑️ Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-        
-        function clearForm() {
-            document.getElementById('sku').value = '';
-            document.getElementById('name').value = '';
-            document.getElementById('category').value = '';
-            document.getElementById('price').value = '';
-            document.getElementById('stock').value = '10';
-            document.getElementById('description').value = '';
-            document.getElementById('productImage').value = '';
-            document.getElementById('imagePreview').innerHTML = '';
-        }
-        
-        // Edit Product Functions
-        function editProduct(id) {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const product = products.find(p => p.id == id);
-            
-            if (!product) {
-                alert('Product not found');
-                return;
-            }
-            
-            // Fill the edit form
-            document.getElementById('editProductId').value = product.id;
-            document.getElementById('editSku').value = product.sku || '';
-            document.getElementById('editName').value = product.name || '';
-            document.getElementById('editCategory').value = product.category || '';
-            document.getElementById('editPrice').value = product.price || '';
-            document.getElementById('editStock').value = product.stock || '';
-            document.getElementById('editDescription').value = product.description || '';
-            document.getElementById('editCurrentImage').src = product.image || CONFIG.PLACEHOLDER_IMAGE;
-            
-            // Clear preview
-            document.getElementById('editImagePreview').innerHTML = '';
-            document.getElementById('editImage').value = '';
-            
-            // Show modal
-            document.getElementById('editModal').style.display = 'block';
-        }
-        
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-        }
-        
-        async function saveEdit() {
-            const id = document.getElementById('editProductId').value;
-            const sku = document.getElementById('editSku').value.trim();
-            const name = document.getElementById('editName').value.trim();
-            const category = document.getElementById('editCategory').value.trim();
-            const price = document.getElementById('editPrice').value.trim();
-            const stock = document.getElementById('editStock').value.trim();
-            const description = document.getElementById('editDescription').value.trim();
-            const imageFile = document.getElementById('editImage').files[0];
-            
-            // Validate required fields
-            if (!sku || !name || !category || !price || !stock) {
-                alert('Please fill all required fields');
-                return;
-            }
-            
-            // Get existing products
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const index = products.findIndex(p => p.id == id);
-            
-            if (index === -1) {
-                alert('Product not found');
-                closeEditModal();
-                return;
-            }
-            
-            const btn = event.target;
-            const originalText = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = 'Saving...';
-            
-            try {
-                let imageUrl = products[index].image;
-                
-                // Upload new image if selected
-                if (imageFile) {
-                    btn.textContent = 'Uploading image...';
-                    const uploadResult = await uploadImageToDrive(imageFile);
-                    
-                    if (uploadResult.success) {
-                        imageUrl = uploadResult.directUrl;
-                    } else {
-                        throw new Error('Image upload failed');
-                    }
-                }
-                
-                // Update product
-                products[index] = {
-                    ...products[index],
-                    sku: sku,
-                    name: name,
-                    category: category,
-                    price: Number(price),
-                    stock: Number(stock),
-                    description: description || '',
-                    image: imageUrl
-                };
-                
-                // Save to localStorage
-                localStorage.setItem('products', JSON.stringify(products));
-                
-                alert('✅ Product updated successfully!');
-                closeEditModal();
-                loadProducts();
-                
-            } catch (error) {
-                console.error('Save error:', error);
-                alert('Error saving product: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = originalText;
-            }
-        }
-        
-        async function addProduct() {
-            const sku = document.getElementById('sku').value.trim();
-            const name = document.getElementById('name').value.trim();
-            const category = document.getElementById('category').value.trim();
-            const price = document.getElementById('price').value.trim();
-            const stock = document.getElementById('stock').value.trim();
-            const description = document.getElementById('description').value.trim();
-            const imageFile = document.getElementById('productImage').files[0];
-            
-            if (!sku || !name || !category || !price || !stock) {
-                alert('Please fill all required fields');
-                return;
-            }
-            
-            if (!imageFile) {
-                alert('Please select an image to upload');
-                return;
-            }
-            
-            const btn = document.getElementById('addProductBtn');
-            const originalText = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = 'Uploading image to Drive...';
-            
+        // Upload new image if selected
+        if (imageFile) {
+            btn.textContent = 'Uploading image...';
             try {
                 const uploadResult = await uploadImageToDrive(imageFile);
-                
-                if (!uploadResult.success) {
-                    throw new Error('Image upload failed');
+                if (uploadResult && uploadResult.success) {
+                    imageUrl = uploadResult.directUrl;
+                } else {
+                    throw new Error(uploadResult?.error || 'Image upload failed');
                 }
-                
-                btn.textContent = 'Saving product...';
-                
-                const newProduct = {
-                    id: Date.now(),
-                    sku: sku,
-                    name: name,
-                    category: category,
-                    price: Number(price),
-                    stock: Number(stock),
-                    description: description || '',
-                    image: uploadResult.directUrl,
-                    driveFileId: uploadResult.fileId,
-                    driveUrl: uploadResult.fileUrl
-                };
-                
-                const products = JSON.parse(localStorage.getItem('products') || '[]');
-                products.push(newProduct);
-                localStorage.setItem('products', JSON.stringify(products));
-                
-                alert('✅ Product added successfully! Image saved to Google Drive.');
-                clearForm();
-                loadProducts();
-                
-            } catch (error) {
-                console.error('Upload error:', error);
-                alert('Error: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = originalText;
+            } catch (uploadError) {
+                console.error('Upload error:', uploadError);
+                alert('Image upload failed: ' + uploadError.message + '\nProduct will be updated without changing image.');
+                // Continue with old image
             }
         }
         
-        function deleteProduct(id) {
-            if (!confirm('Delete this product?')) return;
-            
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const updatedProducts = products.filter(p => p.id != id);
-            localStorage.setItem('products', JSON.stringify(updatedProducts));
-            
-            alert('✅ Product deleted');
-            loadProducts();
-        }
+        // Update product
+        products[index] = {
+            ...products[index],
+            sku: sku,
+            name: name,
+            category: category,
+            price: Number(price),
+            stock: Number(stock),
+            description: description || '',
+            image: imageUrl
+        };
         
-        function logout() {
-            sessionStorage.removeItem('adminLoggedIn');
-            window.location.href = 'login.html';
-        }
+        localStorage.setItem('products', JSON.stringify(products));
         
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('editModal');
-            if (event.target == modal) {
-                closeEditModal();
-            }
-        }
-    </script>
-</body>
-</html>
+        alert('✅ Product updated successfully!');
+        closeEditModal();
+        loadProducts();
+        
+    } catch (error) {
+        console.error('Save error:', error);
+        alert('Error saving product: ' + error.message);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+}
