@@ -5,17 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Management - Style Of Life</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #d4af37; --primary-dark: #b8962e; --dark: #1a1a1a; --darker: #0a0a0a; --light: #ffffff; --gray-100: #f8f9fa; --gray-200: #e9ecef; --gray-600: #6c757d; --danger: #dc3545; }
+        body { font-family: 'Inter', sans-serif; background: var(--gray-100); }
+        header { background: var(--darker); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 600; color: var(--primary); }
+        .logo span { background: var(--primary); color: var(--darker); padding: 4px 8px; border-radius: 4px; font-size: 14px; }
+        nav a { color: #aaa; text-decoration: none; margin-left: 20px; padding: 8px 15px; border-radius: 6px; }
+        nav a:hover, nav a.active { background: rgba(212,175,55,0.1); color: var(--primary); }
+        .container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: var(--primary); margin-bottom: 30px; }
+        .toolbar { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .btn { background: var(--primary); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .form-card { background: white; border-radius: 12px; padding: 30px; margin-bottom: 30px; border: 1px solid var(--gray-200); }
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid var(--gray-200); border-radius: 8px; }
         .image-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 15px 0; }
-        .image-slot { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; padding: 8px; text-align: center; }
-        .url-input { width: 100%; padding: 6px; font-size: 11px; border: 1px solid #dee2e6; border-radius: 4px; }
+        .image-slot { background: var(--gray-100); border: 1px solid var(--gray-200); border-radius: 6px; padding: 8px; text-align: center; }
+        .image-slot input { width: 100%; padding: 5px; font-size: 11px; margin-top: 5px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--gray-200); }
+        .product-card img { width: 100%; height: 180px; object-fit: cover; }
+        .product-card-info { padding: 15px; }
+        .product-card-info h4 { margin-bottom: 5px; }
+        .product-price { color: var(--primary); font-weight: bold; margin: 10px 0; }
+        .delete-btn { background: var(--danger); color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; }
+        footer { background: var(--darker); color: white; text-align: center; padding: 30px; margin-top: 60px; }
     </style>
 </head>
-<body class="admin">
-    <header class="admin-header">
-        <div class="admin-logo">STYLE OF LIFE <span>ADMIN</span></div>
-        <nav class="admin-nav">
+<body>
+    <header>
+        <div class="logo">STYLE OF LIFE <span>ADMIN</span></div>
+        <nav>
             <a href="admin.html">Dashboard</a>
             <a href="admin-products.html" class="active">Products</a>
             <a href="admin-orders.html">Orders</a>
@@ -23,113 +46,130 @@
         </nav>
     </header>
 
-    <div class="admin-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h1 style="color: var(--primary);">Product Management</h1>
-            <button class="admin-btn admin-btn-primary" onclick="showAddForm()">+ Add Product</button>
+    <div class="container">
+        <h1>Product Management</h1>
+        
+        <div class="toolbar">
+            <button class="btn" onclick="toggleForm()">+ Add New Product</button>
         </div>
-
-        <div id="addForm" class="admin-card" style="display: none;">
-            <h2>Add New Product</h2>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="sku" class="admin-input" placeholder="SKU *">
-                <input type="text" id="name" class="admin-input" placeholder="Name *">
-                <input type="text" id="category" class="admin-input" placeholder="Category *">
+        
+        <div id="addForm" class="form-card" style="display: none;">
+            <h2 style="margin-bottom: 20px;">Add New Product</h2>
+            <div class="form-grid">
+                <input type="text" id="sku" placeholder="SKU *">
+                <input type="text" id="name" placeholder="Product Name *">
+                <input type="text" id="category" placeholder="Category *">
             </div>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px;">
-                <input type="number" id="price" class="admin-input" placeholder="Price *">
-                <input type="number" id="stock" class="admin-input" placeholder="Stock *">
+            <div class="form-grid">
+                <input type="number" id="price" placeholder="Price *">
+                <input type="number" id="stock" placeholder="Stock *">
             </div>
-            <textarea id="description" class="admin-input" placeholder="Description" rows="2"></textarea>
+            <textarea id="description" rows="2" placeholder="Description"></textarea>
+            
+            <h3 style="margin: 15px 0;">Image URLs (5 images)</h3>
             <div class="image-grid">
-                <div class="image-slot"><input type="url" id="img1" class="url-input" placeholder="Image 1 URL"></div>
-                <div class="image-slot"><input type="url" id="img2" class="url-input" placeholder="Image 2 URL"></div>
-                <div class="image-slot"><input type="url" id="img3" class="url-input" placeholder="Image 3 URL"></div>
-                <div class="image-slot"><input type="url" id="img4" class="url-input" placeholder="Image 4 URL"></div>
-                <div class="image-slot"><input type="url" id="img5" class="url-input" placeholder="Image 5 URL"></div>
+                <div class="image-slot">Image 1<br><input type="url" id="img1" placeholder="https://..."></div>
+                <div class="image-slot">Image 2<br><input type="url" id="img2" placeholder="https://..."></div>
+                <div class="image-slot">Image 3<br><input type="url" id="img3" placeholder="https://..."></div>
+                <div class="image-slot">Image 4<br><input type="url" id="img4" placeholder="https://..."></div>
+                <div class="image-slot">Image 5<br><input type="url" id="img5" placeholder="https://..."></div>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="admin-btn admin-btn-primary" onclick="saveProduct()">Save</button>
-                <button class="admin-btn admin-btn-danger" onclick="hideAddForm()">Cancel</button>
-            </div>
+            
+            <button class="btn" onclick="saveProduct()" style="margin-top: 15px;">Save Product</button>
+            <button class="btn" onclick="toggleForm()" style="background: #6c757d; margin-top: 10px;">Cancel</button>
         </div>
-
-        <div id="productsGrid" class="admin-product-grid"></div>
+        
+        <div id="productsGrid" class="product-grid"></div>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
+    <footer><p>© 2026 STYLE OF LIFE</p></footer>
+
     <script>
         if (!sessionStorage.getItem('adminLoggedIn')) window.location.href = 'login.html';
         
-        document.addEventListener('DOMContentLoaded', loadProducts);
-        
-        async function loadProducts() {
-            const products = await getProducts();
-            displayProducts(products);
-        }
-        
-        function displayProducts(products) {
+        function loadProducts() {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
             const grid = document.getElementById('productsGrid');
-            if (!products || products.length === 0) {
-                grid.innerHTML = '<div style="text-align:center; padding:50px;">No products found</div>';
+            
+            if (products.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; padding:50px;">No products found</p>';
                 return;
             }
             
             let html = '';
             products.forEach(p => {
-                const img = (p.images?.[0]) || 'https://via.placeholder.com/300x200?text=No+Image';
+                const img = p.image || 'https://via.placeholder.com/300x200?text=No+Image';
                 html += `
-                    <div class="admin-product-card">
-                        <img src="${img}" class="admin-product-image" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
-                        <div class="admin-product-info">
+                    <div class="product-card">
+                        <img src="${img}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                        <div class="product-card-info">
                             <h4>${p.name}</h4>
                             <div style="color:#6c757d;">${p.sku} | ${p.category}</div>
-                            <div class="admin-product-price">₹${Number(p.price).toLocaleString()}</div>
+                            <div class="product-price">₹${Number(p.price).toLocaleString()}</div>
                             <div>Stock: ${p.stock}</div>
-                            <div style="display:flex; gap:10px; margin-top:10px;">
-                                <button class="admin-btn admin-btn-danger" onclick="deleteProduct('${p.id}')">Delete</button>
-                            </div>
+                            <button class="delete-btn" onclick="deleteProduct(${p.id})">Delete</button>
                         </div>
-                    </div>`;
+                    </div>
+                `;
             });
             grid.innerHTML = html;
         }
         
-        function showAddForm() { document.getElementById('addForm').style.display = 'block'; }
-        function hideAddForm() { document.getElementById('addForm').style.display = 'none'; }
-        
-        async function saveProduct() {
-            const product = {
-                sku: document.getElementById('sku').value,
-                name: document.getElementById('name').value,
-                category: document.getElementById('category').value,
-                price: document.getElementById('price').value,
-                stock: document.getElementById('stock').value,
-                description: document.getElementById('description').value,
-                images: [1,2,3,4,5].map(i => document.getElementById(`img${i}`).value)
-            };
-            
-            const result = await addProduct(product);
-            if (result.success) {
-                alert('Product added!');
-                hideAddForm();
-                await loadProducts();
-            } else {
-                alert('Failed: ' + result.error);
-            }
+        function toggleForm() {
+            const form = document.getElementById('addForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
         }
         
-        async function deleteProduct(id) {
-            if (!confirm('Delete this product?')) return;
-            const result = await deleteProduct(id);
-            if (result.success) {
-                alert('Product deleted');
-                await loadProducts();
+        function saveProduct() {
+            const sku = document.getElementById('sku').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const category = document.getElementById('category').value.trim();
+            const price = document.getElementById('price').value.trim();
+            const stock = document.getElementById('stock').value.trim();
+            
+            if (!sku || !name || !category || !price || !stock) {
+                alert('Please fill all required fields');
+                return;
             }
+            
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            const newProduct = {
+                id: Date.now(),
+                sku: sku,
+                name: name,
+                category: category,
+                price: Number(price),
+                stock: Number(stock),
+                description: document.getElementById('description').value.trim() || '',
+                image: document.getElementById('img1').value.trim() || 'https://via.placeholder.com/300x200?text=No+Image',
+                images: [1,2,3,4,5].map(i => document.getElementById(`img${i}`).value.trim())
+            };
+            
+            products.push(newProduct);
+            localStorage.setItem('products', JSON.stringify(products));
+            
+            alert('Product added!');
+            toggleForm();
+            loadProducts();
+            
+            // Clear form
+            ['sku','name','category','price','stock','description','img1','img2','img3','img4','img5'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+        }
+        
+        function deleteProduct(id) {
+            if (!confirm('Delete this product?')) return;
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            const filtered = products.filter(p => p.id !== id);
+            localStorage.setItem('products', JSON.stringify(filtered));
+            loadProducts();
+            alert('Product deleted');
         }
         
         function logout() { sessionStorage.removeItem('adminLoggedIn'); window.location.href = 'login.html'; }
+        
+        document.addEventListener('DOMContentLoaded', loadProducts);
     </script>
 </body>
 </html>
