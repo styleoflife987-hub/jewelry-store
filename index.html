@@ -105,26 +105,6 @@
         .nav-arrow.right {
             right: 10px;
         }
-        
-        .no-images {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #888;
-            font-size: 14px;
-        }
-
-        .debug-info {
-            background: #1a1a1a;
-            color: #888;
-            padding: 10px;
-            margin: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -137,20 +117,12 @@
         </nav>
     </header>
 
-    <!-- Debug Info (hidden by default) -->
-    <div id="debugInfo" class="debug-info"></div>
-
     <div class="hero">
         <h1>Luxury Jewelry Collection</h1>
         <p>Discover Premium Handcrafted Jewelry</p>
     </div>
 
-    <div class="products" id="products">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Loading products...</p>
-        </div>
-    </div>
+    <div class="products" id="products"></div>
 
     <footer>
         <p>© 2026 Style Of Life Jewelry. All rights reserved.</p>
@@ -159,51 +131,33 @@
     <script src="js/config.js"></script>
     <script src="js/cart.js"></script>
     <script>
-        // Main app code
         let products = [];
+        let galleryData = {};
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ Customer portal loaded');
             loadProducts();
             updateCartCount();
         });
 
         function loadProducts() {
             const container = document.getElementById('products');
-            const debugDiv = document.getElementById('debugInfo');
             
             try {
-                // Load products from localStorage
                 const storedProducts = localStorage.getItem('products');
-                console.log('Raw products from localStorage:', storedProducts);
                 
                 if (storedProducts) {
                     products = JSON.parse(storedProducts);
-                    console.log('Parsed products:', products);
                     
                     if (products.length > 0) {
-                        console.log(`✅ Loaded ${products.length} products`);
                         displayProducts(products);
                     } else {
-                        console.log('⚠️ No products found in localStorage');
                         container.innerHTML = '<div class="error-message">No products available. Please check back later.</div>';
                     }
                 } else {
-                    console.log('⚠️ No products key in localStorage');
                     container.innerHTML = '<div class="error-message">No products found. Please add products in admin panel.</div>';
                 }
-                
-                // Show debug info (remove in production)
-                debugDiv.style.display = 'block';
-                debugDiv.innerHTML = `
-                    <strong>Debug Info:</strong><br>
-                    Products in storage: ${products.length}<br>
-                    First product: ${products[0] ? products[0].name : 'None'}<br>
-                    Last updated: ${new Date().toLocaleTimeString()}
-                `;
-                
             } catch (error) {
-                console.error('❌ Error loading products:', error);
+                console.error('Error loading products:', error);
                 container.innerHTML = '<div class="error-message">Error loading products. Please refresh the page.</div>';
             }
         }
@@ -224,14 +178,9 @@
                 const stock = Number(product.stock) || 0;
                 const sku = product.sku || `SKU${product.id}`;
                 
-                // Get images array (ensure 5 slots)
                 const images = product.images || Array(5).fill('');
-                
-                // Filter out empty URLs
                 const validImages = images.filter(url => url && url.trim() !== '');
                 const hasImages = validImages.length > 0;
-                
-                // Use first valid image or placeholder
                 const mainImage = validImages[0] || CONFIG.PLACEHOLDER_IMAGE;
                 
                 html += `
@@ -263,7 +212,6 @@
                                 <img src="${CONFIG.PLACEHOLDER_IMAGE}" 
                                      class="gallery-main"
                                      alt="${product.name}">
-                                <div class="no-images">No images available</div>
                             `}
                         </div>
                         
@@ -288,20 +236,19 @@
             container.innerHTML = html;
             
             // Initialize gallery data
-            window.galleryData = {};
+            galleryData = {};
             products.forEach(product => {
-                window.galleryData[product.id] = {
+                galleryData[product.id] = {
                     currentIndex: 0,
                     images: (product.images || []).filter(url => url && url.trim() !== '')
                 };
             });
         }
 
-        // Gallery functions
         window.changeImage = function(productId, direction) {
-            if (!window.galleryData || !window.galleryData[productId]) return;
+            if (!galleryData[productId]) return;
             
-            const gallery = window.galleryData[productId];
+            const gallery = galleryData[productId];
             if (gallery.images.length === 0) return;
             
             let newIndex = gallery.currentIndex + direction;
@@ -312,83 +259,25 @@
         };
 
         window.setMainImage = function(productId, index) {
-            if (!window.galleryData || !window.galleryData[productId]) return;
+            if (!galleryData[productId]) return;
             
-            const gallery = window.galleryData[productId];
+            const gallery = galleryData[productId];
             if (!gallery.images[index]) return;
             
-            // Update main image
             const mainImg = document.getElementById(`main-${productId}`);
-            if (mainImg) {
-                mainImg.src = gallery.images[index];
-            }
+            if (mainImg) mainImg.src = gallery.images[index];
             
-            // Update counter
             const counter = document.getElementById(`counter-${productId}`);
-            if (counter) {
-                counter.textContent = `${index + 1} / ${gallery.images.length}`;
-            }
+            if (counter) counter.textContent = `${index + 1} / ${gallery.images.length}`;
             
-            // Update thumbnails
             const thumbnails = document.querySelectorAll(`#gallery-${productId} .thumbnail`);
             thumbnails.forEach((thumb, idx) => {
-                if (idx === index) {
-                    thumb.classList.add('active');
-                } else {
-                    thumb.classList.remove('active');
-                }
+                if (idx === index) thumb.classList.add('active');
+                else thumb.classList.remove('active');
             });
             
-            // Update current index
             gallery.currentIndex = index;
         };
-
-        // Add to cart function
-        window.addToCart = function(sku, name, price, image) {
-            if (!sku) {
-                alert('Error: Invalid product');
-                return false;
-            }
-            
-            price = Number(price);
-            if (isNaN(price) || price <= 0) {
-                alert('Error: Invalid price');
-                return false;
-            }
-            
-            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            
-            const existingIndex = cart.findIndex(item => item.sku === sku);
-            
-            if (existingIndex >= 0) {
-                cart[existingIndex].quantity = (cart[existingIndex].quantity || 1) + 1;
-            } else {
-                cart.push({
-                    sku: sku,
-                    name: name || 'Product',
-                    price: price,
-                    image: image || CONFIG.PLACEHOLDER_IMAGE,
-                    quantity: 1
-                });
-            }
-            
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartCount();
-            alert(`${name} added to cart!`);
-            return true;
-        };
-
-        function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
-            
-            document.querySelectorAll('.cart-count, #cartCount').forEach(el => {
-                if (el) {
-                    el.textContent = count;
-                    el.style.display = count > 0 ? 'inline-block' : 'none';
-                }
-            });
-        }
     </script>
 </body>
 </html>
