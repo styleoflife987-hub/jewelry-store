@@ -13,7 +13,6 @@
             gap: 10px;
             margin: 15px 0;
         }
-        
         .image-slot {
             background: var(--gray-100);
             border: 2px dashed var(--gray-300);
@@ -21,18 +20,6 @@
             padding: 10px;
             text-align: center;
         }
-        
-        .image-slot:hover {
-            border-color: var(--primary);
-        }
-        
-        .image-slot label {
-            display: block;
-            font-size: 12px;
-            color: var(--gray-600);
-            margin-bottom: 8px;
-        }
-        
         .url-input {
             width: 100%;
             padding: 8px;
@@ -40,12 +27,15 @@
             border-radius: var(--radius-sm);
             font-size: 12px;
         }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
+        .sync-status {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
@@ -58,12 +48,16 @@
             <a href="admin.html">Dashboard</a>
             <a href="admin-products.html" class="active">Products</a>
             <a href="admin-orders.html">Orders</a>
-            <a href="admin-design.html">Design</a>
             <a href="#" onclick="logout()">Logout</a>
         </nav>
     </header>
 
     <div class="admin-container">
+        <div class="sync-status" id="syncStatus">
+            <span>🟢 Connected to Cloud</span>
+            <button class="admin-btn admin-btn-primary" onclick="syncNow()" style="padding: 5px 15px;">Sync Now</button>
+        </div>
+        
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <h1 style="color: var(--primary);">Product Management</h1>
             <button class="admin-btn admin-btn-primary" onclick="showAddForm()">➕ Add New Product</button>
@@ -73,18 +67,18 @@
         <div id="addForm" class="admin-card" style="display: none;">
             <h2 style="color: var(--primary); margin-bottom: 20px;">Add New Product</h2>
             
-            <div class="form-row">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px;">
                 <input type="text" id="newSku" class="admin-input" placeholder="SKU">
                 <input type="text" id="newName" class="admin-input" placeholder="Product Name">
                 <input type="text" id="newCategory" class="admin-input" placeholder="Category">
             </div>
             
-            <div class="form-row">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
                 <input type="number" id="newPrice" class="admin-input" placeholder="Price">
                 <input type="number" id="newStock" class="admin-input" placeholder="Stock">
             </div>
             
-            <div class="form-row">
+            <div style="margin-bottom: 15px;">
                 <textarea id="newDescription" class="admin-input" placeholder="Description" rows="3"></textarea>
             </div>
             
@@ -123,25 +117,31 @@
     </div>
 
     <script src="js/config.js"></script>
-    <script src="js/data.js"></script>
-    
+    <script src="js/cloud-sync.js"></script>
     <script>
         if (!sessionStorage.getItem('adminLoggedIn')) {
             window.location.href = 'login.html';
         }
 
-        document.addEventListener('DOMContentLoaded', loadProducts);
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadProducts();
+        });
 
-        function loadProducts() {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            displayProducts(products);
+        async function loadProducts() {
+            const products = await loadProductsFromCloud();
+            if (products) {
+                displayProducts(products);
+            } else {
+                const localProducts = JSON.parse(localStorage.getItem('products') || '[]');
+                displayProducts(localProducts);
+            }
         }
 
         function displayProducts(products) {
             const grid = document.getElementById('productsGrid');
             
             if (products.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 100px; color: var(--gray-600);">No products found. Click "Add New Product" to get started.</div>';
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 100px;">No products found. Click "Add New Product" to get started.</div>';
                 return;
             }
             
@@ -157,11 +157,9 @@
                         <div class="admin-product-info">
                             <h4>${product.name}</h4>
                             <div class="admin-product-sku">SKU: ${product.sku}</div>
-                            <div style="color: var(--gray-600); font-size: 14px;">${product.category}</div>
+                            <div style="color: var(--gray-600);">${product.category}</div>
                             <div class="admin-product-price">₹${Number(product.price).toLocaleString('en-IN')}</div>
-                            <div style="margin: 10px 0; color: ${product.stock > 0 ? 'var(--success)' : 'var(--danger)'};">
-                                Stock: ${product.stock}
-                            </div>
+                            <div style="margin: 10px 0; color: ${product.stock > 0 ? 'var(--success)' : 'var(--danger)'};">Stock: ${product.stock}</div>
                             <div style="display: flex; gap: 10px;">
                                 <button class="admin-btn admin-btn-primary" onclick="editProduct('${product.id}')" style="flex: 1;">Edit</button>
                                 <button class="admin-btn admin-btn-danger" onclick="deleteProduct('${product.id}')" style="flex: 1;">Delete</button>
@@ -181,13 +179,13 @@
 
         function hideAddForm() {
             document.getElementById('addForm').style.display = 'none';
-            // Clear form
             ['newSku','newName','newCategory','newPrice','newStock','newDescription','newImg1','newImg2','newImg3','newImg4','newImg5'].forEach(id => {
-                document.getElementById(id).value = '';
+                const el = document.getElementById(id);
+                if (el) el.value = '';
             });
         }
 
-        function saveNewProduct() {
+        async function saveNewProduct() {
             const sku = document.getElementById('newSku').value.trim();
             const name = document.getElementById('newName').value.trim();
             const category = document.getElementById('newCategory').value.trim();
@@ -207,6 +205,7 @@
                 document.getElementById('newImg5').value.trim()
             ];
             
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
             const newProduct = {
                 id: Date.now(),
                 sku: sku,
@@ -217,28 +216,50 @@
                 description: document.getElementById('newDescription').value.trim() || '',
                 images: images
             };
-            
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
             products.push(newProduct);
             localStorage.setItem('products', JSON.stringify(products));
             
-            hideAddForm();
-            loadProducts();
-            alert('✅ Product added successfully!');
+            // Save to cloud
+            const saved = await saveProductsToCloud();
+            if (saved) {
+                alert('✅ Product added to cloud successfully!');
+                hideAddForm();
+                await loadProducts();
+            } else {
+                alert('⚠️ Product saved locally only. Cloud sync failed.');
+            }
         }
 
-        function editProduct(id) {
-            alert('Edit functionality - would open edit modal in production');
-        }
-
-        function deleteProduct(id) {
+        async function deleteProduct(id) {
             if (confirm('Delete this product?')) {
                 const products = JSON.parse(localStorage.getItem('products') || '[]');
                 const updatedProducts = products.filter(p => p.id != id);
                 localStorage.setItem('products', JSON.stringify(updatedProducts));
-                loadProducts();
+                
+                await saveProductsToCloud();
+                await loadProducts();
                 alert('✅ Product deleted');
             }
+        }
+
+        async function syncNow() {
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.innerHTML = '<span>🔄 Syncing...</span><button class="admin-btn admin-btn-primary" onclick="syncNow()" disabled>Syncing...</button>';
+            
+            const saved = await saveProductsToCloud();
+            await loadProducts();
+            
+            if (saved) {
+                statusDiv.innerHTML = '<span>🟢 Connected to Cloud</span><button class="admin-btn admin-btn-primary" onclick="syncNow()">Sync Now</button>';
+                alert('✅ Products synced to cloud successfully!');
+            } else {
+                statusDiv.innerHTML = '<span>🔴 Cloud connection failed</span><button class="admin-btn admin-btn-primary" onclick="syncNow()">Retry Sync</button>';
+                alert('⚠️ Cloud sync failed. Check your internet connection.');
+            }
+        }
+
+        function editProduct(id) {
+            alert('Edit functionality - would open edit modal in production');
         }
 
         function logout() {
