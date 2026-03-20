@@ -29,15 +29,15 @@
     <div class="admin-container">
         <div class="sync-status" style="background:#e8f5e9; margin-bottom:20px;">
             <span>🟢 Orders synced with cloud</span>
-            <button class="admin-btn admin-btn-primary" onclick="refreshOrders()">🔄 Refresh</button>
+            <button class="admin-btn admin-btn-primary" onclick="refreshOrders()">Refresh</button>
         </div>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
             <h1 style="color: var(--primary);">Order Management</h1>
-            <div class="admin-stats-grid" style="grid-template-columns: repeat(3, 1fr); gap: 15px; width: auto;">
-                <div class="admin-stat-card" style="padding: 15px;"><div class="admin-stat-info"><h3>Total Orders</h3><div class="stat-number" id="totalOrders">0</div></div></div>
-                <div class="admin-stat-card" style="padding: 15px;"><div class="admin-stat-info"><h3>Revenue</h3><div class="stat-number" id="totalRevenue">₹0</div></div></div>
-                <div class="admin-stat-card" style="padding: 15px;"><div class="admin-stat-info"><h3>Pending</h3><div class="stat-number" id="pendingOrders">0</div></div></div>
+            <div style="display: flex; gap: 15px;">
+                <div class="admin-stat-card" style="padding: 10px 20px;"><div class="admin-stat-info"><h3>Total</h3><div class="stat-number" id="totalOrders">0</div></div></div>
+                <div class="admin-stat-card" style="padding: 10px 20px;"><div class="admin-stat-info"><h3>Revenue</h3><div class="stat-number" id="totalRevenue">₹0</div></div></div>
+                <div class="admin-stat-card" style="padding: 10px 20px;"><div class="admin-stat-info"><h3>Pending</h3><div class="stat-number" id="pendingOrders">0</div></div></div>
             </div>
         </div>
         
@@ -50,26 +50,28 @@
     </div>
 
     <script src="js/config.js"></script>
-    <script src="js/cloud-sync.js"></script>
+    <script src="js/api.js"></script>
     <script>
         if (!sessionStorage.getItem('adminLoggedIn')) window.location.href = 'login.html';
         
         document.addEventListener('DOMContentLoaded', loadOrders);
+        setInterval(loadOrders, 30000);
         
         async function loadOrders() {
-            const orders = await loadOrdersFromCloud();
-            if (orders) displayOrders(orders);
-            else displayOrders(JSON.parse(localStorage.getItem('orders') || '[]'));
-        }
-        
-        function displayOrders(orders) {
-            const tbody = document.getElementById('ordersList');
+            const orders = await getOrders();
+            displayOrders(orders);
             const total = orders.reduce((s,o)=>s+(o.total||0),0);
             document.getElementById('totalOrders').textContent = orders.length;
             document.getElementById('totalRevenue').textContent = `₹${total.toLocaleString()}`;
             document.getElementById('pendingOrders').textContent = orders.filter(o=>o.status==='Pending').length;
-            
-            if (!orders.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No orders found</td></tr>'; return; }
+        }
+        
+        function displayOrders(orders) {
+            const tbody = document.getElementById('ordersList');
+            if (!orders || orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No orders found</td></tr>';
+                return;
+            }
             
             let html = '';
             orders.forEach(order => {
@@ -81,8 +83,7 @@
                         <td><small>${itemsList}</small></td>
                         <td>₹${order.total.toLocaleString()}</td>
                         <td>
-                            <select class="status-select status-${order.status.toLowerCase()}" 
-                                    onchange="updateStatus('${order.orderId}', this.value)">
+                            <select class="status-select status-${order.status.toLowerCase()}" onchange="updateStatus('${order.orderId}', this.value)">
                                 <option value="Pending" ${order.status==='Pending'?'selected':''}>Pending</option>
                                 <option value="Processing" ${order.status==='Processing'?'selected':''}>Processing</option>
                                 <option value="Shipped" ${order.status==='Shipped'?'selected':''}>Shipped</option>
@@ -98,26 +99,24 @@
         }
         
         async function updateStatus(orderId, status) {
-            const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const index = localOrders.findIndex(o=>o.orderId===orderId);
-            if (index>=0) localOrders[index].status = status;
-            localStorage.setItem('orders', JSON.stringify(localOrders));
-            
-            const cloudSuccess = await updateOrderStatusInCloud(orderId, status);
-            if (cloudSuccess) showNotification(`✅ Order ${orderId} updated to ${status}`, 'success');
-            else showNotification(`⚠️ Order updated locally only`, 'error');
-            await loadOrders();
+            const result = await updateOrderStatus(orderId, status);
+            if (result.success) {
+                showNotification(`✅ Order ${orderId} updated to ${status}`, 'success');
+                await loadOrders();
+            } else {
+                showNotification(`❌ Failed to update: ${result.error}`, 'error');
+            }
         }
         
         async function deleteOrder(orderId) {
             if (!confirm('Delete this order?')) return;
-            const localOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-            localStorage.setItem('orders', JSON.stringify(localOrders.filter(o=>o.orderId!==orderId)));
-            
-            const cloudSuccess = await deleteOrderFromCloud(orderId);
-            if (cloudSuccess) showNotification(`✅ Order ${orderId} deleted`, 'success');
-            else showNotification(`⚠️ Order deleted locally only`, 'error');
-            await loadOrders();
+            const result = await deleteOrder(orderId);
+            if (result.success) {
+                showNotification(`✅ Order ${orderId} deleted`, 'success');
+                await loadOrders();
+            } else {
+                showNotification(`❌ Failed to delete: ${result.error}`, 'error');
+            }
         }
         
         async function refreshOrders() { await loadOrders(); showNotification('Orders refreshed', 'success'); }
