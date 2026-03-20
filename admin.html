@@ -21,8 +21,8 @@
         </nav>
     </header>
 
-    <div style="max-width: 1400px; margin: 40px auto; padding: 0 20px;">
-        <h1 style="color: #d4af37; margin-bottom: 30px; font-size: 32px;">Dashboard Overview</h1>
+    <div class="admin-container">
+        <h1 style="color: var(--primary); margin-bottom: 30px;">Dashboard Overview</h1>
         
         <div class="admin-stats-grid">
             <div class="admin-stat-card">
@@ -58,25 +58,26 @@
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px;">
-            <div class="admin-table-container">
-                <h2 style="padding: 20px; color: #d4af37; border-bottom: 1px solid #3d3d3d;">Recent Orders</h2>
-                <div id="recentOrders" style="padding: 20px;">
-                    <p style="color: #888;">Loading...</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2>Recent Orders</h2>
+                    <a href="admin-orders.html" class="admin-btn admin-btn-primary">View All</a>
+                </div>
+                <div id="recentOrders">
+                    <p style="color: var(--gray-600);">Loading...</p>
                 </div>
             </div>
             
-            <div class="admin-table-container">
-                <h2 style="padding: 20px; color: #d4af37; border-bottom: 1px solid #3d3d3d;">Low Stock Products</h2>
-                <div id="lowStock" style="padding: 20px;">
-                    <p style="color: #888;">Loading...</p>
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2>Low Stock Products</h2>
+                    <a href="admin-products.html" class="admin-btn admin-btn-primary">Manage</a>
+                </div>
+                <div id="lowStock">
+                    <p style="color: var(--gray-600);">Loading...</p>
                 </div>
             </div>
-        </div>
-
-        <div style="margin-top: 40px;">
-            <a href="admin-products.html" class="admin-btn admin-btn-primary">➕ Add New Product</a>
-            <a href="admin-orders.html" class="admin-btn admin-btn-success" style="margin-left: 10px;">📋 View All Orders</a>
         </div>
     </div>
 
@@ -85,9 +86,7 @@
             window.location.href = 'login.html';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDashboardData();
-        });
+        document.addEventListener('DOMContentLoaded', loadDashboardData);
 
         function loadDashboardData() {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
@@ -107,27 +106,27 @@
             let ordersHtml = '';
             recentOrders.forEach(order => {
                 ordersHtml += `
-                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #3d3d3d;">
-                        <span style="color: #d4af37;">${order.orderId}</span>
+                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                        <span style="color: var(--primary);">${order.orderId}</span>
                         <span>${order.name}</span>
-                        <span class="admin-badge admin-badge-${order.status?.toLowerCase()}">${order.status}</span>
+                        <span class="admin-badge admin-badge-${order.status.toLowerCase()}">${order.status}</span>
                     </div>
                 `;
             });
-            document.getElementById('recentOrders').innerHTML = ordersHtml || '<p style="color: #888;">No recent orders</p>';
+            document.getElementById('recentOrders').innerHTML = ordersHtml || '<p style="color: var(--gray-600);">No recent orders</p>';
             
             // Low stock products
             const lowStockProducts = products.filter(p => p.stock < 5);
             let stockHtml = '';
             lowStockProducts.forEach(product => {
                 stockHtml += `
-                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #3d3d3d;">
-                        <span style="color: #d4af37;">${product.name}</span>
-                        <span style="color: #dc3545;">Stock: ${product.stock}</span>
+                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-200);">
+                        <span style="color: var(--primary);">${product.name}</span>
+                        <span style="color: var(--danger);">Stock: ${product.stock}</span>
                     </div>
                 `;
             });
-            document.getElementById('lowStock').innerHTML = stockHtml || '<p style="color: #888;">All products well stocked</p>';
+            document.getElementById('lowStock').innerHTML = stockHtml || '<p style="color: var(--gray-600);">All products well stocked</p>';
         }
 
         function logout() {
