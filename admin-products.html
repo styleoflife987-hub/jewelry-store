@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Management - Manual URL Entry</title>
+    <title>Product Management - Style Of Life</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Excel-like styles */
         .excel-container {
             background: #1e1e1e;
             border: 1px solid #444;
@@ -33,23 +32,7 @@
             border: none;
             border-radius: 4px;
             font-size: 13px;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
             cursor: pointer;
-        }
-        
-        .excel-toolbar button:hover {
-            background: #b8962e;
-        }
-        
-        .excel-toolbar .danger-btn {
-            background: #f44336;
-            color: white;
-        }
-        
-        .excel-toolbar .danger-btn:hover {
-            background: #d32f2f;
         }
         
         .excel-table-wrapper {
@@ -68,14 +51,11 @@
         .excel-table th {
             background: #2d2d2d;
             color: #d4af37;
-            font-weight: 600;
             padding: 12px 10px;
-            text-align: left;
             border-right: 1px solid #444;
             border-bottom: 2px solid #d4af37;
             position: sticky;
             top: 0;
-            z-index: 10;
         }
         
         .excel-table td {
@@ -83,7 +63,6 @@
             border-right: 1px solid #333;
             border-bottom: 1px solid #333;
             background: #1e1e1e;
-            vertical-align: top;
         }
         
         .excel-table tr:hover td {
@@ -98,7 +77,6 @@
             width: 40px;
         }
         
-        /* Image Grid Styles */
         .image-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -123,21 +101,14 @@
         }
         
         .image-preview {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             object-fit: cover;
             border-radius: 4px;
             border: 2px solid #d4af37;
             margin: 5px auto;
             cursor: pointer;
-            transition: transform 0.2s;
             display: block;
-        }
-        
-        .image-preview:hover {
-            transform: scale(3);
-            z-index: 100;
-            position: relative;
         }
         
         .image-input {
@@ -151,11 +122,6 @@
             margin-top: 5px;
         }
         
-        .image-input:focus {
-            outline: none;
-            border-color: #d4af37;
-        }
-        
         .main-badge {
             background: #d4af37;
             color: black;
@@ -164,14 +130,6 @@
             border-radius: 10px;
             display: inline-block;
             margin-top: 5px;
-            font-weight: bold;
-        }
-        
-        .url-help {
-            font-size: 10px;
-            color: #888;
-            margin-top: 3px;
-            word-break: break-all;
         }
         
         .excel-actions {
@@ -194,63 +152,12 @@
             color: #888;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-        }
-        
-        /* Modal for URL help */
-        .help-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-        }
-        
-        .help-content {
-            background: #1e1e1e;
-            max-width: 500px;
-            margin: 100px auto;
-            padding: 30px;
-            border-radius: 10px;
-            border: 2px solid #d4af37;
-        }
-        
-        .help-content h3 {
-            color: #d4af37;
-            margin-bottom: 20px;
-        }
-        
-        .help-content ul {
-            color: #888;
-            line-height: 1.8;
-            margin-left: 20px;
-        }
-        
-        .help-content code {
-            background: #333;
-            padding: 2px 5px;
-            border-radius: 3px;
-            color: #d4af37;
-        }
-        
-        .help-content button {
-            margin-top: 20px;
-            width: 100%;
-            padding: 12px;
-            background: #d4af37;
-            color: black;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo">✨ STYLE OF LIFE - URL ENTRY PORTAL</div>
+        <div class="logo">✨ STYLE OF LIFE - ADMIN</div>
         <nav>
             <a href="index.html">Home</a>
             <a href="admin.html">Dashboard</a>
@@ -261,80 +168,50 @@
     </header>
 
     <div class="admin-container">
-        <h1 class="page-title">📸 Manual Image URL Entry - 5 Images per Product</h1>
+        <h1 class="page-title">📸 Product Management - 5 Images per Product</h1>
         
-        <!-- Help Modal -->
-        <div id="helpModal" class="help-modal">
-            <div class="help-content">
-                <h3>📷 How to Add Image URLs</h3>
-                <ul>
-                    <li>You can use any image URL from the web</li>
-                    <li><strong>Dropbox:</strong> <code>https://www.dropbox.com/s/abc123/image.jpg?raw=1</code></li>
-                    <li><strong>Google Drive:</strong> Not recommended (needs special setup)</li>
-                    <li><strong>Imgur:</strong> <code>https://i.imgur.com/abc123.jpg</code></li>
-                    <li><strong>Any direct image link</strong> ending in .jpg, .png, .gif</li>
-                </ul>
-                <p style="color: #d4af37; margin-top: 15px;">Simply paste the URL in any of the 5 image slots</p>
-                <button onclick="closeHelp()">Got it!</button>
-            </div>
-        </div>
-        
-        <!-- Excel-like Interface -->
         <div class="excel-container">
             <div class="excel-toolbar">
-                <button onclick="addNewProduct()">
-                    <span>➕</span> Add New Product
-                </button>
-                <button onclick="showHelp()">
-                    <span>❓</span> URL Help
-                </button>
-                <button onclick="refreshData()">
-                    <span>🔄</span> Refresh
-                </button>
-                <button class="danger-btn" onclick="clearAllUrls()">
-                    <span>🗑️</span> Clear All URLs
-                </button>
-                <span style="color: #888; margin-left: auto;" id="rowCount"></span>
+                <button onclick="addNewProduct()">➕ Add New Product</button>
+                <button onclick="refreshData()">🔄 Refresh</button>
+                <span style="color: #888; margin-left: auto;" id="rowCount">0 products</span>
             </div>
             
             <div class="excel-table-wrapper">
                 <table class="excel-table" id="productTable">
                     <thead>
                         <tr>
-                            <th rowspan="2" style="width: 40px;">#</th>
+                            <th rowspan="2">#</th>
                             <th rowspan="2">SKU</th>
-                            <th rowspan="2">Product Name</th>
+                            <th rowspan="2">Name</th>
                             <th rowspan="2">Category</th>
                             <th rowspan="2">Price</th>
                             <th rowspan="2">Stock</th>
-                            <th colspan="5" style="text-align: center; background: #3d3d3d;">5 IMAGE URLS (Paste Any URL)</th>
+                            <th colspan="5">5 IMAGE URLS</th>
                             <th rowspan="2">Description</th>
                             <th rowspan="2">Actions</th>
                         </tr>
                         <tr>
-                            <th style="background: #3d3d3d;">Image 1 (Main)</th>
-                            <th style="background: #3d3d3d;">Image 2</th>
-                            <th style="background: #3d3d3d;">Image 3</th>
-                            <th style="background: #3d3d3d;">Image 4</th>
-                            <th style="background: #3d3d3d;">Image 5</th>
+                            <th>Img 1</th>
+                            <th>Img 2</th>
+                            <th>Img 3</th>
+                            <th>Img 4</th>
+                            <th>Img 5</th>
                         </tr>
                     </thead>
-                    <tbody id="productTableBody">
-                        <!-- Data will be loaded here -->
-                    </tbody>
+                    <tbody id="productTableBody"></tbody>
                 </table>
             </div>
             
             <div class="excel-status-bar">
-                <span id="recordCount">0 products</span>
-                <span>✏️ Click any URL field to edit | Paste any image URL</span>
-                <span>⭐ First image is main product image</span>
+                <span id="recordCount">0 records</span>
+                <span>✏️ Click any field to edit | Paste image URLs in the boxes</span>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>© 2026 Style Of Life Jewelry - Manual URL Entry System</p>
+        <p>© 2026 Style Of Life Jewelry</p>
     </footer>
 
     <script src="js/config.js"></script>
@@ -345,14 +222,13 @@
             window.location.href = 'login.html';
         }
         
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProducts();
-        });
+        document.addEventListener('DOMContentLoaded', loadProducts);
         
         function loadProducts() {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             displayProducts(products);
-            updateRowCount(products.length);
+            document.getElementById('rowCount').textContent = `${products.length} products`;
+            document.getElementById('recordCount').textContent = `${products.length} records`;
         }
         
         function displayProducts(products) {
@@ -361,61 +237,41 @@
             
             products.forEach((product, index) => {
                 const rowId = product.id;
-                // Ensure images array exists with 5 slots
                 const images = product.images || Array(5).fill('');
                 
                 html += `
                     <tr id="row-${rowId}" data-id="${rowId}">
                         <td class="excel-row-number">${index + 1}</td>
-                        <td>
-                            <div class="excel-cell-content" ondblclick="editField(this, 'sku', '${rowId}')">${product.sku || ''}</div>
-                        </td>
-                        <td>
-                            <div class="excel-cell-content" ondblclick="editField(this, 'name', '${rowId}')">${product.name || ''}</div>
-                        </td>
-                        <td>
-                            <div class="excel-cell-content" ondblclick="editField(this, 'category', '${rowId}')">${product.category || ''}</div>
-                        </td>
-                        <td>
-                            <div class="excel-cell-content" ondblclick="editField(this, 'price', '${rowId}')">${product.price || 0}</div>
-                        </td>
-                        <td>
-                            <div class="excel-cell-content" ondblclick="editField(this, 'stock', '${rowId}')">${product.stock || 0}</div>
-                        </td>
+                        <td><input type="text" value="${product.sku || ''}" class="image-input" onchange="updateField('${rowId}', 'sku', this.value)"></td>
+                        <td><input type="text" value="${product.name || ''}" class="image-input" onchange="updateField('${rowId}', 'name', this.value)"></td>
+                        <td><input type="text" value="${product.category || ''}" class="image-input" onchange="updateField('${rowId}', 'category', this.value)"></td>
+                        <td><input type="number" value="${product.price || 0}" class="image-input" onchange="updateField('${rowId}', 'price', this.value)"></td>
+                        <td><input type="number" value="${product.stock || 0}" class="image-input" onchange="updateField('${rowId}', 'stock', this.value)"></td>
                 `;
                 
-                // Add 5 image slots
                 for (let i = 0; i < 5; i++) {
                     const imgUrl = images[i] || '';
-                    const isMain = i === 0 ? '<div class="main-badge">⭐ MAIN</div>' : '';
-                    
                     html += `
                         <td>
                             <div class="image-slot">
-                                <label>Image ${i + 1}</label>
-                                ${imgUrl ? `<img src="${imgUrl}" class="image-preview" onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">` : ''}
+                                <label>Image ${i + 1} ${i === 0 ? '(Main)' : ''}</label>
+                                ${imgUrl ? `<img src="${imgUrl}" class="image-preview" onerror="this.style.display='none'">` : ''}
                                 <input type="text" 
                                        class="image-input" 
                                        value="${imgUrl}" 
-                                       placeholder="Paste image URL here..."
+                                       placeholder="Paste URL..."
                                        onchange="updateImageUrl('${rowId}', ${i}, this.value)"
                                        onkeyup="previewOnType('${rowId}', ${i}, this.value)">
-                                <div class="url-help">${imgUrl ? imgUrl.substring(0, 30) + '...' : 'No URL'}</div>
-                                ${isMain}
                             </div>
                         </td>
                     `;
                 }
                 
                 html += `
-                        <td>
-                            <div class="excel-cell-content" ondblclick="editField(this, 'description', '${rowId}')">${product.description || ''}</div>
-                        </td>
+                        <td><input type="text" value="${product.description || ''}" class="image-input" onchange="updateField('${rowId}', 'description', this.value)"></td>
                         <td>
                             <div class="excel-actions">
                                 <button onclick="deleteProduct('${rowId}')" style="background: #f44336;">🗑️ Delete</button>
-                                <button onclick="copyUrls('${rowId}')" style="background: #2196f3;">📋 Copy URLs</button>
-                                <button onclick="clearImages('${rowId}')" style="background: #ff9800;">🔄 Clear Images</button>
                             </div>
                         </td>
                     </tr>
@@ -425,47 +281,16 @@
             tbody.innerHTML = html;
         }
         
-        function editField(element, field, rowId) {
-            const currentValue = element.textContent;
-            const td = element.parentElement;
-            
-            const input = document.createElement('input');
-            input.type = (field === 'price' || field === 'stock') ? 'number' : 'text';
-            input.value = currentValue;
-            input.style.width = '100%';
-            input.style.padding = '8px';
-            input.style.background = '#333';
-            input.style.border = '2px solid #d4af37';
-            input.style.color = 'white';
-            
-            td.innerHTML = '';
-            td.appendChild(input);
-            input.focus();
-            
-            input.onblur = function() {
-                saveField(td, input.value, field, rowId);
-            };
-            
-            input.onkeypress = function(e) {
-                if (e.key === 'Enter') {
-                    saveField(td, input.value, field, rowId);
-                }
-            };
-        }
-        
-        function saveField(td, newValue, field, rowId) {
+        function updateField(rowId, field, value) {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             const index = products.findIndex(p => p.id == rowId);
             
             if (index !== -1) {
                 if (field === 'price' || field === 'stock') {
-                    newValue = Number(newValue) || 0;
+                    value = Number(value) || 0;
                 }
-                
-                products[index][field] = newValue;
+                products[index][field] = value;
                 localStorage.setItem('products', JSON.stringify(products));
-                
-                td.innerHTML = `<div class="excel-cell-content" ondblclick="editField(this, '${field}', '${rowId}')">${newValue}</div>`;
             }
         }
         
@@ -477,43 +302,12 @@
                 if (!products[index].images) {
                     products[index].images = Array(5).fill('');
                 }
-                
-                // Clean up URL (remove spaces)
-                const cleanUrl = url.trim();
-                products[index].images[slot] = cleanUrl;
+                products[index].images[slot] = url.trim();
                 localStorage.setItem('products', JSON.stringify(products));
-                
-                // Update preview and help text
-                const slotElement = document.querySelector(`#row-${rowId} td:nth-child(${7 + slot}) .image-slot`);
-                if (slotElement) {
-                    const preview = slotElement.querySelector('.image-preview');
-                    const helpText = slotElement.querySelector('.url-help');
-                    
-                    if (cleanUrl) {
-                        if (!preview) {
-                            const newPreview = document.createElement('img');
-                            newPreview.className = 'image-preview';
-                            newPreview.src = cleanUrl;
-                            newPreview.onerror = function() { this.src = CONFIG.PLACEHOLDER_IMAGE; };
-                            slotElement.insertBefore(newPreview, slotElement.querySelector('.image-input'));
-                        } else {
-                            preview.src = cleanUrl;
-                            preview.onerror = function() { this.src = CONFIG.PLACEHOLDER_IMAGE; };
-                        }
-                        
-                        if (helpText) {
-                            helpText.textContent = cleanUrl.length > 30 ? cleanUrl.substring(0, 30) + '...' : cleanUrl;
-                        }
-                    } else {
-                        if (preview) preview.remove();
-                        if (helpText) helpText.textContent = 'No URL';
-                    }
-                }
             }
         }
         
         function previewOnType(rowId, slot, url) {
-            // Live preview as you type
             const slotElement = document.querySelector(`#row-${rowId} td:nth-child(${7 + slot}) .image-slot`);
             if (slotElement) {
                 let preview = slotElement.querySelector('.image-preview');
@@ -523,17 +317,19 @@
                     if (!preview) {
                         preview = document.createElement('img');
                         preview.className = 'image-preview';
-                        preview.onerror = function() { this.src = CONFIG.PLACEHOLDER_IMAGE; };
+                        preview.onerror = function() { this.style.display = 'none'; };
                         slotElement.insertBefore(preview, slotElement.querySelector('.image-input'));
                     }
                     preview.src = cleanUrl;
-                } else {
-                    if (preview) preview.remove();
+                    preview.style.display = 'block';
+                } else if (preview) {
+                    preview.remove();
                 }
             }
         }
         
         function addNewProduct() {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
             const newProduct = {
                 id: Date.now(),
                 sku: 'NEW' + Date.now().toString().slice(-4),
@@ -544,11 +340,8 @@
                 description: '',
                 images: Array(5).fill('')
             };
-            
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
             products.push(newProduct);
             localStorage.setItem('products', JSON.stringify(products));
-            
             loadProducts();
         }
         
@@ -561,86 +354,13 @@
             }
         }
         
-        function copyUrls(rowId) {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const product = products.find(p => p.id == rowId);
-            
-            if (product && product.images) {
-                const urls = product.images.filter(url => url).join('\n');
-                if (urls) {
-                    navigator.clipboard.writeText(urls).then(() => {
-                        alert('✅ URLs copied to clipboard!');
-                    });
-                } else {
-                    alert('No URLs to copy');
-                }
-            }
-        }
-        
-        function clearImages(rowId) {
-            if (confirm('Clear all image URLs for this product?')) {
-                const products = JSON.parse(localStorage.getItem('products') || '[]');
-                const index = products.findIndex(p => p.id == rowId);
-                
-                if (index !== -1) {
-                    products[index].images = Array(5).fill('');
-                    localStorage.setItem('products', JSON.stringify(products));
-                    
-                    // Clear all image slots in UI
-                    for (let i = 0; i < 5; i++) {
-                        const slotElement = document.querySelector(`#row-${rowId} td:nth-child(${7 + i}) .image-slot`);
-                        if (slotElement) {
-                            const preview = slotElement.querySelector('.image-preview');
-                            const input = slotElement.querySelector('.image-input');
-                            const helpText = slotElement.querySelector('.url-help');
-                            
-                            if (preview) preview.remove();
-                            if (input) input.value = '';
-                            if (helpText) helpText.textContent = 'No URL';
-                        }
-                    }
-                }
-            }
-        }
-        
-        function clearAllUrls() {
-            if (confirm('Clear ALL image URLs for ALL products?')) {
-                const products = JSON.parse(localStorage.getItem('products') || '[]');
-                products.forEach(product => {
-                    product.images = Array(5).fill('');
-                });
-                localStorage.setItem('products', JSON.stringify(products));
-                loadProducts();
-            }
-        }
-        
-        function showHelp() {
-            document.getElementById('helpModal').style.display = 'block';
-        }
-        
-        function closeHelp() {
-            document.getElementById('helpModal').style.display = 'none';
-        }
-        
         function refreshData() {
             loadProducts();
-        }
-        
-        function updateRowCount(count) {
-            document.getElementById('rowCount').textContent = `${count} products`;
         }
         
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');
             window.location.href = 'login.html';
-        }
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('helpModal');
-            if (event.target == modal) {
-                closeHelp();
-            }
         }
     </script>
 </body>
