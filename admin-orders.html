@@ -56,9 +56,7 @@
             window.location.href = 'login.html';
         }
         
-        document.addEventListener('DOMContentLoaded', function() {
-            loadOrders();
-        });
+        document.addEventListener('DOMContentLoaded', loadOrders);
         
         function loadOrders() {
             const orders = JSON.parse(localStorage.getItem('orders') || '[]');
@@ -103,11 +101,6 @@
                     `${item.name} x${item.quantity}`
                 ).join('<br>') : 'No items';
                 
-                const statusColor = order.status === 'Pending' ? '#ff9800' : 
-                                   order.status === 'Processing' ? '#2196f3' :
-                                   order.status === 'Shipped' ? '#9c27b0' :
-                                   order.status === 'Delivered' ? '#4CAF50' : '#f44336';
-                
                 html += `
                     <tr>
                         <td><strong>${order.orderId}</strong></td>
@@ -116,7 +109,7 @@
                         <td><strong>₹${(order.total || 0).toLocaleString('en-IN')}</strong></td>
                         <td>
                             <select onchange="updateOrderStatus('${order.orderId}', this.value)" 
-                                    style="background: ${statusColor}; color: black; padding: 5px; border-radius: 4px; border: none;">
+                                    style="background: ${order.status === 'Pending' ? '#ff9800' : '#4CAF50'}; color: black; padding: 5px; border-radius: 4px; border: none;">
                                 <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
                                 <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
                                 <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
@@ -126,7 +119,7 @@
                         </td>
                         <td>${new Date(order.date).toLocaleDateString()}</td>
                         <td>
-                            <button onclick="deleteOrder('${order.orderId}')" class="delete-btn">🗑️ Delete</button>
+                            <button onclick="deleteOrder('${order.orderId}')" style="background: #f44336; width: auto; padding: 5px 10px;">🗑️ Delete</button>
                         </td>
                     </tr>
                 `;
@@ -138,10 +131,10 @@
         
         function updateOrderStatus(orderId, status) {
             const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const orderIndex = orders.findIndex(o => o.orderId === orderId);
+            const index = orders.findIndex(o => o.orderId === orderId);
             
-            if (orderIndex >= 0) {
-                orders[orderIndex].status = status;
+            if (index >= 0) {
+                orders[index].status = status;
                 localStorage.setItem('orders', JSON.stringify(orders));
                 alert(`✅ Order ${orderId} updated to ${status}`);
                 loadOrders();
