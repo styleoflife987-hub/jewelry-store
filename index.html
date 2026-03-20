@@ -7,7 +7,41 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        body { font-family: 'Cormorant Garamond', serif; }
+        .loading-spinner {
+            text-align: center;
+            padding: 100px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #c5a059;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 100px;
+            color: #dc3545;
+        }
+        
+        .retry-btn {
+            background: #c5a059;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body class="customer">
@@ -27,7 +61,12 @@
         </div>
     </div>
 
-    <div class="customer-products" id="products"></div>
+    <div class="customer-products" id="products">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading products from cloud...</p>
+        </div>
+    </div>
 
     <footer style="text-align: center; padding: 60px; background: var(--customer-charcoal); color: var(--customer-cream); margin-top: 60px;">
         <p style="font-size: 14px; letter-spacing: 2px;">© 2026 STYLE OF LIFE. ALL RIGHTS RESERVED.</p>
@@ -38,17 +77,47 @@
     <script src="js/cart.js"></script>
     <script>
         let products = [];
-        let galleryData = {};
 
         document.addEventListener('DOMContentLoaded', function() {
-            loadProducts();
+            loadProductsFromCloud();
             updateCartCount();
+            
+            // Refresh every 30 seconds
+            setInterval(loadProductsFromCloud, 30000);
         });
 
-        function loadProducts() {
-            const storedProducts = localStorage.getItem('products');
-            products = storedProducts ? JSON.parse(storedProducts) : [];
-            displayProducts(products);
+        async function loadProductsFromCloud() {
+            const container = document.getElementById('products');
+            
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?action=getProducts&t=${Date.now()}`);
+                const data = await response.json();
+                
+                if (Array.isArray(data)) {
+                    products = data;
+                    // Save to localStorage as backup
+                    localStorage.setItem('products', JSON.stringify(products));
+                    displayProducts(products);
+                } else {
+                    throw new Error('Invalid data from cloud');
+                }
+            } catch (error) {
+                console.error('Cloud fetch failed, using local backup:', error);
+                
+                // Fallback to localStorage
+                const storedProducts = localStorage.getItem('products');
+                if (storedProducts) {
+                    products = JSON.parse(storedProducts);
+                    displayProducts(products);
+                } else {
+                    container.innerHTML = `
+                        <div class="error-message">
+                            <p>Unable to load products. Please check your connection.</p>
+                            <button class="retry-btn" onclick="loadProductsFromCloud()">Retry</button>
+                        </div>
+                    `;
+                }
+            }
         }
 
         function displayProducts(products) {
@@ -68,8 +137,7 @@
                 const sku = product.sku || `SKU${product.id}`;
                 
                 const images = product.images || [];
-                const validImages = images.filter(url => url && url.trim() !== '');
-                const mainImage = validImages[0] || 'https://via.placeholder.com/400x500?text=No+Image';
+                const mainImage = images[0] || 'https://via.placeholder.com/400x500?text=No+Image';
                 
                 html += `
                     <div class="customer-card" data-product-id="${product.id}">
