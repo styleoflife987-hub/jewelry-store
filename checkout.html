@@ -45,9 +45,9 @@
     <script>
         let cart = [];
         
-        document.addEventListener('DOMContentLoaded', async function() {
-            const cartData = await getCart();
-            cart = cartData.items || [];
+        document.addEventListener('DOMContentLoaded', async () => {
+            const data = await getCart();
+            cart = data.items || [];
             updateCheckoutSummary();
         });
         
@@ -61,33 +61,33 @@
             
             if (cart.length === 0) return alert('Your cart is empty');
             
-            const subtotal = cart.reduce((sum, i) => sum + (i.price * (i.quantity || 1)), 0);
+            const subtotal = cart.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0);
             const tax = Math.round(subtotal * 0.18);
             const total = subtotal + tax + 100;
             
             const order = {
                 name, phone, email: document.getElementById('email').value.trim(),
                 address: `${address}, ${city} - ${pincode}`,
-                items: cart, subtotal, tax, shipping: 100, total
+                items: cart, total
             };
             
             const result = await placeOrder(order);
             if (result.success) {
-                await clearCart();
+                await saveCart([], 0);
                 alert(`✅ Order placed! ID: ${result.orderId}`);
                 window.location.href = `track.html?order=${result.orderId}`;
             } else {
-                alert('❌ Failed to place order: ' + (result.error || 'Unknown error'));
+                alert('❌ Failed: ' + (result.error || 'Unknown error'));
             }
         }
         
         function updateCheckoutSummary() {
-            const subtotal = cart.reduce((sum, i) => sum + (i.price * (i.quantity || 1)), 0);
+            const subtotal = cart.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0);
             const tax = Math.round(subtotal * 0.18);
             const total = subtotal + tax + 100;
             
             let itemsHtml = '';
-            cart.forEach(item => itemsHtml += `<div style="display:flex; justify-content:space-between; margin:5px 0;"><span>${item.name} x${item.quantity}</span><span>₹${(item.price * item.quantity).toLocaleString()}</span></div>`);
+            cart.forEach(i => itemsHtml += `<div style="display:flex;justify-content:space-between;margin:5px 0;"><span>${i.name} x${i.quantity}</span><span>₹${(i.price * i.quantity).toLocaleString()}</span></div>`);
             document.getElementById('cartSummary').innerHTML = itemsHtml || '<p>Your cart is empty</p>';
             document.getElementById('orderSubtotal').textContent = subtotal.toLocaleString();
             document.getElementById('orderTax').textContent = tax.toLocaleString();
