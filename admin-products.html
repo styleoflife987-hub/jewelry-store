@@ -7,6 +7,100 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="js/config.js"></script>
     <script src="js/drive-upload.js"></script>
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background: #1a1a1a;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #d4af37;
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .modal-header h2 {
+            color: #d4af37;
+            margin: 0;
+        }
+        
+        .close-btn {
+            background: transparent;
+            color: #888;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            width: auto;
+            padding: 0 10px;
+        }
+        
+        .close-btn:hover {
+            color: #f44336;
+        }
+        
+        .current-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid #d4af37;
+            margin: 10px 0;
+        }
+        
+        .image-preview {
+            margin-top: 10px;
+        }
+        
+        .image-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid #d4af37;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -24,56 +118,59 @@
         <h1 class="page-title">Product Management</h1>
         
         <!-- Edit Product Modal -->
-        <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; overflow-y: auto;">
-            <div style="background: #1a1a1a; max-width: 600px; margin: 50px auto; padding: 30px; border-radius: 15px; border: 2px solid #d4af37;">
-                <h2 style="color: #d4af37; margin-bottom: 20px;">Edit Product</h2>
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>✏️ Edit Product</h2>
+                    <button class="close-btn" onclick="closeEditModal()">&times;</button>
+                </div>
                 
                 <input type="hidden" id="editProductId">
                 
                 <div class="form-group">
-                    <label>SKU</label>
-                    <input type="text" id="editSku" required>
+                    <label for="editSku">SKU *</label>
+                    <input type="text" id="editSku" placeholder="e.g., SKU001" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>Product Name</label>
-                    <input type="text" id="editName" required>
+                    <label for="editName">Product Name *</label>
+                    <input type="text" id="editName" placeholder="e.g., Gold Necklace" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>Category</label>
-                    <input type="text" id="editCategory" required>
+                    <label for="editCategory">Category *</label>
+                    <input type="text" id="editCategory" placeholder="e.g., Necklaces" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>Price (₹)</label>
-                    <input type="number" id="editPrice" required>
+                    <label for="editPrice">Price (₹) *</label>
+                    <input type="number" id="editPrice" placeholder="e.g., 25000" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>Stock</label>
-                    <input type="number" id="editStock" required>
+                    <label for="editStock">Stock Quantity *</label>
+                    <input type="number" id="editStock" placeholder="e.g., 10" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="editDescription" rows="2"></textarea>
+                    <label for="editDescription">Description</label>
+                    <textarea id="editDescription" rows="2" placeholder="Product description"></textarea>
                 </div>
                 
                 <div class="form-group">
                     <label>Current Image</label>
-                    <img id="editCurrentImage" src="" style="max-width: 200px; max-height: 200px; display: block; margin: 10px 0; border-radius: 8px;">
+                    <img id="editCurrentImage" class="current-image" src="" alt="Current product image">
                 </div>
                 
                 <div class="form-group">
-                    <label>Upload New Image (optional)</label>
-                    <input type="file" id="editImage" accept="image/*">
-                    <div id="editImagePreview"></div>
+                    <label for="editImage">Upload New Image (optional)</label>
+                    <input type="file" id="editImage" accept="image/*" style="background: transparent; border: none; padding: 0;">
+                    <div id="editImagePreview" class="image-preview"></div>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button onclick="saveEdit()" class="submit-btn" style="flex: 1;">💾 Save Changes</button>
-                    <button onclick="closeEditModal()" class="submit-btn" style="flex: 1; background: #666;">❌ Cancel</button>
+                <div class="modal-actions">
+                    <button onclick="saveEdit()" class="submit-btn" style="background: #4CAF50;">💾 Save Changes</button>
+                    <button onclick="closeEditModal()" class="submit-btn" style="background: #666;">❌ Cancel</button>
                 </div>
             </div>
         </div>
@@ -116,8 +213,8 @@
                 <div class="form-group full-width">
                     <label>Product Image *</label>
                     <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-                        <input type="file" id="productImage" accept="image/*" style="width: auto; background: transparent; border: none;">
-                        <div id="imagePreview"></div>
+                        <input type="file" id="productImage" accept="image/*" style="width: auto; background: transparent; border: none;" required>
+                        <div id="imagePreview" class="image-preview"></div>
                     </div>
                     <p style="color: #888; font-size: 12px; margin-top: 5px;">Upload image to Google Drive (JPG, PNG, GIF)</p>
                 </div>
@@ -154,12 +251,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadProducts();
             
+            // File input preview for add form
             document.getElementById('productImage').addEventListener('change', function(e) {
                 if (e.target.files[0]) {
                     createImagePreview(e.target.files[0], 'imagePreview');
                 }
             });
             
+            // File input preview for edit form
             document.getElementById('editImage').addEventListener('change', function(e) {
                 if (e.target.files[0]) {
                     createImagePreview(e.target.files[0], 'editImagePreview');
@@ -224,8 +323,12 @@
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             const product = products.find(p => p.id == id);
             
-            if (!product) return;
+            if (!product) {
+                alert('Product not found');
+                return;
+            }
             
+            // Fill the edit form
             document.getElementById('editProductId').value = product.id;
             document.getElementById('editSku').value = product.sku || '';
             document.getElementById('editName').value = product.name || '';
@@ -234,9 +337,12 @@
             document.getElementById('editStock').value = product.stock || '';
             document.getElementById('editDescription').value = product.description || '';
             document.getElementById('editCurrentImage').src = product.image || CONFIG.PLACEHOLDER_IMAGE;
+            
+            // Clear preview
             document.getElementById('editImagePreview').innerHTML = '';
             document.getElementById('editImage').value = '';
             
+            // Show modal
             document.getElementById('editModal').style.display = 'block';
         }
         
@@ -254,48 +360,68 @@
             const description = document.getElementById('editDescription').value.trim();
             const imageFile = document.getElementById('editImage').files[0];
             
+            // Validate required fields
             if (!sku || !name || !category || !price || !stock) {
                 alert('Please fill all required fields');
                 return;
             }
             
+            // Get existing products
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             const index = products.findIndex(p => p.id == id);
             
-            if (index === -1) return;
-            
-            let imageUrl = products[index].image;
-            
-            // Upload new image if selected
-            if (imageFile) {
-                try {
-                    const uploadResult = await uploadImageToDrive(imageFile);
-                    if (uploadResult.success) {
-                        imageUrl = uploadResult.directUrl;
-                    }
-                } catch (error) {
-                    console.error('Image upload failed:', error);
-                    alert('Image upload failed, but product will be updated without new image');
-                }
+            if (index === -1) {
+                alert('Product not found');
+                closeEditModal();
+                return;
             }
             
-            // Update product
-            products[index] = {
-                ...products[index],
-                sku: sku,
-                name: name,
-                category: category,
-                price: Number(price),
-                stock: Number(stock),
-                description: description || '',
-                image: imageUrl
-            };
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
             
-            localStorage.setItem('products', JSON.stringify(products));
-            
-            alert('✅ Product updated successfully!');
-            closeEditModal();
-            loadProducts();
+            try {
+                let imageUrl = products[index].image;
+                
+                // Upload new image if selected
+                if (imageFile) {
+                    btn.textContent = 'Uploading image...';
+                    const uploadResult = await uploadImageToDrive(imageFile);
+                    
+                    if (uploadResult.success) {
+                        imageUrl = uploadResult.directUrl;
+                    } else {
+                        throw new Error('Image upload failed');
+                    }
+                }
+                
+                // Update product
+                products[index] = {
+                    ...products[index],
+                    sku: sku,
+                    name: name,
+                    category: category,
+                    price: Number(price),
+                    stock: Number(stock),
+                    description: description || '',
+                    image: imageUrl
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('products', JSON.stringify(products));
+                
+                alert('✅ Product updated successfully!');
+                closeEditModal();
+                loadProducts();
+                
+            } catch (error) {
+                console.error('Save error:', error);
+                alert('Error saving product: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
         }
         
         async function addProduct() {
@@ -375,6 +501,14 @@
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');
             window.location.href = 'login.html';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeEditModal();
+            }
         }
     </script>
 </body>
