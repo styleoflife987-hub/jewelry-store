@@ -41,11 +41,16 @@
     </div>
 
     <script src="js/config.js"></script>
-    <script src="js/cloud-sync.js"></script>
-    <script src="js/cart.js"></script>
+    <script src="js/api.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', updateCheckoutSummary);
-
+        let cart = [];
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            const cartData = await getCart();
+            cart = cartData.items || [];
+            updateCheckoutSummary();
+        });
+        
         async function processOrder() {
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
@@ -54,37 +59,30 @@
             const pincode = document.getElementById('pincode').value.trim();
             if (!name || !phone || !address || !city || !pincode) return alert('Please fill all required fields');
             
-            const cart = getCart();
             if (cart.length === 0) return alert('Your cart is empty');
             
-            const subtotal = getCartTotal();
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * (i.quantity || 1)), 0);
             const tax = Math.round(subtotal * 0.18);
             const total = subtotal + tax + 100;
             
             const order = {
-                orderId: 'ORD' + Date.now(),
                 name, phone, email: document.getElementById('email').value.trim(),
                 address: `${address}, ${city} - ${pincode}`,
-                items: cart, subtotal, tax, shipping: 100, total, status: 'Pending', date: new Date().toISOString()
+                items: cart, subtotal, tax, shipping: 100, total
             };
             
-            // Save to cloud first
-            const cloudSaved = await saveOrderToCloud(order);
-            // Always save locally
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            orders.push(order);
-            localStorage.setItem('orders', JSON.stringify(orders));
-            localStorage.removeItem('cart');
-            updateCartCount();
-            
-            if (cloudSaved) alert(`✅ Order placed! ID: ${order.orderId}`);
-            else alert(`⚠️ Order saved locally. ID: ${order.orderId}`);
-            window.location.href = `track.html?order=${order.orderId}`;
+            const result = await placeOrder(order);
+            if (result.success) {
+                await clearCart();
+                alert(`✅ Order placed! ID: ${result.orderId}`);
+                window.location.href = `track.html?order=${result.orderId}`;
+            } else {
+                alert('❌ Failed to place order: ' + (result.error || 'Unknown error'));
+            }
         }
-
+        
         function updateCheckoutSummary() {
-            const cart = getCart();
-            const subtotal = getCartTotal();
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * (i.quantity || 1)), 0);
             const tax = Math.round(subtotal * 0.18);
             const total = subtotal + tax + 100;
             
