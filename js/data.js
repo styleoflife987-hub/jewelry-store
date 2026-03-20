@@ -1,6 +1,6 @@
-// js/data.js - Initialize data with sample images
+// js/data.js - Initialize data if not exists
 (function() {
-    // Sample Drive image URLs (using Unsplash as fallback)
+    // Sample product images
     const sampleImages = [
         'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338',
         'https://images.unsplash.com/photo-1605100804763-247f67b3557e',
