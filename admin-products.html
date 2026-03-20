@@ -3,10 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Products - Style Of Life</title>
+    <title>Product Management - Excel Style</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .modal {
+        /* Excel-like styles */
+        .excel-container {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .excel-toolbar {
+            background: #2d2d2d;
+            padding: 10px 20px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .excel-toolbar button {
+            width: auto;
+            padding: 8px 15px;
+            background: #d4af37;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .excel-toolbar button:hover {
+            background: #b8962e;
+        }
+        
+        .excel-toolbar .danger-btn {
+            background: #f44336;
+            color: white;
+        }
+        
+        .excel-toolbar .danger-btn:hover {
+            background: #d32f2f;
+        }
+        
+        .excel-status-bar {
+            background: #2d2d2d;
+            padding: 5px 20px;
+            border-top: 1px solid #444;
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .excel-table-wrapper {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 1200px;
+        }
+        
+        .excel-table th {
+            background: #2d2d2d;
+            color: #d4af37;
+            font-weight: 600;
+            padding: 12px 10px;
+            text-align: left;
+            border-right: 1px solid #444;
+            border-bottom: 2px solid #d4af37;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .excel-table td {
+            padding: 10px;
+            border-right: 1px solid #333;
+            border-bottom: 1px solid #333;
+            background: #1e1e1e;
+        }
+        
+        .excel-table tr:hover td {
+            background: #2a2a2a;
+        }
+        
+        .excel-table td.editing {
+            padding: 0;
+        }
+        
+        .excel-table input, .excel-table select {
+            width: 100%;
+            padding: 8px;
+            background: #333;
+            border: 2px solid #d4af37;
+            color: white;
+            font-size: 14px;
+            border-radius: 0;
+        }
+        
+        .excel-table input:focus {
+            outline: none;
+        }
+        
+        .excel-cell-content {
+            min-height: 30px;
+            cursor: pointer;
+        }
+        
+        .excel-cell-content:hover {
+            background: #333;
+        }
+        
+        .excel-row-number {
+            background: #2d2d2d !important;
+            color: #888;
+            text-align: center;
+            font-weight: bold;
+            width: 40px;
+            border-right: 1px solid #444 !important;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+        }
+        
+        .excel-add-row {
+            background: #2d2d2d;
+            padding: 15px;
+            text-align: center;
+            border-top: 2px solid #d4af37;
+        }
+        
+        .excel-add-row button {
+            width: auto;
+            padding: 10px 30px;
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .excel-add-row button:hover {
+            background: #45a049;
+        }
+        
+        .excel-image-preview {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #d4af37;
+            cursor: pointer;
+        }
+        
+        .excel-image-preview:hover {
+            transform: scale(2);
+            transition: transform 0.2s;
+            z-index: 100;
+            position: relative;
+        }
+        
+        .excel-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .excel-actions button {
+            width: auto;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .excel-edit-btn {
+            background: #2196f3 !important;
+        }
+        
+        .excel-delete-btn {
+            background: #f44336 !important;
+        }
+        
+        .excel-save-btn {
+            background: #4CAF50 !important;
+        }
+        
+        .excel-cancel-btn {
+            background: #ff9800 !important;
+        }
+        
+        /* Modal for image upload */
+        .image-upload-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -15,66 +207,37 @@
             height: 100%;
             background: rgba(0,0,0,0.8);
             z-index: 2000;
-            overflow-y: auto;
         }
         
-        .modal-content {
-            background: #1a1a1a;
-            max-width: 600px;
-            margin: 50px auto;
+        .image-upload-content {
+            background: #1e1e1e;
+            max-width: 500px;
+            margin: 100px auto;
             padding: 30px;
-            border-radius: 15px;
+            border-radius: 10px;
             border: 2px solid #d4af37;
         }
         
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #333;
-        }
-        
-        .modal-header h2 {
+        .image-upload-content h3 {
             color: #d4af37;
-            margin: 0;
+            margin-bottom: 20px;
         }
         
-        .close-btn {
-            background: transparent;
-            color: #888;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
+        .image-upload-content input[type="file"] {
+            margin: 20px 0;
         }
         
-        .close-btn:hover {
-            color: #f44336;
-        }
-        
-        .current-image {
+        .image-preview {
             max-width: 200px;
             max-height: 200px;
-            border-radius: 8px;
-            border: 2px solid #d4af37;
             margin: 10px 0;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .modal-actions button {
-            flex: 1;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo">✨ STYLE OF LIFE - PRODUCTS</div>
+        <div class="logo">✨ STYLE OF LIFE - EXCEL PORTAL</div>
         <nav>
             <a href="index.html">Home</a>
             <a href="admin.html">Dashboard</a>
@@ -84,124 +247,78 @@
         </nav>
     </header>
 
-    <!-- Edit Product Modal -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>✏️ Edit Product</h2>
-                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+    <div class="admin-container">
+        <h1 class="page-title">📊 Product Spreadsheet</h1>
+        
+        <!-- Excel-like Interface -->
+        <div class="excel-container">
+            <div class="excel-toolbar">
+                <button onclick="addNewRow()">
+                    <span>➕</span> Add Row
+                </button>
+                <button onclick="saveAllChanges()">
+                    <span>💾</span> Save All
+                </button>
+                <button onclick="refreshData()">
+                    <span>🔄</span> Refresh
+                </button>
+                <button class="danger-btn" onclick="deleteSelected()">
+                    <span>🗑️</span> Delete Selected
+                </button>
+                <span style="color: #888; margin-left: auto;" id="rowCount"></span>
             </div>
             
-            <input type="hidden" id="editProductId">
-            
-            <div class="form-group">
-                <label for="editSku">SKU *</label>
-                <input type="text" id="editSku" required>
+            <div class="excel-table-wrapper">
+                <table class="excel-table" id="productTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">#</th>
+                            <th style="width: 40px;">
+                                <input type="checkbox" id="selectAll" onclick="toggleAll()">
+                            </th>
+                            <th>SKU</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Price (₹)</th>
+                            <th>Stock</th>
+                            <th>Image</th>
+                            <th>Description</th>
+                            <th style="width: 150px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
             </div>
             
-            <div class="form-group">
-                <label for="editName">Product Name *</label>
-                <input type="text" id="editName" required>
+            <div class="excel-add-row">
+                <button onclick="addNewRow()">➕ Add New Row</button>
             </div>
             
-            <div class="form-group">
-                <label for="editCategory">Category *</label>
-                <input type="text" id="editCategory" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="editPrice">Price (₹) *</label>
-                <input type="number" id="editPrice" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="editStock">Stock Quantity *</label>
-                <input type="number" id="editStock" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="editDescription">Description</label>
-                <textarea id="editDescription" rows="2"></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label>Current Image</label>
-                <img id="editCurrentImage" class="current-image" src="" alt="Current product image">
-            </div>
-            
-            <div class="form-group">
-                <label for="editImage">Change Image (optional)</label>
-                <input type="file" id="editImage" accept="image/*">
-            </div>
-            
-            <div class="modal-actions">
-                <button onclick="saveEdit()" style="background: #4CAF50;">💾 Save Changes</button>
-                <button onclick="closeEditModal()" style="background: #666;">❌ Cancel</button>
+            <div class="excel-status-bar">
+                <span id="recordCount">0 records</span>
+                <span id="lastUpdated">Last updated: just now</span>
             </div>
         </div>
     </div>
-
-    <div class="admin-container">
-        <h1 class="page-title">Product Management</h1>
-        
-        <!-- Add Product Form -->
-        <div class="add-product-form">
-            <h2>Add New Product</h2>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="sku">SKU *</label>
-                    <input type="text" id="sku" placeholder="e.g., SKU001" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="name">Product Name *</label>
-                    <input type="text" id="name" placeholder="e.g., Gold Necklace" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="category">Category *</label>
-                    <input type="text" id="category" placeholder="e.g., Necklaces" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="price">Price (₹) *</label>
-                    <input type="number" id="price" placeholder="e.g., 25000" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="stock">Stock Quantity *</label>
-                    <input type="number" id="stock" placeholder="e.g., 10" value="10" required>
-                </div>
-                
-                <div class="form-group full-width">
-                    <label for="description">Description</label>
-                    <textarea id="description" rows="2" placeholder="Product description"></textarea>
-                </div>
-                
-                <div class="form-group full-width">
-                    <label for="productImage">Product Image</label>
-                    <input type="file" id="productImage" accept="image/*">
-                    <p style="color: #888; font-size: 12px; margin-top: 5px;">Optional - if no image, a default will be used</p>
-                </div>
-            </div>
-            
-            <button onclick="addProduct()" class="submit-btn" id="addProductBtn">
-                ➕ Add Product
-            </button>
-        </div>
-        
-        <!-- Products List -->
-        <div class="products-list-section">
-            <h2>Current Products</h2>
-            <div id="productsList" class="products-grid-admin">
-                <p>Loading products...</p>
+    
+    <!-- Image Upload Modal -->
+    <div id="imageModal" class="image-upload-modal">
+        <div class="image-upload-content">
+            <h3>Upload Image</h3>
+            <p style="color: #888; margin-bottom: 15px;">Select an image for the product</p>
+            <input type="file" id="modalImageInput" accept="image/*">
+            <div id="modalImagePreview"></div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="saveUploadedImage()" style="background: #4CAF50;">Save</button>
+                <button onclick="closeImageModal()" style="background: #666;">Cancel</button>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>© 2026 Style Of Life Jewelry - Product Management</p>
+        <p>© 2026 Style Of Life Jewelry - Excel-like Portal</p>
     </footer>
 
     <script src="js/config.js"></script>
@@ -212,181 +329,315 @@
             window.location.href = 'login.html';
         }
         
-        const imageMap = {
-            'Necklaces': 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338',
-            'Rings': 'https://images.unsplash.com/photo-1605100804763-247f67b3557e',
-            'Earrings': 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908',
-            'Bracelets': 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a',
-            'Bangles': 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0'
-        };
+        let currentEditingRow = null;
+        let selectedRows = new Set();
+        let currentImageRow = null;
         
-        document.addEventListener('DOMContentLoaded', loadProducts);
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExcelData();
+        });
         
-        function loadProducts() {
+        function loadExcelData() {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
-            displayProducts(products);
+            displayExcelData(products);
+            updateRecordCount(products.length);
         }
         
-        function displayProducts(products) {
-            const container = document.getElementById('productsList');
-            
-            if (products.length === 0) {
-                container.innerHTML = '<p>No products found. Add your first product above.</p>';
-                return;
-            }
-            
+        function displayExcelData(products) {
+            const tbody = document.getElementById('productTableBody');
             let html = '';
-            products.forEach(product => {
+            
+            products.forEach((product, index) => {
+                const rowId = product.id;
+                const isSelected = selectedRows.has(rowId);
+                
                 html += `
-                    <div class="product-card-admin">
-                        <div style="display: flex; gap: 20px; width: 100%;">
+                    <tr id="row-${rowId}" data-id="${rowId}" data-index="${index}">
+                        <td class="excel-row-number">${index + 1}</td>
+                        <td style="text-align: center;">
+                            <input type="checkbox" class="row-checkbox" data-id="${rowId}" ${isSelected ? 'checked' : ''} onchange="toggleRow('${rowId}')">
+                        </td>
+                        <td>
+                            <div class="excel-cell-content" ondblclick="editCell(this, 'sku', '${rowId}')">${product.sku || ''}</div>
+                        </td>
+                        <td>
+                            <div class="excel-cell-content" ondblclick="editCell(this, 'name', '${rowId}')">${product.name || ''}</div>
+                        </td>
+                        <td>
+                            <div class="excel-cell-content" ondblclick="editCell(this, 'category', '${rowId}')">${product.category || ''}</div>
+                        </td>
+                        <td>
+                            <div class="excel-cell-content" ondblclick="editCell(this, 'price', '${rowId}')">${product.price || 0}</div>
+                        </td>
+                        <td>
+                            <div class="excel-cell-content" ondblclick="editCell(this, 'stock', '${rowId}')">${product.stock || 0}</div>
+                        </td>
+                        <td>
                             <img src="${product.image || CONFIG.PLACEHOLDER_IMAGE}" 
-                                 style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 2px solid #d4af37;"
+                                 class="excel-image-preview" 
+                                 onclick="openImageModal('${rowId}')"
                                  onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
-                            <div style="flex: 1;">
-                                <h4>${product.name}</h4>
-                                <p style="color: #888;">SKU: ${product.sku}</p>
-                                <p style="color: #d4af37;">Category: ${product.category}</p>
-                                <p style="color: #d4af37; font-weight: bold;">₹${Number(product.price).toLocaleString('en-IN')}</p>
-                                <p>Stock: ${product.stock}</p>
+                        </td>
+                        <td>
+                            <div class="excel-cell-content" ondblclick="editCell(this, 'description', '${rowId}')">${product.description || ''}</div>
+                        </td>
+                        <td>
+                            <div class="excel-actions">
+                                <button class="excel-edit-btn" onclick="editRow('${rowId}')">✏️ Edit</button>
+                                <button class="excel-delete-btn" onclick="deleteRow('${rowId}')">🗑️ Del</button>
                             </div>
-                            <div>
-                                <button onclick="editProduct('${product.id}')" style="background: #2196f3; width: auto; padding: 8px 15px; margin-bottom: 5px;">✏️ Edit</button>
-                                <button onclick="deleteProduct('${product.id}')" style="background: #f44336; width: auto; padding: 8px 15px;">🗑️ Delete</button>
-                            </div>
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
                 `;
             });
             
-            container.innerHTML = html;
+            tbody.innerHTML = html;
+            document.getElementById('rowCount').textContent = `Total: ${products.length} rows`;
         }
         
-        function addProduct() {
-            const sku = document.getElementById('sku').value.trim();
-            const name = document.getElementById('name').value.trim();
-            const category = document.getElementById('category').value.trim();
-            const price = document.getElementById('price').value.trim();
-            const stock = document.getElementById('stock').value.trim();
-            const description = document.getElementById('description').value.trim();
+        function editCell(element, field, rowId) {
+            if (currentEditingRow) return;
             
-            if (!sku || !name || !category || !price || !stock) {
-                alert('Please fill all required fields');
-                return;
+            const currentValue = element.textContent;
+            const td = element.parentElement;
+            
+            let input;
+            if (field === 'category') {
+                input = document.createElement('select');
+                input.innerHTML = `
+                    <option value="Necklaces">Necklaces</option>
+                    <option value="Rings">Rings</option>
+                    <option value="Earrings">Earrings</option>
+                    <option value="Bracelets">Bracelets</option>
+                    <option value="Bangles">Bangles</option>
+                `;
+                input.value = currentValue;
+            } else {
+                input = document.createElement('input');
+                input.type = (field === 'price' || field === 'stock') ? 'number' : 'text';
+                input.value = currentValue;
+                if (field === 'price' || field === 'stock') {
+                    input.min = "0";
+                    input.step = field === 'price' ? "1" : "1";
+                }
             }
             
-            // Get image based on category or use placeholder
-            const imageUrl = imageMap[category] || CONFIG.PLACEHOLDER_IMAGE;
+            input.className = 'excel-edit-input';
+            input.style.width = '100%';
             
+            td.innerHTML = '';
+            td.appendChild(input);
+            input.focus();
+            
+            currentEditingRow = { element: td, field, rowId, oldValue: currentValue };
+            
+            input.onblur = function() {
+                saveCellEdit(td, input.value, field, rowId);
+            };
+            
+            input.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    saveCellEdit(td, input.value, field, rowId);
+                }
+            };
+        }
+        
+        function saveCellEdit(td, newValue, field, rowId) {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            const index = products.findIndex(p => p.id == rowId);
+            
+            if (index !== -1) {
+                if (field === 'price' || field === 'stock') {
+                    newValue = Number(newValue) || 0;
+                }
+                
+                products[index][field] = newValue;
+                localStorage.setItem('products', JSON.stringify(products));
+                
+                // Update cell display
+                td.innerHTML = `<div class="excel-cell-content" ondblclick="editCell(this, '${field}', '${rowId}')">${newValue}</div>`;
+            }
+            
+            currentEditingRow = null;
+            updateLastUpdated();
+        }
+        
+        function addNewRow() {
             const newProduct = {
                 id: Date.now(),
-                sku: sku,
-                name: name,
-                category: category,
-                price: Number(price),
-                stock: Number(stock),
-                description: description || '',
-                image: imageUrl
+                sku: 'NEW' + Date.now().toString().slice(-4),
+                name: 'New Product',
+                category: 'Necklaces',
+                price: 0,
+                stock: 0,
+                description: '',
+                image: CONFIG.PLACEHOLDER_IMAGE
             };
             
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             products.push(newProduct);
             localStorage.setItem('products', JSON.stringify(products));
             
-            alert('✅ Product added successfully!');
+            loadExcelData();
+            updateLastUpdated();
             
-            // Clear form
-            document.getElementById('sku').value = '';
-            document.getElementById('name').value = '';
-            document.getElementById('category').value = '';
-            document.getElementById('price').value = '';
-            document.getElementById('stock').value = '10';
-            document.getElementById('description').value = '';
-            document.getElementById('productImage').value = '';
-            
-            loadProducts();
+            // Scroll to new row
+            setTimeout(() => {
+                document.getElementById(`row-${newProduct.id}`)?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
         }
         
-        function editProduct(id) {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const product = products.find(p => p.id == id);
-            
-            if (!product) return;
-            
-            document.getElementById('editProductId').value = product.id;
-            document.getElementById('editSku').value = product.sku || '';
-            document.getElementById('editName').value = product.name || '';
-            document.getElementById('editCategory').value = product.category || '';
-            document.getElementById('editPrice').value = product.price || '';
-            document.getElementById('editStock').value = product.stock || '';
-            document.getElementById('editDescription').value = product.description || '';
-            document.getElementById('editCurrentImage').src = product.image || CONFIG.PLACEHOLDER_IMAGE;
-            
-            document.getElementById('editModal').style.display = 'block';
+        function editRow(rowId) {
+            // Double-click to edit first cell
+            const firstCell = document.querySelector(`#row-${rowId} td:nth-child(3) .excel-cell-content`);
+            if (firstCell) {
+                firstCell.dblclick();
+            }
         }
         
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
+        function deleteRow(rowId) {
+            if (confirm('Delete this row?')) {
+                const products = JSON.parse(localStorage.getItem('products') || '[]');
+                const updatedProducts = products.filter(p => p.id != rowId);
+                localStorage.setItem('products', JSON.stringify(updatedProducts));
+                
+                selectedRows.delete(rowId);
+                loadExcelData();
+                updateLastUpdated();
+            }
         }
         
-        function saveEdit() {
-            const id = document.getElementById('editProductId').value;
-            const sku = document.getElementById('editSku').value.trim();
-            const name = document.getElementById('editName').value.trim();
-            const category = document.getElementById('editCategory').value.trim();
-            const price = document.getElementById('editPrice').value.trim();
-            const stock = document.getElementById('editStock').value.trim();
-            const description = document.getElementById('editDescription').value.trim();
-            
-            if (!sku || !name || !category || !price || !stock) {
-                alert('Please fill all required fields');
+        function deleteSelected() {
+            if (selectedRows.size === 0) {
+                alert('No rows selected');
                 return;
             }
             
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const index = products.findIndex(p => p.id == id);
-            
-            if (index === -1) return;
-            
-            // Update product
-            products[index] = {
-                ...products[index],
-                sku: sku,
-                name: name,
-                category: category,
-                price: Number(price),
-                stock: Number(stock),
-                description: description || ''
-            };
-            
-            localStorage.setItem('products', JSON.stringify(products));
-            
-            alert('✅ Product updated successfully!');
-            closeEditModal();
-            loadProducts();
+            if (confirm(`Delete ${selectedRows.size} selected row(s)?`)) {
+                const products = JSON.parse(localStorage.getItem('products') || '[]');
+                const updatedProducts = products.filter(p => !selectedRows.has(p.id.toString()));
+                localStorage.setItem('products', JSON.stringify(updatedProducts));
+                
+                selectedRows.clear();
+                loadExcelData();
+                updateLastUpdated();
+            }
         }
         
-        function deleteProduct(id) {
-            if (!confirm('Delete this product?')) return;
+        function toggleRow(rowId) {
+            if (selectedRows.has(rowId)) {
+                selectedRows.delete(rowId);
+            } else {
+                selectedRows.add(rowId);
+            }
+            updateSelectAllCheckbox();
+        }
+        
+        function toggleAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.row-checkbox');
             
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const updatedProducts = products.filter(p => p.id != id);
-            localStorage.setItem('products', JSON.stringify(updatedProducts));
+            if (selectAll.checked) {
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                    selectedRows.add(cb.dataset.id);
+                });
+            } else {
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                });
+                selectedRows.clear();
+            }
+        }
+        
+        function updateSelectAllCheckbox() {
+            const totalRows = document.querySelectorAll('.row-checkbox').length;
+            const selectAll = document.getElementById('selectAll');
             
-            alert('✅ Product deleted');
-            loadProducts();
+            if (selectedRows.size === totalRows && totalRows > 0) {
+                selectAll.checked = true;
+            } else {
+                selectAll.checked = false;
+            }
+        }
+        
+        function saveAllChanges() {
+            alert('All changes saved!');
+            updateLastUpdated();
+        }
+        
+        function refreshData() {
+            loadExcelData();
+            updateLastUpdated();
+        }
+        
+        function updateRecordCount(count) {
+            document.getElementById('recordCount').textContent = `${count} records`;
+        }
+        
+        function updateLastUpdated() {
+            document.getElementById('lastUpdated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+        }
+        
+        // Image handling
+        function openImageModal(rowId) {
+            currentImageRow = rowId;
+            document.getElementById('imageModal').style.display = 'block';
+        }
+        
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+            document.getElementById('modalImageInput').value = '';
+            document.getElementById('modalImagePreview').innerHTML = '';
+            currentImageRow = null;
+        }
+        
+        document.getElementById('modalImageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('modalImagePreview').innerHTML = 
+                        `<img src="${event.target.result}" class="image-preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        function saveUploadedImage() {
+            const file = document.getElementById('modalImageInput').files[0];
+            if (!file || !currentImageRow) {
+                closeImageModal();
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imageUrl = event.target.result;
+                
+                const products = JSON.parse(localStorage.getItem('products') || '[]');
+                const index = products.findIndex(p => p.id == currentImageRow);
+                
+                if (index !== -1) {
+                    products[index].image = imageUrl;
+                    localStorage.setItem('products', JSON.stringify(products));
+                    
+                    // Update image in table
+                    const imgCell = document.querySelector(`#row-${currentImageRow} td:nth-child(8) img`);
+                    if (imgCell) {
+                        imgCell.src = imageUrl;
+                    }
+                }
+                
+                closeImageModal();
+                updateLastUpdated();
+            };
+            reader.readAsDataURL(file);
         }
         
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');
             window.location.href = 'login.html';
-        }
-        
-        window.onclick = function(event) {
-            const modal = document.getElementById('editModal');
-            if (event.target == modal) {
-                closeEditModal();
-            }
         }
     </script>
 </body>
