@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Design - Style Of Life</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .design-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .design-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .design-card h2 {
+            color: #d4af37;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .design-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .design-item {
+            background: #222;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .design-item h3 {
+            color: #d4af37;
+            margin-bottom: 15px;
+        }
+        
+        .preview-image {
+            width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 2px solid #333;
+            margin-bottom: 15px;
+            background: #2a2a2a;
+            padding: 10px;
+        }
+        
+        .url-input {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .url-input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+        
+        .upload-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+        }
+        
+        .file-input {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .upload-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 14px;
+        }
+        
+        .upload-btn:hover {
+            background: #45a049;
+        }
+        
+        .color-picker {
+            width: 100%;
+            height: 40px;
+            padding: 5px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 5px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        
+        .save-btn {
+            background: #d4af37;
+            color: black;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .save-btn:hover {
+            background: #b8962e;
+        }
+        
+        .current-image {
+            font-size: 12px;
+            color: #888;
+            word-break: break-all;
+            margin-top: 10px;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 5px;
+        }
+        
+        .reset-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .reset-btn:hover {
+            background: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">✨ STYLE OF LIFE - DESIGN</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="admin.html">Dashboard</a>
+            <a href="admin-products.html">Products</a>
+            <a href="admin-orders.html">Orders</a>
+            <a href="admin-design.html" class="active">Design</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+
+    <div class="design-container">
+        <h1 class="page-title">🎨 Website Design Settings</h1>
+        
+        <div class="design-card">
+            <h2>Website Images</h2>
+            <p style="color: #888; margin-bottom: 20px;">Upload images or paste URLs for your website design</p>
+            
+            <div class="design-grid">
+                <!-- Logo Upload -->
+                <div class="design-item">
+                    <h3>Logo</h3>
+                    <img id="logoPreview" class="preview-image" src="" alt="Logo preview">
+                    <div class="upload-section">
+                        <input type="file" id="logoFile" class="file-input" accept="image/*">
+                        <button class="upload-btn" onclick="uploadImage('logo')">Upload Logo</button>
+                    </div>
+                    <div class="url-input-section">
+                        <input type="url" id="logoUrl" class="url-input" placeholder="Or paste image URL">
+                        <button class="upload-btn" onclick="saveUrl('logo')" style="background: #2196f3;">Use URL</button>
+                    </div>
+                    <div id="logoCurrent" class="current-image"></div>
+                </div>
+                
+                <!-- Hero Image Upload -->
+                <div class="design-item">
+                    <h3>Hero Banner</h3>
+                    <img id="heroPreview" class="preview-image" src="" alt="Hero preview">
+                    <div class="upload-section">
+                        <input type="file" id="heroFile" class="file-input" accept="image/*">
+                        <button class="upload-btn" onclick="uploadImage('hero')">Upload Hero</button>
+                    </div>
+                    <div class="url-input-section">
+                        <input type="url" id="heroUrl" class="url-input" placeholder="Or paste image URL">
+                        <button class="upload-btn" onclick="saveUrl('hero')" style="background: #2196f3;">Use URL</button>
+                    </div>
+                    <div id="heroCurrent" class="current-image"></div>
+                </div>
+                
+                <!-- Banner Image Upload -->
+                <div class="design-item">
+                    <h3>Promotional Banner</h3>
+                    <img id="bannerPreview" class="preview-image" src="" alt="Banner preview">
+                    <div class="upload-section">
+                        <input type="file" id="bannerFile" class="file-input" accept="image/*">
+                        <button class="upload-btn" onclick="uploadImage('banner')">Upload Banner</button>
+                    </div>
+                    <div class="url-input-section">
+                        <input type="url" id="bannerUrl" class="url-input" placeholder="Or paste image URL">
+                        <button class="upload-btn" onclick="saveUrl('banner')" style="background: #2196f3;">Use URL</button>
+                    </div>
+                    <div id="bannerCurrent" class="current-image"></div>
+                </div>
+                
+                <!-- Favicon Upload -->
+                <div class="design-item">
+                    <h3>Favicon</h3>
+                    <img id="faviconPreview" class="preview-image" src="" alt="Favicon preview" style="max-height: 50px;">
+                    <div class="upload-section">
+                        <input type="file" id="faviconFile" class="file-input" accept="image/*">
+                        <button class="upload-btn" onclick="uploadImage('favicon')">Upload Favicon</button>
+                    </div>
+                    <div class="url-input-section">
+                        <input type="url" id="faviconUrl" class="url-input" placeholder="Or paste image URL">
+                        <button class="upload-btn" onclick="saveUrl('favicon')" style="background: #2196f3;">Use URL</button>
+                    </div>
+                    <div id="faviconCurrent" class="current-image"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="design-card">
+            <h2>Site Settings</h2>
+            
+            <div style="max-width: 500px; margin: 0 auto;">
+                <div class="form-group">
+                    <label>Site Name</label>
+                    <input type="text" id="siteName" class="url-input" value="Style Of Life Jewelry">
+                </div>
+                
+                <div class="form-group">
+                    <label>Primary Color (Gold)</label>
+                    <input type="color" id="primaryColor" class="color-picker" value="#d4af37">
+                </div>
+                
+                <div class="form-group">
+                    <label>Secondary Color (Black)</label>
+                    <input type="color" id="secondaryColor" class="color-picker" value="#000000">
+                </div>
+            </div>
+        </div>
+        
+        <button class="save-btn" onclick="saveAllSettings()">💾 Save All Changes</button>
+        <button class="save-btn" onclick="resetToDefault()" style="background: #666; margin-top: 10px;">↺ Reset to Default</button>
+    </div>
+
+    <footer>
+        <p>© 2026 Style Of Life Jewelry - Design Settings</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script>
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+        
+        // Load current settings
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDesignSettings();
+        });
+        
+        function loadDesignSettings() {
+            const settings = JSON.parse(localStorage.getItem('design_settings') || '{}');
+            
+            // Update previews
+            if (settings.logo) {
+                document.getElementById('logoPreview').src = settings.logo;
+                document.getElementById('logoCurrent').innerHTML = `Current: ${settings.logo.substring(0, 50)}... <button class="reset-btn" onclick="clearImage('logo')">Clear</button>`;
+            }
+            if (settings.hero) {
+                document.getElementById('heroPreview').src = settings.hero;
+                document.getElementById('heroCurrent').innerHTML = `Current: ${settings.hero.substring(0, 50)}... <button class="reset-btn" onclick="clearImage('hero')">Clear</button>`;
+            }
+            if (settings.banner) {
+                document.getElementById('bannerPreview').src = settings.banner;
+                document.getElementById('bannerCurrent').innerHTML = `Current: ${settings.banner.substring(0, 50)}... <button class="reset-btn" onclick="clearImage('banner')">Clear</button>`;
+            }
+            if (settings.favicon) {
+                document.getElementById('faviconPreview').src = settings.favicon;
+                document.getElementById('faviconCurrent').innerHTML = `Current: ${settings.favicon.substring(0, 50)}... <button class="reset-btn" onclick="clearImage('favicon')">Clear</button>`;
+            }
+            
+            document.getElementById('siteName').value = settings.siteName || 'Style Of Life Jewelry';
+            document.getElementById('primaryColor').value = settings.primaryColor || '#d4af37';
+            document.getElementById('secondaryColor').value = settings.secondaryColor || '#000000';
+        }
+        
+        function uploadImage(type) {
+            const fileInput = document.getElementById(type + 'File');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            // Check file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File too large! Maximum size is 2MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageData = e.target.result;
+                
+                // Save to settings
+                const settings = JSON.parse(localStorage.getItem('design_settings') || '{}');
+                settings[type] = imageData;
+                localStorage.setItem('design_settings', JSON.stringify(settings));
+                
+                // Update preview
+                document.getElementById(type + 'Preview').src = imageData;
+                document.getElementById(type + 'Current').innerHTML = `Current: Image uploaded <button class="reset-btn" onclick="clearImage('${type}')">Clear</button>`;
+                
+                alert(type + ' image uploaded successfully!');
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function saveUrl(type) {
+            const url = document.getElementById(type + 'Url').value.trim();
+            
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+            
+            // Validate URL
+            try {
+                new URL(url);
+            } catch(e) {
+                alert('Please enter a valid URL');
+                return;
+            }
+            
+            const settings = JSON.parse(localStorage.getItem('design_settings') || '{}');
+            settings[type] = url;
+            localStorage.setItem('design_settings', JSON.stringify(settings));
+            
+            // Update preview
+            document.getElementById(type + 'Preview').src = url;
+            document.getElementById(type + 'Current').innerHTML = `Current: ${url.substring(0, 50)}... <button class="reset-btn" onclick="clearImage('${type}')">Clear</button>`;
+            document.getElementById(type + 'Url').value = '';
+            
+            alert(type + ' URL saved successfully!');
+        }
+        
+        function clearImage(type) {
+            if (confirm('Remove this image?')) {
+                const settings = JSON.parse(localStorage.getItem('design_settings') || '{}');
+                delete settings[type];
+                localStorage.setItem('design_settings', JSON.stringify(settings));
+                
+                document.getElementById(type + 'Preview').src = '';
+                document.getElementById(type + 'Current').innerHTML = '';
+            }
+        }
+        
+        function saveAllSettings() {
+            const settings = JSON.parse(localStorage.getItem('design_settings') || '{}');
+            
+            settings.siteName = document.getElementById('siteName').value;
+            settings.primaryColor = document.getElementById('primaryColor').value;
+            settings.secondaryColor = document.getElementById('secondaryColor').value;
+            
+            localStorage.setItem('design_settings', JSON.stringify(settings));
+            
+            alert('✅ All settings saved!');
+        }
+        
+        function resetToDefault() {
+            if (confirm('Reset all design settings to default?')) {
+                localStorage.removeItem('design_settings');
+                loadDesignSettings();
+                alert('Settings reset to default');
+            }
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
