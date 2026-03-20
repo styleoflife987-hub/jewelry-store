@@ -4,70 +4,132 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Style Of Life</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <header>
-        <div class="logo">✨ STYLE OF LIFE - ADMIN</div>
-        <nav>
-            <a href="index.html">Home</a>
+<body class="admin">
+    <header class="admin-header">
+        <div class="admin-logo">
+            STYLE OF LIFE <span>ADMIN</span>
+        </div>
+        <nav class="admin-nav">
             <a href="admin.html" class="active">Dashboard</a>
             <a href="admin-products.html">Products</a>
             <a href="admin-orders.html">Orders</a>
+            <a href="admin-design.html">Design</a>
             <a href="#" onclick="logout()">Logout</a>
         </nav>
     </header>
 
-    <div class="admin-container">
-        <h1 class="page-title">Admin Dashboard</h1>
+    <div style="max-width: 1400px; margin: 40px auto; padding: 0 20px;">
+        <h1 style="color: #d4af37; margin-bottom: 30px; font-size: 32px;">Dashboard Overview</h1>
         
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon">📦</div>
-                <div class="stat-info">
-                    <h3>Products</h3>
-                    <p class="stat-number" id="totalProducts">0</p>
+        <div class="admin-stats-grid">
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">📦</div>
+                <div class="admin-stat-info">
+                    <h3>Total Products</h3>
+                    <div class="stat-number" id="totalProducts">0</div>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">🛍️</div>
-                <div class="stat-info">
-                    <h3>Orders</h3>
-                    <p class="stat-number" id="totalOrders">0</p>
+            
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">🛍️</div>
+                <div class="admin-stat-info">
+                    <h3>Total Orders</h3>
+                    <div class="stat-number" id="totalOrders">0</div>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">💰</div>
-                <div class="stat-info">
+            
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">💰</div>
+                <div class="admin-stat-info">
                     <h3>Revenue</h3>
-                    <p class="stat-number" id="totalRevenue">₹0</p>
+                    <div class="stat-number" id="totalRevenue">₹0</div>
+                </div>
+            </div>
+            
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon">⏳</div>
+                <div class="admin-stat-info">
+                    <h3>Pending Orders</h3>
+                    <div class="stat-number" id="pendingOrders">0</div>
                 </div>
             </div>
         </div>
-        
-        <div class="quick-actions">
-            <a href="admin-products.html" class="action-btn">➕ Manage Products</a>
-            <a href="admin-orders.html" class="action-btn">📋 View Orders</a>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px;">
+            <div class="admin-table-container">
+                <h2 style="padding: 20px; color: #d4af37; border-bottom: 1px solid #3d3d3d;">Recent Orders</h2>
+                <div id="recentOrders" style="padding: 20px;">
+                    <p style="color: #888;">Loading...</p>
+                </div>
+            </div>
+            
+            <div class="admin-table-container">
+                <h2 style="padding: 20px; color: #d4af37; border-bottom: 1px solid #3d3d3d;">Low Stock Products</h2>
+                <div id="lowStock" style="padding: 20px;">
+                    <p style="color: #888;">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px;">
+            <a href="admin-products.html" class="admin-btn admin-btn-primary">➕ Add New Product</a>
+            <a href="admin-orders.html" class="admin-btn admin-btn-success" style="margin-left: 10px;">📋 View All Orders</a>
         </div>
     </div>
 
-    <footer>
-        <p>© 2026 Style Of Life Jewelry</p>
-    </footer>
-
     <script>
-        if (!sessionStorage.getItem('adminLoggedIn')) window.location.href = 'login.html';
-        
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+        });
+
+        function loadDashboardData() {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const revenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
             
             document.getElementById('totalProducts').textContent = products.length;
             document.getElementById('totalOrders').textContent = orders.length;
-            document.getElementById('totalRevenue').textContent = `₹${revenue.toLocaleString()}`;
-        });
-        
+            
+            const revenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+            document.getElementById('totalRevenue').textContent = `₹${revenue.toLocaleString('en-IN')}`;
+            
+            const pending = orders.filter(o => o.status === 'Pending').length;
+            document.getElementById('pendingOrders').textContent = pending;
+            
+            // Recent orders
+            const recentOrders = orders.slice(-5).reverse();
+            let ordersHtml = '';
+            recentOrders.forEach(order => {
+                ordersHtml += `
+                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #3d3d3d;">
+                        <span style="color: #d4af37;">${order.orderId}</span>
+                        <span>${order.name}</span>
+                        <span class="admin-badge admin-badge-${order.status?.toLowerCase()}">${order.status}</span>
+                    </div>
+                `;
+            });
+            document.getElementById('recentOrders').innerHTML = ordersHtml || '<p style="color: #888;">No recent orders</p>';
+            
+            // Low stock products
+            const lowStockProducts = products.filter(p => p.stock < 5);
+            let stockHtml = '';
+            lowStockProducts.forEach(product => {
+                stockHtml += `
+                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #3d3d3d;">
+                        <span style="color: #d4af37;">${product.name}</span>
+                        <span style="color: #dc3545;">Stock: ${product.stock}</span>
+                    </div>
+                `;
+            });
+            document.getElementById('lowStock').innerHTML = stockHtml || '<p style="color: #888;">All products well stocked</p>';
+        }
+
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');
             window.location.href = 'login.html';
