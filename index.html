@@ -3,113 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Style Of Life - Luxury Jewelry</title>
+    <title id="siteTitle">Style Of Life - Luxury Jewelry</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Gallery Styles */
-        .product-gallery {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            overflow: hidden;
-            background: #2a2a2a;
-        }
-        
-        .gallery-main {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: opacity 0.3s;
-        }
-        
-        .gallery-thumbnails {
-            display: flex;
-            gap: 5px;
-            padding: 10px;
-            background: rgba(0,0,0,0.8);
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .thumbnail {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: all 0.3s;
-        }
-        
-        .thumbnail:hover {
-            opacity: 1;
-            transform: scale(1.1);
-        }
-        
-        .thumbnail.active {
-            border-color: #d4af37;
-            opacity: 1;
-        }
-        
-        .image-counter {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            z-index: 10;
-        }
-        
-        .nav-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 20;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .product-gallery:hover .nav-arrow {
-            opacity: 1;
-        }
-        
-        .nav-arrow:hover {
-            background: #d4af37;
-            color: black;
-        }
-        
-        .nav-arrow.left {
-            left: 10px;
-        }
-        
-        .nav-arrow.right {
-            right: 10px;
-        }
-    </style>
+    <style id="dynamicStyles"></style>
+    <link id="favicon" rel="icon" type="image/x-icon" href="">
 </head>
 <body>
     <header>
-        <div class="logo">✨ STYLE OF LIFE</div>
+        <div class="logo" id="siteLogo">✨ STYLE OF LIFE</div>
         <nav>
             <a href="index.html" class="active">Home</a>
             <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
@@ -117,7 +19,7 @@
         </nav>
     </header>
 
-    <div class="hero">
+    <div class="hero" id="heroSection">
         <h1>Luxury Jewelry Collection</h1>
         <p>Discover Premium Handcrafted Jewelry</p>
     </div>
@@ -135,31 +37,62 @@
         let galleryData = {};
 
         document.addEventListener('DOMContentLoaded', function() {
+            applyDesignSettings();
             loadProducts();
             updateCartCount();
         });
 
-        function loadProducts() {
-            const container = document.getElementById('products');
+        function applyDesignSettings() {
+            const settings = JSON.parse(localStorage.getItem('design_settings') || '{}');
             
-            try {
-                const storedProducts = localStorage.getItem('products');
-                
-                if (storedProducts) {
-                    products = JSON.parse(storedProducts);
-                    
-                    if (products.length > 0) {
-                        displayProducts(products);
-                    } else {
-                        container.innerHTML = '<div class="error-message">No products available. Please check back later.</div>';
-                    }
-                } else {
-                    container.innerHTML = '<div class="error-message">No products found. Please add products in admin panel.</div>';
-                }
-            } catch (error) {
-                console.error('Error loading products:', error);
-                container.innerHTML = '<div class="error-message">Error loading products. Please refresh the page.</div>';
+            // Update site title
+            if (settings.siteName) {
+                document.getElementById('siteTitle').textContent = settings.siteName;
+                document.getElementById('siteLogo').textContent = settings.siteName;
             }
+            
+            // Update favicon
+            if (settings.favicon) {
+                document.getElementById('favicon').href = settings.favicon;
+            }
+            
+            // Update hero background if image exists
+            if (settings.hero) {
+                document.getElementById('heroSection').style.background = 
+                    `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('${settings.hero}')`;
+                document.getElementById('heroSection').style.backgroundSize = 'cover';
+                document.getElementById('heroSection').style.backgroundPosition = 'center';
+            }
+            
+            // Apply colors
+            if (settings.primaryColor) {
+                const style = document.createElement('style');
+                style.textContent = `
+                    .logo, .page-title, .price, .category, 
+                    nav a:hover, nav a.active,
+                    button, .checkout-btn, .place-order-btn {
+                        color: ${settings.primaryColor};
+                    }
+                    button, .checkout-btn, .place-order-btn {
+                        background: ${settings.primaryColor};
+                    }
+                    button:hover {
+                        background: ${adjustBrightness(settings.primaryColor, -20)};
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        function adjustBrightness(hex, percent) {
+            // Simple brightness adjustment
+            return hex; // You can implement proper color adjustment if needed
+        }
+
+        function loadProducts() {
+            const storedProducts = localStorage.getItem('products');
+            products = storedProducts ? JSON.parse(storedProducts) : [];
+            displayProducts(products);
         }
 
         function displayProducts(products) {
@@ -178,23 +111,22 @@
                 const stock = Number(product.stock) || 0;
                 const sku = product.sku || `SKU${product.id}`;
                 
-                const images = product.images || Array(5).fill('');
+                const images = product.images || [];
                 const validImages = images.filter(url => url && url.trim() !== '');
-                const hasImages = validImages.length > 0;
-                const mainImage = validImages[0] || CONFIG.PLACEHOLDER_IMAGE;
                 
                 html += `
                     <div class="card" data-product-id="${product.id}">
                         <div class="product-gallery" id="gallery-${product.id}">
-                            ${hasImages ? `
+                            ${validImages.length > 0 ? `
                                 <button class="nav-arrow left" onclick="changeImage('${product.id}', -1)">←</button>
                                 <button class="nav-arrow right" onclick="changeImage('${product.id}', 1)">→</button>
                                 
-                                <img src="${mainImage}" 
+                                <img src="${validImages[0]}" 
                                      class="gallery-main" 
                                      id="main-${product.id}"
                                      alt="${product.name}"
-                                     onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
+                                     onclick="showImage('${validImages[0]}')"
+                                     style="cursor: pointer;">
                                 
                                 <div class="image-counter" id="counter-${product.id}">
                                     1 / ${validImages.length}
@@ -205,25 +137,23 @@
                                         <img src="${img}" 
                                              class="thumbnail ${idx === 0 ? 'active' : ''}" 
                                              onclick="setMainImage('${product.id}', ${idx})"
-                                             onerror="this.style.display='none'">
+                                             style="cursor: pointer;">
                                     `).join('')}
                                 </div>
                             ` : `
-                                <img src="${CONFIG.PLACEHOLDER_IMAGE}" 
-                                     class="gallery-main"
-                                     alt="${product.name}">
+                                <div class="no-image">No image uploaded</div>
                             `}
                         </div>
                         
                         <div class="product-info">
                             <p class="sku">SKU: ${sku}</p>
                             <h3>${product.name}</h3>
-                            <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
+                            <p class="category">${product.category || ''}</p>
                             <div class="price">${CONFIG.CURRENCY}${price.toLocaleString('en-IN')}</div>
                             <p class="stock ${stock > 0 ? 'in-stock' : 'out-of-stock'}">
                                 ${stock > 0 ? `In Stock (${stock})` : 'Out of Stock'}
                             </p>
-                            <button onclick="addToCart('${sku}', '${product.name.replace(/'/g, "\\'")}', ${price}, '${mainImage}')" 
+                            <button onclick="addToCart('${sku}', '${product.name.replace(/'/g, "\\'")}', ${price}, '${validImages[0] || ''}')" 
                                     class="add-to-cart-btn"
                                     ${stock <= 0 ? 'disabled' : ''}>
                                 Add to Cart
@@ -236,7 +166,6 @@
             container.innerHTML = html;
             
             // Initialize gallery data
-            galleryData = {};
             products.forEach(product => {
                 galleryData[product.id] = {
                     currentIndex: 0,
@@ -264,13 +193,16 @@
             const gallery = galleryData[productId];
             if (!gallery.images[index]) return;
             
-            const mainImg = document.getElementById(`main-${productId}`);
-            if (mainImg) mainImg.src = gallery.images[index];
+            const mainImg = document.getElementById(`main-${product.id}`);
+            if (mainImg) {
+                mainImg.src = gallery.images[index];
+                mainImg.onclick = function() { showImage(gallery.images[index]); };
+            }
             
-            const counter = document.getElementById(`counter-${productId}`);
+            const counter = document.getElementById(`counter-${product.id}`);
             if (counter) counter.textContent = `${index + 1} / ${gallery.images.length}`;
             
-            const thumbnails = document.querySelectorAll(`#gallery-${productId} .thumbnail`);
+            const thumbnails = document.querySelectorAll(`#gallery-${product.id} .thumbnail`);
             thumbnails.forEach((thumb, idx) => {
                 if (idx === index) thumb.classList.add('active');
                 else thumb.classList.remove('active');
@@ -278,6 +210,11 @@
             
             gallery.currentIndex = index;
         };
+        
+        function showImage(src) {
+            // You can add a lightbox here if needed
+            window.open(src, '_blank');
+        }
     </script>
 </body>
 </html>
