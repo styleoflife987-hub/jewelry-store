@@ -5,20 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Management - Style Of Life</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
     <style>
-        .status-select { padding: 5px 10px; border-radius: 20px; border: none; font-weight: 500; cursor: pointer; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #d4af37; --dark: #1a1a1a; --darker: #0a0a0a; --light: #ffffff; --gray-100: #f8f9fa; --gray-200: #e9ecef; --danger: #dc3545; }
+        body { font-family: 'Inter', sans-serif; background: var(--gray-100); }
+        header { background: var(--darker); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 600; color: var(--primary); }
+        .logo span { background: var(--primary); color: var(--darker); padding: 4px 8px; border-radius: 4px; font-size: 14px; }
+        nav a { color: #aaa; text-decoration: none; margin-left: 20px; padding: 8px 15px; border-radius: 6px; }
+        nav a:hover, nav a.active { background: rgba(212,175,55,0.1); color: var(--primary); }
+        .container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
+        h1 { color: var(--primary); margin-bottom: 30px; }
+        .stats { display: flex; gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--gray-200); text-align: center; flex: 1; }
+        .stat-number { font-size: 28px; font-weight: 700; color: var(--primary); }
+        table { width: 100%; background: white; border-radius: 12px; overflow: hidden; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--gray-200); }
+        th { background: var(--gray-100); color: var(--gray-600); }
+        .status-select { padding: 5px 10px; border-radius: 20px; border: none; cursor: pointer; }
         .status-pending { background: #fff3cd; color: #856404; }
-        .status-processing { background: #d1ecf1; color: #0c5460; }
-        .status-shipped { background: #d4edda; color: #155724; }
-        .status-delivered { background: #c3e6cb; color: #155724; }
-        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .delete-btn { background: var(--danger); color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; }
+        footer { background: var(--darker); color: white; text-align: center; padding: 30px; margin-top: 60px; }
     </style>
 </head>
-<body class="admin">
-    <header class="admin-header">
-        <div class="admin-logo">STYLE OF LIFE <span>ADMIN</span></div>
-        <nav class="admin-nav">
+<body>
+    <header>
+        <div class="logo">STYLE OF LIFE <span>ADMIN</span></div>
+        <nav>
             <a href="admin.html">Dashboard</a>
             <a href="admin-products.html">Products</a>
             <a href="admin-orders.html" class="active">Orders</a>
@@ -26,44 +39,33 @@
         </nav>
     </header>
 
-    <div class="admin-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h1 style="color: var(--primary);">Order Management</h1>
-            <div style="display: flex; gap: 15px;">
-                <div class="admin-stat-card" style="padding: 10px 20px;"><div class="admin-stat-info"><h3>Total</h3><div class="stat-number" id="totalOrders">0</div></div></div>
-                <div class="admin-stat-card" style="padding: 10px 20px;"><div class="admin-stat-info"><h3>Revenue</h3><div class="stat-number" id="totalRevenue">₹0</div></div></div>
-                <div class="admin-stat-card" style="padding: 10px 20px;"><div class="admin-stat-info"><h3>Pending</h3><div class="stat-number" id="pendingOrders">0</div></div></div>
-            </div>
-        </div>
+    <div class="container">
+        <h1>Order Management</h1>
+        <div class="stats" id="stats"></div>
         
-        <div class="admin-table-container">
-            <table class="admin-table">
-                <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
-                <tbody id="ordersList"></tbody>
-            </table>
-        </div>
+        <table>
+            <thead><tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th> </thead>
+            <tbody id="ordersList"></tbody>
+        </table>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
+    <footer><p>© 2026 STYLE OF LIFE</p></footer>
+
     <script>
         if (!sessionStorage.getItem('adminLoggedIn')) window.location.href = 'login.html';
         
-        document.addEventListener('DOMContentLoaded', loadOrders);
-        setInterval(loadOrders, 30000);
-        
-        async function loadOrders() {
-            const orders = await getOrders();
-            displayOrders(orders);
-            const total = orders.reduce((s,o) => s + (o.total || 0), 0);
-            document.getElementById('totalOrders').textContent = orders.length;
-            document.getElementById('totalRevenue').textContent = `₹${total.toLocaleString()}`;
-            document.getElementById('pendingOrders').textContent = orders.filter(o => o.status === 'Pending').length;
-        }
-        
-        function displayOrders(orders) {
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const totalRevenue = orders.reduce((s, o) => s + (o.total || 0), 0);
+            
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card"><h3>Total Orders</h3><div class="stat-number">${orders.length}</div></div>
+                <div class="stat-card"><h3>Revenue</h3><div class="stat-number">₹${totalRevenue.toLocaleString()}</div></div>
+                <div class="stat-card"><h3>Pending</h3><div class="stat-number">${orders.filter(o => o.status === 'Pending').length}</div></div>
+            `;
+            
             const tbody = document.getElementById('ordersList');
-            if (!orders || orders.length === 0) {
+            if (orders.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No orders found</td></tr>';
                 return;
             }
@@ -87,32 +89,37 @@
                             </select>
                         </td>
                         <td>${new Date(o.date).toLocaleDateString()}</td>
-                        <td><button class="admin-btn admin-btn-danger" onclick="deleteOrder('${o.orderId}')">Delete</button></td>
-                    </tr>`;
+                        <td><button class="delete-btn" onclick="deleteOrder('${o.orderId}')">Delete</button></td>
+                    </tr>
+                `;
             });
             tbody.innerHTML = html;
         }
         
-        async function updateStatus(orderId, status) {
-            const result = await updateOrderStatus(orderId, status);
-            if (result.success) {
-                showNotification(`✅ Order ${orderId} updated to ${status}`);
-                await loadOrders();
-            } else {
-                showNotification(`❌ Failed: ${result.error}`, 'error');
+        function updateStatus(orderId, status) {
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const index = orders.findIndex(o => o.orderId === orderId);
+            if (index !== -1) {
+                orders[index].status = status;
+                localStorage.setItem('orders', JSON.stringify(orders));
+                loadOrders();
+                alert(`Order ${orderId} updated to ${status}`);
             }
         }
         
-        async function deleteOrder(orderId) {
+        function deleteOrder(orderId) {
             if (!confirm('Delete this order?')) return;
-            const result = await deleteOrder(orderId);
-            if (result.success) {
-                showNotification(`✅ Order ${orderId} deleted`);
-                await loadOrders();
-            }
+            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const filtered = orders.filter(o => o.orderId !== orderId);
+            localStorage.setItem('orders', JSON.stringify(filtered));
+            loadOrders();
+            alert('Order deleted');
         }
         
         function logout() { sessionStorage.removeItem('adminLoggedIn'); window.location.href = 'login.html'; }
+        
+        document.addEventListener('DOMContentLoaded', loadOrders);
+        setInterval(loadOrders, 5000);
     </script>
 </body>
 </html>
