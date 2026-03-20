@@ -4,32 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Order - Style Of Life</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
-    <header>
-        <div class="logo">✨ STYLE OF LIFE</div>
-        <nav>
+<body class="customer">
+    <header class="customer-header">
+        <div class="customer-logo">STYLE OF LIFE</div>
+        <nav class="customer-nav">
             <a href="index.html">Home</a>
             <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
             <a href="track.html" class="active">Track Order</a>
         </nav>
     </header>
 
-    <div class="container">
-        <div class="track-container">
-            <h1 class="page-title">Track Your Order</h1>
-            <div class="track-form">
-                <input type="text" id="orderId" placeholder="Enter Order ID" class="track-input">
-                <button onclick="trackOrder()" class="track-btn">Track</button>
-            </div>
-            <div id="trackingResult" class="tracking-result"></div>
+    <div class="track-container">
+        <h1 style="color: var(--primary); margin-bottom: 20px;">Track Your Order</h1>
+        <div class="track-form">
+            <input type="text" id="orderId" class="track-input" placeholder="Enter Order ID">
+            <button class="track-btn" onclick="trackOrder()">Track</button>
         </div>
+        <div id="trackingResult"></div>
     </div>
-
-    <footer>
-        <p>© 2026 Style Of Life Jewelry</p>
-    </footer>
 
     <script>
         function trackOrder() {
@@ -48,16 +43,18 @@
                 });
                 
                 resultDiv.innerHTML = `
-                    <h3>Order Found</h3>
-                    <p>ID: ${order.orderId}</p>
-                    <p>Customer: ${order.name}</p>
-                    <p>Status: ${order.status}</p>
-                    <p>Total: ₹${order.total}</p>
-                    <h4>Items:</h4>
-                    ${itemsHtml}
+                    <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                        <h3 style="color: var(--primary);">Order Found</h3>
+                        <p><strong>ID:</strong> ${order.orderId}</p>
+                        <p><strong>Customer:</strong> ${order.name}</p>
+                        <p><strong>Status:</strong> <span class="admin-badge admin-badge-${order.status.toLowerCase()}">${order.status}</span></p>
+                        <p><strong>Total:</strong> ₹${order.total}</p>
+                        <h4>Items:</h4>
+                        ${itemsHtml}
+                    </div>
                 `;
             } else {
-                resultDiv.innerHTML = '<p>Order not found</p>';
+                resultDiv.innerHTML = '<p style="color: var(--danger);">Order not found</p>';
             }
         }
         
