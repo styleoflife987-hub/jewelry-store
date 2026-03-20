@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Upload</title>
+</head>
+<body>
+    <h2>Test Apps Script Connection</h2>
+    <div id="result"></div>
+    
+    <script>
+        const TEST_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+        
+        async function testConnection() {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(TEST_URL + '?action=test');
+                const text = await response.text();
+                result.innerHTML = '<pre>' + text + '</pre>';
+            } catch (error) {
+                result.innerHTML = 'Error: ' + error.message;
+            }
+        }
+        
+        testConnection();
+    </script>
+</body>
+</html>
