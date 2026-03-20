@@ -1,16 +1,12 @@
+// js/data.js - Initialize data
 (function() {
-    // Initialize with empty products array
+    // Initialize products if not exists
     if (!localStorage.getItem('products')) {
         localStorage.setItem('products', '[]');
     }
     
-    // Initialize orders
+    // Initialize orders if not exists
     if (!localStorage.getItem('orders')) {
         localStorage.setItem('orders', '[]');
-    }
-    
-    // Initialize design settings if not exists
-    if (!localStorage.getItem('design_settings')) {
-        localStorage.setItem('design_settings', '{}');
     }
 })();
