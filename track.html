@@ -7,12 +7,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
+        .order-details { background: white; border-radius: 12px; padding: 20px; margin-top: 20px; text-align: left; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
         .status-pending { background: #ffc107; color: #856404; }
         .status-processing { background: #17a2b8; color: white; }
         .status-shipped { background: #28a745; color: white; }
         .status-delivered { background: #20c997; color: white; }
         .status-cancelled { background: #dc3545; color: white; }
-        .order-details { background: white; border-radius: 12px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="customer">
@@ -28,7 +29,7 @@
     <div class="track-container">
         <h1 style="color: var(--primary); margin-bottom: 20px;">Track Your Order</h1>
         <div class="track-form">
-            <input type="text" id="orderId" class="track-input" placeholder="Enter Order ID">
+            <input type="text" id="orderId" class="track-input" placeholder="Enter Order ID (e.g., ORD1234567890)">
             <button class="track-btn" onclick="trackOrder()">Track</button>
         </div>
         <div id="trackingResult"></div>
@@ -53,8 +54,8 @@
             }
             
             let itemsHtml = '';
-            order.items.forEach(item => {
-                itemsHtml += `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #e9ecef;"><span>${item.name} x${item.quantity}</span><span>₹${(item.price * item.quantity).toLocaleString()}</span></div>`;
+            order.items.forEach(i => {
+                itemsHtml += `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #e9ecef;"><span>${i.name} x${i.quantity}</span><span>₹${(i.price * i.quantity).toLocaleString()}</span></div>`;
             });
             
             resultDiv.innerHTML = `
@@ -64,18 +65,14 @@
                     <p><strong>Customer:</strong> ${order.name}</p>
                     <p><strong>Phone:</strong> ${order.phone}</p>
                     <p><strong>Address:</strong> ${order.address}</p>
-                    <p><strong>Status:</strong> <span class="admin-badge status-${order.status.toLowerCase()}">${order.status}</span></p>
+                    <p><strong>Status:</strong> <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></p>
                     <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
                     <h4 style="margin:15px 0 10px;">Items:</h4>
                     ${itemsHtml}
                     <div style="margin-top:15px; padding-top:10px; border-top:2px solid #e9ecef;">
-                        <p><strong>Subtotal:</strong> ₹${order.subtotal.toLocaleString()}</p>
-                        <p><strong>Tax (18%):</strong> ₹${order.tax.toLocaleString()}</p>
-                        <p><strong>Shipping:</strong> ₹${order.shipping}</p>
-                        <p style="font-size:20px; color:var(--primary);"><strong>Total:</strong> ₹${order.total.toLocaleString()}</p>
+                        <p><strong>Total:</strong> ₹${order.total.toLocaleString()}</p>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
         
         const urlParams = new URLSearchParams(window.location.search);
