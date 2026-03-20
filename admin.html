@@ -9,14 +9,11 @@
 </head>
 <body class="admin">
     <header class="admin-header">
-        <div class="admin-logo">
-            STYLE OF LIFE <span>ADMIN</span>
-        </div>
+        <div class="admin-logo">STYLE OF LIFE <span>ADMIN</span></div>
         <nav class="admin-nav">
             <a href="admin.html" class="active">Dashboard</a>
             <a href="admin-products.html">Products</a>
             <a href="admin-orders.html">Orders</a>
-            <a href="admin-design.html">Design</a>
             <a href="#" onclick="logout()">Logout</a>
         </nav>
     </header>
@@ -25,114 +22,42 @@
         <h1 style="color: var(--primary); margin-bottom: 30px;">Dashboard Overview</h1>
         
         <div class="admin-stats-grid">
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">📦</div>
-                <div class="admin-stat-info">
-                    <h3>Total Products</h3>
-                    <div class="stat-number" id="totalProducts">0</div>
-                </div>
-            </div>
-            
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">🛍️</div>
-                <div class="admin-stat-info">
-                    <h3>Total Orders</h3>
-                    <div class="stat-number" id="totalOrders">0</div>
-                </div>
-            </div>
-            
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">💰</div>
-                <div class="admin-stat-info">
-                    <h3>Revenue</h3>
-                    <div class="stat-number" id="totalRevenue">₹0</div>
-                </div>
-            </div>
-            
-            <div class="admin-stat-card">
-                <div class="admin-stat-icon">⏳</div>
-                <div class="admin-stat-info">
-                    <h3>Pending Orders</h3>
-                    <div class="stat-number" id="pendingOrders">0</div>
-                </div>
-            </div>
+            <div class="admin-stat-card"><div class="admin-stat-icon">📦</div><div class="admin-stat-info"><h3>Products</h3><div class="stat-number" id="totalProducts">0</div></div></div>
+            <div class="admin-stat-card"><div class="admin-stat-icon">🛍️</div><div class="admin-stat-info"><h3>Orders</h3><div class="stat-number" id="totalOrders">0</div></div></div>
+            <div class="admin-stat-card"><div class="admin-stat-icon">💰</div><div class="admin-stat-info"><h3>Revenue</h3><div class="stat-number" id="totalRevenue">₹0</div></div></div>
+            <div class="admin-stat-card"><div class="admin-stat-icon">⏳</div><div class="admin-stat-info"><h3>Pending</h3><div class="stat-number" id="pendingOrders">0</div></div></div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-            <div class="admin-card">
-                <div class="admin-card-header">
-                    <h2>Recent Orders</h2>
-                    <a href="admin-orders.html" class="admin-btn admin-btn-primary">View All</a>
-                </div>
-                <div id="recentOrders">
-                    <p style="color: var(--gray-600);">Loading...</p>
-                </div>
-            </div>
-            
-            <div class="admin-card">
-                <div class="admin-card-header">
-                    <h2>Low Stock Products</h2>
-                    <a href="admin-products.html" class="admin-btn admin-btn-primary">Manage</a>
-                </div>
-                <div id="lowStock">
-                    <p style="color: var(--gray-600);">Loading...</p>
-                </div>
-            </div>
+            <div class="admin-card"><div class="admin-card-header"><h2>Recent Orders</h2><a href="admin-orders.html" class="admin-btn admin-btn-primary">View All</a></div><div id="recentOrders"></div></div>
+            <div class="admin-card"><div class="admin-card-header"><h2>Low Stock Products</h2><a href="admin-products.html" class="admin-btn admin-btn-primary">Manage</a></div><div id="lowStock"></div></div>
         </div>
     </div>
 
+    <script src="js/config.js"></script>
+    <script src="js/cloud-sync.js"></script>
     <script>
-        if (!sessionStorage.getItem('adminLoggedIn')) {
-            window.location.href = 'login.html';
-        }
-
-        document.addEventListener('DOMContentLoaded', loadDashboardData);
-
-        function loadDashboardData() {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        if (!sessionStorage.getItem('adminLoggedIn')) window.location.href = 'login.html';
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            const products = await loadProductsFromCloud() || JSON.parse(localStorage.getItem('products') || '[]');
+            const orders = await loadOrdersFromCloud() || JSON.parse(localStorage.getItem('orders') || '[]');
             
             document.getElementById('totalProducts').textContent = products.length;
             document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('totalRevenue').textContent = `₹${orders.reduce((s,o)=>s+(o.total||0),0).toLocaleString()}`;
+            document.getElementById('pendingOrders').textContent = orders.filter(o=>o.status==='Pending').length;
             
-            const revenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
-            document.getElementById('totalRevenue').textContent = `₹${revenue.toLocaleString('en-IN')}`;
+            let recentHtml = '';
+            orders.slice(-5).reverse().forEach(o => recentHtml += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #e9ecef;"><span style="color:var(--primary);">${o.orderId}</span><span>${o.name}</span><span class="admin-badge admin-badge-${o.status?.toLowerCase()}">${o.status}</span></div>`);
+            document.getElementById('recentOrders').innerHTML = recentHtml || '<p>No recent orders</p>';
             
-            const pending = orders.filter(o => o.status === 'Pending').length;
-            document.getElementById('pendingOrders').textContent = pending;
-            
-            // Recent orders
-            const recentOrders = orders.slice(-5).reverse();
-            let ordersHtml = '';
-            recentOrders.forEach(order => {
-                ordersHtml += `
-                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-200);">
-                        <span style="color: var(--primary);">${order.orderId}</span>
-                        <span>${order.name}</span>
-                        <span class="admin-badge admin-badge-${order.status.toLowerCase()}">${order.status}</span>
-                    </div>
-                `;
-            });
-            document.getElementById('recentOrders').innerHTML = ordersHtml || '<p style="color: var(--gray-600);">No recent orders</p>';
-            
-            // Low stock products
-            const lowStockProducts = products.filter(p => p.stock < 5);
             let stockHtml = '';
-            lowStockProducts.forEach(product => {
-                stockHtml += `
-                    <div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--gray-200);">
-                        <span style="color: var(--primary);">${product.name}</span>
-                        <span style="color: var(--danger);">Stock: ${product.stock}</span>
-                    </div>
-                `;
-            });
-            document.getElementById('lowStock').innerHTML = stockHtml || '<p style="color: var(--gray-600);">All products well stocked</p>';
-        }
-
-        function logout() {
-            sessionStorage.removeItem('adminLoggedIn');
-            window.location.href = 'login.html';
-        }
+            products.filter(p=>p.stock<5).forEach(p => stockHtml += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #e9ecef;"><span style="color:var(--primary);">${p.name}</span><span style="color:var(--danger);">Stock: ${p.stock}</span></div>`);
+            document.getElementById('lowStock').innerHTML = stockHtml || '<p>All products well stocked</p>';
+        });
+        
+        function logout() { sessionStorage.removeItem('adminLoggedIn'); window.location.href = 'login.html'; }
     </script>
 </body>
 </html>
