@@ -3,123 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart - Style Of Life</title>
+    <title>Cart - Style Of Life</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #d4af37; --primary-dark: #b8962e; --dark: #1a1a1a; --darker: #0a0a0a; --light: #ffffff; --gray-200: #e9ecef; --gray-600: #6c757d; --success: #28a745; --danger: #dc3545; }
+        body { font-family: 'Inter', sans-serif; background: var(--light); }
+        header { background: white; padding: 20px 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 28px; font-weight: 600; color: var(--primary); }
+        nav a { color: var(--gray-600); text-decoration: none; margin-left: 30px; }
+        nav a:hover, nav a.active { color: var(--primary); }
+        .cart-count { background: var(--primary); color: white; padding: 2px 6px; border-radius: 20px; font-size: 12px; margin-left: 5px; }
+        .container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+        .cart-item { display: grid; grid-template-columns: 100px 2fr 1fr 100px 100px 50px; gap: 15px; align-items: center; background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--gray-200); }
+        .cart-item img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; }
+        .cart-summary { background: white; border-radius: 12px; padding: 25px; border: 1px solid var(--gray-200); margin-top: 20px; }
+        .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-200); }
+        .summary-row.total { border-bottom: none; font-size: 20px; font-weight: bold; color: var(--primary); padding-top: 15px; }
+        button { padding: 12px; background: var(--primary); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; width: 100%; }
+        .checkout-btn { display: block; text-align: center; text-decoration: none; margin: 20px 0 10px; }
+        .clear-btn { background: var(--danger); }
+        input { width: 60px; padding: 5px; border: 1px solid var(--gray-200); border-radius: 4px; text-align: center; }
+        footer { background: var(--darker); color: white; text-align: center; padding: 40px; margin-top: 60px; }
+        @media (max-width: 768px) { .cart-item { grid-template-columns: 80px 1fr; gap: 10px; } }
+    </style>
 </head>
-<body class="customer">
-    <header class="customer-header">
-        <div class="customer-logo">STYLE OF LIFE</div>
-        <nav class="customer-nav">
+<body>
+    <header>
+        <div class="logo">STYLE OF LIFE</div>
+        <nav>
             <a href="index.html">Home</a>
             <a href="cart.html" class="active">Cart <span class="cart-count" id="cartCount">0</span></a>
             <a href="track.html">Track Order</a>
         </nav>
     </header>
 
-    <div class="cart-container">
+    <div class="container">
         <h1 style="color: var(--primary); margin-bottom: 30px;">Shopping Cart</h1>
         <div id="cartItems"></div>
         <div class="cart-summary">
-            <div class="summary-row"><span>Subtotal:</span><span>₹<span id="cartSubtotal">0</span></span></div>
+            <div class="summary-row"><span>Subtotal:</span><span>₹<span id="subtotal">0</span></span></div>
             <div class="summary-row"><span>Shipping:</span><span>₹100</span></div>
-            <div class="summary-row"><span>GST (18%):</span><span>₹<span id="cartTax">0</span></span></div>
-            <div class="summary-row total"><span>Total:</span><span>₹<span id="cartTotal">0</span></span></div>
-            <a href="checkout.html" class="checkout-btn">Proceed to Checkout</a>
-            <button onclick="clearCart()" class="customer-btn" style="background: var(--danger);">Clear Cart</button>
+            <div class="summary-row"><span>GST (18%):</span><span>₹<span id="tax">0</span></span></div>
+            <div class="summary-row total"><span>Total:</span><span>₹<span id="total">0</span></span></div>
+            <a href="checkout.html" class="checkout-btn" style="background: var(--primary); color: white; text-decoration: none;">Proceed to Checkout</a>
+            <button onclick="clearCart()" class="clear-btn">Clear Cart</button>
         </div>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/api.js"></script>
+    <footer><p>© 2026 STYLE OF LIFE. All rights reserved.</p></footer>
+
     <script>
         let cart = [];
-        
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadCart();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCart();
             displayCart();
+            updateCartCount();
         });
-        
-        async function loadCart() {
-            const data = await getCart();
-            cart = data.items || [];
+
+        function loadCart() {
+            const stored = localStorage.getItem('cart');
+            cart = stored ? JSON.parse(stored) : [];
+        }
+
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
             updateCartCount();
         }
-        
-        async function saveCartToCloud() {
-            const total = cart.reduce((s, i) => s + (i.price * (i.quantity || 1)), 0);
-            await saveCart(cart, total);
+
+        function updateCartCount() {
+            const count = cart.reduce((t, i) => t + (i.quantity || 1), 0);
+            document.getElementById('cartCount').textContent = count;
         }
-        
-        async function updateQuantity(sku, qty) {
-            const idx = cart.findIndex(i => i.sku === sku);
-            if (idx === -1) return;
-            qty = parseInt(qty);
-            if (qty < 1) cart.splice(idx, 1);
-            else { if (qty > 10) qty = 10; cart[idx].quantity = qty; }
-            await saveCartToCloud();
-            displayCart();
-        }
-        
-        async function removeFromCart(sku) {
-            cart = cart.filter(i => i.sku !== sku);
-            await saveCartToCloud();
-            displayCart();
-        }
-        
-        async function clearCart() {
-            if (cart.length === 0) return alert('Cart is empty');
-            if (confirm('Clear cart?')) {
-                cart = [];
-                await saveCartToCloud();
+
+        function updateQuantity(id, qty) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                qty = parseInt(qty);
+                if (qty < 1) {
+                    cart = cart.filter(i => i.id !== id);
+                } else {
+                    item.quantity = Math.min(qty, 10);
+                }
+                saveCart();
                 displayCart();
             }
         }
-        
-        function updateCartCount() {
-            const count = cart.reduce((t, i) => t + (i.quantity || 1), 0);
-            document.querySelectorAll('.cart-count, #cartCount').forEach(el => {
-                if (el) { el.textContent = count; el.style.display = count > 0 ? 'inline-block' : 'none'; }
-            });
+
+        function removeItem(id) {
+            cart = cart.filter(i => i.id !== id);
+            saveCart();
+            displayCart();
         }
-        
+
+        function clearCart() {
+            if (confirm('Clear your cart?')) {
+                cart = [];
+                saveCart();
+                displayCart();
+            }
+        }
+
         function displayCart() {
             const container = document.getElementById('cartItems');
-            const subtotalEl = document.getElementById('cartSubtotal');
-            const taxEl = document.getElementById('cartTax');
-            const totalEl = document.getElementById('cartTotal');
-            
-            if (!container) return;
             
             if (cart.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding:60px;">Your cart is empty</div>';
-                if (subtotalEl) subtotalEl.textContent = '0';
-                if (taxEl) taxEl.textContent = '0';
-                if (totalEl) totalEl.textContent = '0';
+                document.getElementById('subtotal').textContent = '0';
+                document.getElementById('tax').textContent = '0';
+                document.getElementById('total').textContent = '0';
                 return;
             }
             
-            let html = '', subtotal = 0;
+            let html = '';
+            let subtotal = 0;
+            
             cart.forEach(item => {
                 const itemTotal = item.price * item.quantity;
                 subtotal += itemTotal;
                 html += `
                     <div class="cart-item">
-                        ${item.image ? `<img src="${item.image}" alt="${item.name}">` : '<div style="width:100px;height:100px;background:#f8f9fa;"></div>'}
+                        <img src="${item.image}" onerror="this.src='https://via.placeholder.com/100x100'">
                         <div><h4>${item.name}</h4><p>SKU: ${item.sku}</p></div>
-                        <div style="color:var(--primary);font-weight:600;">₹${item.price.toLocaleString()}</div>
-                        <div><input type="number" value="${item.quantity}" min="1" max="10" onchange="updateQuantity('${item.sku}', this.value)" style="width:60px;padding:5px;border:1px solid #dee2e6;border-radius:4px;"></div>
-                        <div style="font-weight:600;">₹${itemTotal.toLocaleString()}</div>
-                        <button onclick="removeFromCart('${item.sku}')" style="background:none;border:none;color:var(--danger);cursor:pointer;">✕</button>
-                    </div>`;
+                        <div>₹${item.price.toLocaleString()}</div>
+                        <div><input type="number" value="${item.quantity}" min="1" max="10" onchange="updateQuantity(${item.id}, this.value)"></div>
+                        <div>₹${itemTotal.toLocaleString()}</div>
+                        <button onclick="removeItem(${item.id})" style="background: none; color: var(--danger); width: auto;">✕</button>
+                    </div>
+                `;
             });
+            
             container.innerHTML = html;
             
             const tax = Math.round(subtotal * 0.18);
             const total = subtotal + tax + 100;
-            if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString();
-            if (taxEl) taxEl.textContent = tax.toLocaleString();
-            if (totalEl) totalEl.textContent = total.toLocaleString();
+            
+            document.getElementById('subtotal').textContent = subtotal.toLocaleString();
+            document.getElementById('tax').textContent = tax.toLocaleString();
+            document.getElementById('total').textContent = total.toLocaleString();
         }
     </script>
 </body>
