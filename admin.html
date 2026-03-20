@@ -25,19 +25,17 @@
             <div class="stat-card">
                 <div class="stat-icon">📦</div>
                 <div class="stat-info">
-                    <h3>Total Products</h3>
+                    <h3>Products</h3>
                     <p class="stat-number" id="totalProducts">0</p>
                 </div>
             </div>
-            
             <div class="stat-card">
                 <div class="stat-icon">🛍️</div>
                 <div class="stat-info">
-                    <h3>Total Orders</h3>
+                    <h3>Orders</h3>
                     <p class="stat-number" id="totalOrders">0</p>
                 </div>
             </div>
-            
             <div class="stat-card">
                 <div class="stat-icon">💰</div>
                 <div class="stat-info">
@@ -45,89 +43,30 @@
                     <p class="stat-number" id="totalRevenue">₹0</p>
                 </div>
             </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">⏳</div>
-                <div class="stat-info">
-                    <h3>Pending Orders</h3>
-                    <p class="stat-number" id="pendingOrders">0</p>
-                </div>
-            </div>
         </div>
         
         <div class="quick-actions">
-            <h2>Quick Actions</h2>
-            <div class="action-buttons">
-                <a href="admin-products.html" class="action-btn">➕ Add New Product</a>
-                <a href="admin-orders.html" class="action-btn">📋 View All Orders</a>
-            </div>
-        </div>
-        
-        <div class="recent-orders" style="margin-top: 30px; background: #1a1a1a; padding: 20px; border-radius: 10px;">
-            <h2>Recent Orders</h2>
-            <div id="recentOrdersList">
-                <p>Loading recent orders...</p>
-            </div>
+            <a href="admin-products.html" class="action-btn">➕ Manage Products</a>
+            <a href="admin-orders.html" class="action-btn">📋 View Orders</a>
         </div>
     </div>
 
     <footer>
-        <p>© 2026 Style Of Life Jewelry - Admin Panel</p>
+        <p>© 2026 Style Of Life Jewelry</p>
     </footer>
 
-    <script src="js/config.js"></script>
-    <script src="js/data.js"></script>
-    
     <script>
-        if (!sessionStorage.getItem('adminLoggedIn')) {
-            window.location.href = 'login.html';
-        }
+        if (!sessionStorage.getItem('adminLoggedIn')) window.location.href = 'login.html';
         
         document.addEventListener('DOMContentLoaded', function() {
-            loadDashboardStats();
-            loadRecentOrders();
-        });
-        
-        function loadDashboardStats() {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+            const revenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
             
             document.getElementById('totalProducts').textContent = products.length;
             document.getElementById('totalOrders').textContent = orders.length;
-            
-            const revenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
-            document.getElementById('totalRevenue').textContent = `₹${revenue.toLocaleString('en-IN')}`;
-            
-            const pending = orders.filter(o => o.status === 'Pending').length;
-            document.getElementById('pendingOrders').textContent = pending;
-        }
-        
-        function loadRecentOrders() {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const recentOrders = orders.slice(-5).reverse();
-            
-            const container = document.getElementById('recentOrdersList');
-            
-            if (recentOrders.length === 0) {
-                container.innerHTML = '<p>No recent orders</p>';
-                return;
-            }
-            
-            let html = '<div style="display: grid; gap: 10px;">';
-            recentOrders.forEach(order => {
-                html += `
-                    <div style="background: #333; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong>${order.orderId}</strong><br>
-                            <small>${order.name} - ₹${(order.total || 0).toLocaleString('en-IN')}</small>
-                        </div>
-                        <span style="background: ${order.status === 'Pending' ? '#ff9800' : '#4CAF50'}; color: black; padding: 5px 10px; border-radius: 20px; font-size: 12px;">${order.status}</span>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-        }
+            document.getElementById('totalRevenue').textContent = `₹${revenue.toLocaleString()}`;
+        });
         
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');
