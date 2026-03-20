@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Management - 5 Images per Product</title>
+    <title>Product Management - Manual URL Entry</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         /* Excel-like styles */
@@ -22,6 +22,7 @@
             display: flex;
             gap: 15px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .excel-toolbar button {
@@ -38,6 +39,19 @@
             cursor: pointer;
         }
         
+        .excel-toolbar button:hover {
+            background: #b8962e;
+        }
+        
+        .excel-toolbar .danger-btn {
+            background: #f44336;
+            color: white;
+        }
+        
+        .excel-toolbar .danger-btn:hover {
+            background: #d32f2f;
+        }
+        
         .excel-table-wrapper {
             overflow-x: auto;
             max-height: 600px;
@@ -48,7 +62,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
-            min-width: 1600px;
+            min-width: 1800px;
         }
         
         .excel-table th {
@@ -84,60 +98,80 @@
             width: 40px;
         }
         
-        /* Image Gallery Styles */
-        .image-gallery {
+        /* Image Grid Styles */
+        .image-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 5px;
-            min-width: 300px;
+            gap: 8px;
+            min-width: 400px;
         }
         
         .image-slot {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 8px;
             text-align: center;
         }
         
         .image-slot label {
             display: block;
             font-size: 11px;
-            color: #888;
-            margin-bottom: 3px;
+            color: #d4af37;
+            margin-bottom: 5px;
+            font-weight: bold;
         }
         
         .image-preview {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             object-fit: cover;
             border-radius: 4px;
-            border: 1px solid #d4af37;
+            border: 2px solid #d4af37;
+            margin: 5px auto;
             cursor: pointer;
-            margin-bottom: 3px;
+            transition: transform 0.2s;
+            display: block;
         }
         
         .image-preview:hover {
-            transform: scale(2);
-            transition: transform 0.2s;
+            transform: scale(3);
             z-index: 100;
             position: relative;
         }
         
         .image-input {
             width: 100%;
-            padding: 3px;
-            font-size: 10px;
+            padding: 6px;
+            font-size: 11px;
             background: #333;
-            border: 1px solid #444;
+            border: 1px solid #555;
             color: white;
-            border-radius: 3px;
+            border-radius: 4px;
+            margin-top: 5px;
         }
         
-        .main-image-badge {
+        .image-input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+        
+        .main-badge {
             background: #d4af37;
             color: black;
             font-size: 10px;
-            padding: 2px 4px;
-            border-radius: 3px;
+            padding: 2px 6px;
+            border-radius: 10px;
             display: inline-block;
-            margin-top: 2px;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        
+        .url-help {
+            font-size: 10px;
+            color: #888;
+            margin-top: 3px;
+            word-break: break-all;
         }
         
         .excel-actions {
@@ -147,100 +181,76 @@
         }
         
         .excel-actions button {
-            width: auto;
-            padding: 5px 10px;
+            width: 100%;
+            padding: 6px 10px;
             font-size: 12px;
         }
         
         .excel-status-bar {
             background: #2d2d2d;
-            padding: 5px 20px;
+            padding: 8px 20px;
             border-top: 1px solid #444;
             font-size: 12px;
             color: #888;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         
-        /* Modal for image URL input */
-        .url-modal {
+        /* Modal for URL help */
+        .help-modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             z-index: 2000;
         }
         
-        .url-content {
+        .help-content {
             background: #1e1e1e;
-            max-width: 600px;
+            max-width: 500px;
             margin: 100px auto;
             padding: 30px;
             border-radius: 10px;
             border: 2px solid #d4af37;
         }
         
-        .url-content h3 {
+        .help-content h3 {
             color: #d4af37;
             margin-bottom: 20px;
         }
         
-        .url-content input {
-            width: 100%;
-            padding: 12px;
-            background: #333;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 4px;
-            margin: 10px 0;
-        }
-        
-        .url-content .preview {
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        .url-content .preview img {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 8px;
-            border: 2px solid #d4af37;
-        }
-        
-        .url-content .help-text {
-            background: #2d2d2d;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 15px 0;
-            font-size: 13px;
+        .help-content ul {
             color: #888;
+            line-height: 1.8;
+            margin-left: 20px;
         }
         
-        .url-content .help-text code {
-            background: #1e1e1e;
+        .help-content code {
+            background: #333;
             padding: 2px 5px;
             border-radius: 3px;
             color: #d4af37;
         }
         
-        .modal-actions {
-            display: flex;
-            gap: 10px;
+        .help-content button {
             margin-top: 20px;
-        }
-        
-        .modal-actions button {
-            flex: 1;
+            width: 100%;
             padding: 12px;
+            background: #d4af37;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo">✨ STYLE OF LIFE - 5 IMAGES PER PRODUCT</div>
+        <div class="logo">✨ STYLE OF LIFE - URL ENTRY PORTAL</div>
         <nav>
             <a href="index.html">Home</a>
             <a href="admin.html">Dashboard</a>
@@ -251,44 +261,38 @@
     </header>
 
     <div class="admin-container">
-        <h1 class="page-title">📊 Product Management - 5 Images per Product</h1>
+        <h1 class="page-title">📸 Manual Image URL Entry - 5 Images per Product</h1>
         
-        <!-- URL Input Modal -->
-        <div id="urlModal" class="url-modal">
-            <div class="url-content">
-                <h3>📷 Add Image URL</h3>
-                
-                <div class="help-text">
-                    <p><strong>For Dropbox URLs:</strong></p>
-                    <ol style="margin-left: 20px; margin-top: 10px;">
-                        <li>Upload image to Dropbox</li>
-                        <li>Get share link: <code>https://www.dropbox.com/s/abc123/name.jpg?dl=0</code></li>
-                        <li>Change to: <code>https://www.dropbox.com/s/abc123/name.jpg?raw=1</code></li>
-                    </ol>
-                    <p style="margin-top: 10px;">Any image URL works!</p>
-                </div>
-                
-                <input type="text" id="imageUrlInput" placeholder="https://...">
-                
-                <div class="preview" id="urlPreview">
-                    <img src="" style="display: none;">
-                </div>
-                
-                <div class="modal-actions">
-                    <button onclick="saveImageUrl()" style="background: #4CAF50;">💾 Save URL</button>
-                    <button onclick="closeUrlModal()" style="background: #666;">❌ Cancel</button>
-                </div>
+        <!-- Help Modal -->
+        <div id="helpModal" class="help-modal">
+            <div class="help-content">
+                <h3>📷 How to Add Image URLs</h3>
+                <ul>
+                    <li>You can use any image URL from the web</li>
+                    <li><strong>Dropbox:</strong> <code>https://www.dropbox.com/s/abc123/image.jpg?raw=1</code></li>
+                    <li><strong>Google Drive:</strong> Not recommended (needs special setup)</li>
+                    <li><strong>Imgur:</strong> <code>https://i.imgur.com/abc123.jpg</code></li>
+                    <li><strong>Any direct image link</strong> ending in .jpg, .png, .gif</li>
+                </ul>
+                <p style="color: #d4af37; margin-top: 15px;">Simply paste the URL in any of the 5 image slots</p>
+                <button onclick="closeHelp()">Got it!</button>
             </div>
         </div>
         
         <!-- Excel-like Interface -->
         <div class="excel-container">
             <div class="excel-toolbar">
-                <button onclick="addNewRow()">
-                    <span>➕</span> Add Product
+                <button onclick="addNewProduct()">
+                    <span>➕</span> Add New Product
+                </button>
+                <button onclick="showHelp()">
+                    <span>❓</span> URL Help
                 </button>
                 <button onclick="refreshData()">
                     <span>🔄</span> Refresh
+                </button>
+                <button class="danger-btn" onclick="clearAllUrls()">
+                    <span>🗑️</span> Clear All URLs
                 </button>
                 <span style="color: #888; margin-left: auto;" id="rowCount"></span>
             </div>
@@ -297,30 +301,22 @@
                 <table class="excel-table" id="productTable">
                     <thead>
                         <tr>
-                            <th style="width: 40px;">#</th>
-                            <th>SKU</th>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th colspan="5">5 Images</th>
-                            <th>Description</th>
-                            <th>Actions</th>
+                            <th rowspan="2" style="width: 40px;">#</th>
+                            <th rowspan="2">SKU</th>
+                            <th rowspan="2">Product Name</th>
+                            <th rowspan="2">Category</th>
+                            <th rowspan="2">Price</th>
+                            <th rowspan="2">Stock</th>
+                            <th colspan="5" style="text-align: center; background: #3d3d3d;">5 IMAGE URLS (Paste Any URL)</th>
+                            <th rowspan="2">Description</th>
+                            <th rowspan="2">Actions</th>
                         </tr>
                         <tr>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th>Img 1</th>
-                            <th>Img 2</th>
-                            <th>Img 3</th>
-                            <th>Img 4</th>
-                            <th>Img 5</th>
-                            <th></th>
-                            <th></th>
+                            <th style="background: #3d3d3d;">Image 1 (Main)</th>
+                            <th style="background: #3d3d3d;">Image 2</th>
+                            <th style="background: #3d3d3d;">Image 3</th>
+                            <th style="background: #3d3d3d;">Image 4</th>
+                            <th style="background: #3d3d3d;">Image 5</th>
                         </tr>
                     </thead>
                     <tbody id="productTableBody">
@@ -330,14 +326,15 @@
             </div>
             
             <div class="excel-status-bar">
-                <span id="recordCount">0 records</span>
-                <span>📸 5 images per product | Dropbox URLs</span>
+                <span id="recordCount">0 products</span>
+                <span>✏️ Click any URL field to edit | Paste any image URL</span>
+                <span>⭐ First image is main product image</span>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>© 2026 Style Of Life Jewelry - 5 Images per Product</p>
+        <p>© 2026 Style Of Life Jewelry - Manual URL Entry System</p>
     </footer>
 
     <script src="js/config.js"></script>
@@ -348,64 +345,63 @@
             window.location.href = 'login.html';
         }
         
-        let currentImageSlot = { rowId: null, slot: 0 };
-        
         document.addEventListener('DOMContentLoaded', function() {
-            loadExcelData();
+            loadProducts();
         });
         
-        function loadExcelData() {
+        function loadProducts() {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
-            displayExcelData(products);
-            updateRecordCount(products.length);
+            displayProducts(products);
+            updateRowCount(products.length);
         }
         
-        function displayExcelData(products) {
+        function displayProducts(products) {
             const tbody = document.getElementById('productTableBody');
             let html = '';
             
             products.forEach((product, index) => {
                 const rowId = product.id;
-                const images = product.images || Array(5).fill(CONFIG.PLACEHOLDER_IMAGE);
+                // Ensure images array exists with 5 slots
+                const images = product.images || Array(5).fill('');
                 
                 html += `
                     <tr id="row-${rowId}" data-id="${rowId}">
                         <td class="excel-row-number">${index + 1}</td>
                         <td>
-                            <div class="excel-cell-content" ondblclick="editCell(this, 'sku', '${rowId}')">${product.sku || ''}</div>
+                            <div class="excel-cell-content" ondblclick="editField(this, 'sku', '${rowId}')">${product.sku || ''}</div>
                         </td>
                         <td>
-                            <div class="excel-cell-content" ondblclick="editCell(this, 'name', '${rowId}')">${product.name || ''}</div>
+                            <div class="excel-cell-content" ondblclick="editField(this, 'name', '${rowId}')">${product.name || ''}</div>
                         </td>
                         <td>
-                            <div class="excel-cell-content" ondblclick="editCell(this, 'category', '${rowId}')">${product.category || ''}</div>
+                            <div class="excel-cell-content" ondblclick="editField(this, 'category', '${rowId}')">${product.category || ''}</div>
                         </td>
                         <td>
-                            <div class="excel-cell-content" ondblclick="editCell(this, 'price', '${rowId}')">${product.price || 0}</div>
+                            <div class="excel-cell-content" ondblclick="editField(this, 'price', '${rowId}')">${product.price || 0}</div>
                         </td>
                         <td>
-                            <div class="excel-cell-content" ondblclick="editCell(this, 'stock', '${rowId}')">${product.stock || 0}</div>
+                            <div class="excel-cell-content" ondblclick="editField(this, 'stock', '${rowId}')">${product.stock || 0}</div>
                         </td>
                 `;
                 
                 // Add 5 image slots
                 for (let i = 0; i < 5; i++) {
-                    const imgUrl = images[i] || CONFIG.PLACEHOLDER_IMAGE;
-                    const isMain = (i === 0) ? '⭐ Main' : '';
+                    const imgUrl = images[i] || '';
+                    const isMain = i === 0 ? '<div class="main-badge">⭐ MAIN</div>' : '';
+                    
                     html += `
                         <td>
                             <div class="image-slot">
-                                <img src="${imgUrl}" 
-                                     class="image-preview" 
-                                     onclick="openUrlModal('${rowId}', ${i})"
-                                     onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'"
-                                     title="Click to change image ${i+1}">
+                                <label>Image ${i + 1}</label>
+                                ${imgUrl ? `<img src="${imgUrl}" class="image-preview" onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">` : ''}
                                 <input type="text" 
                                        class="image-input" 
                                        value="${imgUrl}" 
-                                       placeholder="Image ${i+1} URL"
-                                       onchange="updateImageUrl('${rowId}', ${i}, this.value)">
-                                ${i === 0 ? '<div class="main-image-badge">⭐ Main</div>' : ''}
+                                       placeholder="Paste image URL here..."
+                                       onchange="updateImageUrl('${rowId}', ${i}, this.value)"
+                                       onkeyup="previewOnType('${rowId}', ${i}, this.value)">
+                                <div class="url-help">${imgUrl ? imgUrl.substring(0, 30) + '...' : 'No URL'}</div>
+                                ${isMain}
                             </div>
                         </td>
                     `;
@@ -413,12 +409,13 @@
                 
                 html += `
                         <td>
-                            <div class="excel-cell-content" ondblclick="editCell(this, 'description', '${rowId}')">${product.description || ''}</div>
+                            <div class="excel-cell-content" ondblclick="editField(this, 'description', '${rowId}')">${product.description || ''}</div>
                         </td>
                         <td>
                             <div class="excel-actions">
-                                <button onclick="deleteRow('${rowId}')" style="background: #f44336;">🗑️ Delete</button>
-                                <button onclick="setMainImage('${rowId}')" style="background: #d4af37;">⭐ Set Main</button>
+                                <button onclick="deleteProduct('${rowId}')" style="background: #f44336;">🗑️ Delete</button>
+                                <button onclick="copyUrls('${rowId}')" style="background: #2196f3;">📋 Copy URLs</button>
+                                <button onclick="clearImages('${rowId}')" style="background: #ff9800;">🔄 Clear Images</button>
                             </div>
                         </td>
                     </tr>
@@ -426,20 +423,15 @@
             });
             
             tbody.innerHTML = html;
-            document.getElementById('rowCount').textContent = `Total: ${products.length} rows`;
         }
         
-        function editCell(element, field, rowId) {
+        function editField(element, field, rowId) {
             const currentValue = element.textContent;
             const td = element.parentElement;
             
             const input = document.createElement('input');
             input.type = (field === 'price' || field === 'stock') ? 'number' : 'text';
             input.value = currentValue;
-            if (field === 'price' || field === 'stock') {
-                input.min = "0";
-            }
-            
             input.style.width = '100%';
             input.style.padding = '8px';
             input.style.background = '#333';
@@ -451,17 +443,17 @@
             input.focus();
             
             input.onblur = function() {
-                saveCellEdit(td, input.value, field, rowId);
+                saveField(td, input.value, field, rowId);
             };
             
             input.onkeypress = function(e) {
                 if (e.key === 'Enter') {
-                    saveCellEdit(td, input.value, field, rowId);
+                    saveField(td, input.value, field, rowId);
                 }
             };
         }
         
-        function saveCellEdit(td, newValue, field, rowId) {
+        function saveField(td, newValue, field, rowId) {
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             const index = products.findIndex(p => p.id == rowId);
             
@@ -473,7 +465,7 @@
                 products[index][field] = newValue;
                 localStorage.setItem('products', JSON.stringify(products));
                 
-                td.innerHTML = `<div class="excel-cell-content" ondblclick="editCell(this, '${field}', '${rowId}')">${newValue}</div>`;
+                td.innerHTML = `<div class="excel-cell-content" ondblclick="editField(this, '${field}', '${rowId}')">${newValue}</div>`;
             }
         }
         
@@ -483,81 +475,65 @@
             
             if (index !== -1) {
                 if (!products[index].images) {
-                    products[index].images = Array(5).fill(CONFIG.PLACEHOLDER_IMAGE);
+                    products[index].images = Array(5).fill('');
                 }
                 
-                // Convert Dropbox URL if needed
-                let finalUrl = url;
-                if (url.includes('dropbox.com') && url.includes('?dl=0')) {
-                    finalUrl = url.replace('?dl=0', '?raw=1');
-                }
-                
-                products[index].images[slot] = finalUrl || CONFIG.PLACEHOLDER_IMAGE;
+                // Clean up URL (remove spaces)
+                const cleanUrl = url.trim();
+                products[index].images[slot] = cleanUrl;
                 localStorage.setItem('products', JSON.stringify(products));
                 
-                // Update preview
-                const imgElement = document.querySelector(`#row-${rowId} td:nth-child(${7 + slot}) img`);
-                if (imgElement) {
-                    imgElement.src = finalUrl || CONFIG.PLACEHOLDER_IMAGE;
+                // Update preview and help text
+                const slotElement = document.querySelector(`#row-${rowId} td:nth-child(${7 + slot}) .image-slot`);
+                if (slotElement) {
+                    const preview = slotElement.querySelector('.image-preview');
+                    const helpText = slotElement.querySelector('.url-help');
+                    
+                    if (cleanUrl) {
+                        if (!preview) {
+                            const newPreview = document.createElement('img');
+                            newPreview.className = 'image-preview';
+                            newPreview.src = cleanUrl;
+                            newPreview.onerror = function() { this.src = CONFIG.PLACEHOLDER_IMAGE; };
+                            slotElement.insertBefore(newPreview, slotElement.querySelector('.image-input'));
+                        } else {
+                            preview.src = cleanUrl;
+                            preview.onerror = function() { this.src = CONFIG.PLACEHOLDER_IMAGE; };
+                        }
+                        
+                        if (helpText) {
+                            helpText.textContent = cleanUrl.length > 30 ? cleanUrl.substring(0, 30) + '...' : cleanUrl;
+                        }
+                    } else {
+                        if (preview) preview.remove();
+                        if (helpText) helpText.textContent = 'No URL';
+                    }
                 }
             }
         }
         
-        function openUrlModal(rowId, slot) {
-            currentImageSlot = { rowId, slot };
-            document.getElementById('imageUrlInput').value = '';
-            document.getElementById('urlPreview').innerHTML = '<img src="" style="display: none;">';
-            document.getElementById('urlModal').style.display = 'block';
-        }
-        
-        function closeUrlModal() {
-            document.getElementById('urlModal').style.display = 'none';
-            currentImageSlot = { rowId: null, slot: 0 };
-        }
-        
-        document.getElementById('imageUrlInput').addEventListener('input', function(e) {
-            const url = e.target.value.trim();
-            const preview = document.getElementById('urlPreview');
-            
-            if (url) {
-                let previewUrl = url;
-                if (url.includes('dropbox.com') && url.includes('?dl=0')) {
-                    previewUrl = url.replace('?dl=0', '?raw=1');
+        function previewOnType(rowId, slot, url) {
+            // Live preview as you type
+            const slotElement = document.querySelector(`#row-${rowId} td:nth-child(${7 + slot}) .image-slot`);
+            if (slotElement) {
+                let preview = slotElement.querySelector('.image-preview');
+                const cleanUrl = url.trim();
+                
+                if (cleanUrl) {
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.className = 'image-preview';
+                        preview.onerror = function() { this.src = CONFIG.PLACEHOLDER_IMAGE; };
+                        slotElement.insertBefore(preview, slotElement.querySelector('.image-input'));
+                    }
+                    preview.src = cleanUrl;
+                } else {
+                    if (preview) preview.remove();
                 }
-                preview.innerHTML = `<img src="${previewUrl}" onerror="this.style.display='none'">`;
-            } else {
-                preview.innerHTML = '<img src="" style="display: none;">';
-            }
-        });
-        
-        function saveImageUrl() {
-            let url = document.getElementById('imageUrlInput').value.trim();
-            
-            if (!url) {
-                alert('Please enter a URL');
-                return;
-            }
-            
-            // Convert Dropbox URL if needed
-            if (url.includes('dropbox.com') && url.includes('?dl=0')) {
-                url = url.replace('?dl=0', '?raw=1');
-            }
-            
-            updateImageUrl(currentImageSlot.rowId, currentImageSlot.slot, url);
-            closeUrlModal();
-        }
-        
-        function setMainImage(rowId) {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const index = products.findIndex(p => p.id == rowId);
-            
-            if (index !== -1 && products[index].images && products[index].images.length > 0) {
-                // Move first image to main position (already first)
-                alert('Image 1 is already the main image');
             }
         }
         
-        function addNewRow() {
+        function addNewProduct() {
             const newProduct = {
                 id: Date.now(),
                 sku: 'NEW' + Date.now().toString().slice(-4),
@@ -566,31 +542,92 @@
                 price: 0,
                 stock: 0,
                 description: '',
-                images: Array(5).fill(CONFIG.PLACEHOLDER_IMAGE)
+                images: Array(5).fill('')
             };
             
             const products = JSON.parse(localStorage.getItem('products') || '[]');
             products.push(newProduct);
             localStorage.setItem('products', JSON.stringify(products));
             
-            loadExcelData();
+            loadProducts();
         }
         
-        function deleteRow(rowId) {
+        function deleteProduct(rowId) {
             if (confirm('Delete this product?')) {
                 const products = JSON.parse(localStorage.getItem('products') || '[]');
                 const updatedProducts = products.filter(p => p.id != rowId);
                 localStorage.setItem('products', JSON.stringify(updatedProducts));
-                loadExcelData();
+                loadProducts();
             }
         }
         
-        function refreshData() {
-            loadExcelData();
+        function copyUrls(rowId) {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            const product = products.find(p => p.id == rowId);
+            
+            if (product && product.images) {
+                const urls = product.images.filter(url => url).join('\n');
+                if (urls) {
+                    navigator.clipboard.writeText(urls).then(() => {
+                        alert('✅ URLs copied to clipboard!');
+                    });
+                } else {
+                    alert('No URLs to copy');
+                }
+            }
         }
         
-        function updateRecordCount(count) {
-            document.getElementById('recordCount').textContent = `${count} records`;
+        function clearImages(rowId) {
+            if (confirm('Clear all image URLs for this product?')) {
+                const products = JSON.parse(localStorage.getItem('products') || '[]');
+                const index = products.findIndex(p => p.id == rowId);
+                
+                if (index !== -1) {
+                    products[index].images = Array(5).fill('');
+                    localStorage.setItem('products', JSON.stringify(products));
+                    
+                    // Clear all image slots in UI
+                    for (let i = 0; i < 5; i++) {
+                        const slotElement = document.querySelector(`#row-${rowId} td:nth-child(${7 + i}) .image-slot`);
+                        if (slotElement) {
+                            const preview = slotElement.querySelector('.image-preview');
+                            const input = slotElement.querySelector('.image-input');
+                            const helpText = slotElement.querySelector('.url-help');
+                            
+                            if (preview) preview.remove();
+                            if (input) input.value = '';
+                            if (helpText) helpText.textContent = 'No URL';
+                        }
+                    }
+                }
+            }
+        }
+        
+        function clearAllUrls() {
+            if (confirm('Clear ALL image URLs for ALL products?')) {
+                const products = JSON.parse(localStorage.getItem('products') || '[]');
+                products.forEach(product => {
+                    product.images = Array(5).fill('');
+                });
+                localStorage.setItem('products', JSON.stringify(products));
+                loadProducts();
+            }
+        }
+        
+        function showHelp() {
+            document.getElementById('helpModal').style.display = 'block';
+        }
+        
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+        
+        function refreshData() {
+            loadProducts();
+        }
+        
+        function updateRowCount(count) {
+            document.getElementById('rowCount').textContent = `${count} products`;
         }
         
         function logout() {
@@ -598,10 +635,11 @@
             window.location.href = 'login.html';
         }
         
+        // Close modal when clicking outside
         window.onclick = function(event) {
-            const modal = document.getElementById('urlModal');
+            const modal = document.getElementById('helpModal');
             if (event.target == modal) {
-                closeUrlModal();
+                closeHelp();
             }
         }
     </script>
