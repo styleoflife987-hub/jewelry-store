@@ -24,6 +24,17 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1a1a1a;
+            color: #888;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="customer">
@@ -50,6 +61,8 @@
         </div>
     </div>
 
+    <div class="sync-status" id="syncStatus">🟢 Live Sync</div>
+
     <footer style="background: var(--darker); color: white; text-align: center; padding: 60px; margin-top: 60px;">
         <p>© 2026 STYLE OF LIFE. All rights reserved.</p>
     </footer>
@@ -63,39 +76,34 @@
         document.addEventListener('DOMContentLoaded', async function() {
             await loadAndDisplayProducts();
             updateCartCount();
-            
-            // Auto-refresh every 30 seconds
-            setInterval(loadAndDisplayProducts, 30000);
         });
 
         async function loadAndDisplayProducts() {
             const cloudProducts = await loadProductsFromCloud();
-            
             if (cloudProducts && cloudProducts.length > 0) {
                 products = cloudProducts;
                 displayProducts(products);
+                document.getElementById('syncStatus').innerHTML = '🟢 Cloud Sync Active';
             } else {
-                // Fallback to local storage
                 const storedProducts = localStorage.getItem('products');
                 if (storedProducts) {
                     products = JSON.parse(storedProducts);
                     displayProducts(products);
+                    document.getElementById('syncStatus').innerHTML = '🟡 Using Local Cache';
                 } else {
                     document.getElementById('products').innerHTML = '<div style="text-align: center; padding: 100px;">No products available</div>';
                 }
             }
         }
 
-        function displayProducts(products) {
+        window.displayProducts = function(products) {
             const container = document.getElementById('products');
-            
             if (!products || products.length === 0) {
                 container.innerHTML = '<div style="text-align: center; padding: 100px;">No products available</div>';
                 return;
             }
             
             let html = '';
-            
             products.forEach(product => {
                 const price = Number(product.price) || 0;
                 const stock = Number(product.stock) || 0;
@@ -125,9 +133,8 @@
                     </div>
                 `;
             });
-            
             container.innerHTML = html;
-        }
+        };
     </script>
 </body>
 </html>
