@@ -1,4 +1,4 @@
-// js/app.js - Product Display with Drive Images
+// js/app.js - Product Display
 let products = [];
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -28,17 +28,16 @@ function displayProducts(products) {
         const sku = product.sku || `SKU${product.id}`;
         
         html += `
-            <div class="card" data-sku="${sku}">
+            <div class="card">
                 <div class="product-images">
                     <img src="${image}" 
                          class="main-image"
                          alt="${product.name}"
-                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'"
-                         style="object-fit: contain;">
+                         onerror="this.src='${CONFIG.PLACEHOLDER_IMAGE}'">
                 </div>
                 
                 <div class="product-info">
-                    <p class="sku">SKU: <span class="sku-value">${sku}</span></p>
+                    <p class="sku">SKU: ${sku}</p>
                     <h3>${product.name}</h3>
                     <p class="category">${product.category || CONFIG.DEFAULT_CATEGORY}</p>
                     <div class="price">${CONFIG.CURRENCY}${price.toLocaleString('en-IN')}</div>
