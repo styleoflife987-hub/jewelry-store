@@ -1,5 +1,5 @@
 /* =========================================
-   STYLE OF LIFE - MODERN E-COMMERCE DESIGN
+   STYLE OF LIFE - COMPLETE MODERN DESIGN
    ========================================= */
 
 * {
@@ -9,7 +9,7 @@
 }
 
 :root {
-    /* Color Scheme */
+    /* Colors */
     --primary: #d4af37;
     --primary-dark: #b8962e;
     --primary-light: #e5c87a;
@@ -47,7 +47,7 @@
 }
 
 /* =========================================
-   CUSTOMER PORTAL - MODERN BOUTIQUE
+   CUSTOMER PORTAL
    ========================================= */
 
 body.customer {
@@ -57,7 +57,6 @@ body.customer {
     line-height: 1.6;
 }
 
-/* Modern Header */
 .customer-header {
     background: white;
     padding: var(--spacing-md) var(--spacing-xl);
@@ -119,7 +118,6 @@ body.customer {
     margin-left: 5px;
 }
 
-/* Modern Hero Section */
 .customer-hero {
     height: 500px;
     background-size: cover;
@@ -161,7 +159,6 @@ body.customer {
     opacity: 0.95;
 }
 
-/* Modern Product Grid */
 .customer-products {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -171,7 +168,6 @@ body.customer {
     margin: 0 auto;
 }
 
-/* Modern Product Card */
 .customer-card {
     background: white;
     border-radius: var(--radius-lg);
@@ -247,7 +243,6 @@ body.customer {
     color: var(--danger);
 }
 
-/* Modern Button */
 .customer-btn {
     width: 100%;
     padding: 14px;
@@ -272,8 +267,173 @@ body.customer {
     cursor: not-allowed;
 }
 
+/* Cart Page */
+.cart-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.cart-item {
+    display: grid;
+    grid-template-columns: 100px 2fr 1fr 100px 100px 50px;
+    gap: 15px;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 15px;
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.cart-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+}
+
+.cart-summary {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 25px;
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    margin-top: 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.summary-row.total {
+    border-bottom: none;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--primary);
+    padding-top: 15px;
+}
+
+.checkout-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background: var(--primary);
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    margin: 20px 0 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.checkout-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* Checkout Page */
+.checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.checkout-form {
+    background: white;
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.order-summary {
+    background: white;
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+    height: fit-content;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    color: var(--primary);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(212,175,55,0.1);
+}
+
+/* Track Order Page */
+.track-container {
+    max-width: 600px;
+    margin: 100px auto;
+    background: white;
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+}
+
+.track-form {
+    display: flex;
+    gap: 10px;
+    margin: 30px 0;
+}
+
+.track-input {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    font-size: 16px;
+}
+
+.track-btn {
+    padding: 15px 30px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.track-btn:hover {
+    background: var(--primary-dark);
+}
+
 /* =========================================
-   ADMIN PANEL - MODERN DASHBOARD
+   ADMIN PANEL
    ========================================= */
 
 body.admin {
@@ -282,7 +442,6 @@ body.admin {
     color: var(--gray-800);
 }
 
-/* Modern Admin Header */
 .admin-header {
     background: var(--darker);
     padding: var(--spacing-md) var(--spacing-xl);
@@ -336,7 +495,12 @@ body.admin {
     color: var(--darker);
 }
 
-/* Modern Dashboard Cards */
+.admin-container {
+    max-width: 1400px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
 .admin-stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -352,14 +516,7 @@ body.admin {
     align-items: center;
     gap: var(--spacing-lg);
     box-shadow: var(--shadow-sm);
-    transition: all 0.3s;
     border: 1px solid var(--gray-200);
-}
-
-.admin-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
 }
 
 .admin-stat-icon {
@@ -389,7 +546,6 @@ body.admin {
     color: var(--gray-800);
 }
 
-/* Modern Table */
 .admin-table-container {
     background: white;
     border-radius: var(--radius-lg);
@@ -425,7 +581,6 @@ body.admin {
     background: var(--gray-100);
 }
 
-/* Modern Buttons */
 .admin-btn {
     padding: 10px 20px;
     border-radius: var(--radius-md);
@@ -455,16 +610,11 @@ body.admin {
     color: white;
 }
 
-.admin-btn-danger:hover {
-    background: #c82333;
-}
-
 .admin-btn-success {
     background: var(--success);
     color: white;
 }
 
-/* Modern Form Elements */
 .admin-input {
     background: white;
     border: 1px solid var(--gray-300);
@@ -481,13 +631,13 @@ body.admin {
     box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
 }
 
-/* Modern Cards */
 .admin-card {
     background: white;
     border-radius: var(--radius-lg);
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--gray-200);
+    margin-bottom: var(--spacing-lg);
 }
 
 .admin-card-header {
@@ -505,7 +655,6 @@ body.admin {
     font-weight: 600;
 }
 
-/* Modern Badges */
 .admin-badge {
     padding: 4px 8px;
     border-radius: 20px;
@@ -539,15 +688,13 @@ body.admin {
     color: #721c24;
 }
 
-/* Modern Grid */
-.admin-grid {
+.admin-product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
 }
 
-/* Modern Product Management */
 .admin-product-card {
     background: white;
     border-radius: var(--radius-lg);
@@ -592,7 +739,6 @@ body.admin {
     margin: var(--spacing-sm) 0;
 }
 
-/* Modern Modal */
 .admin-modal {
     position: fixed;
     top: 0;
@@ -621,7 +767,7 @@ body.admin {
     margin-bottom: var(--spacing-lg);
 }
 
-/* Modern Login */
+/* Login Page */
 .admin-login-container {
     min-height: 100vh;
     display: flex;
@@ -667,6 +813,10 @@ body.admin {
         padding: var(--spacing-md);
     }
     
+    .checkout-grid {
+        grid-template-columns: 1fr;
+    }
+    
     .admin-header {
         flex-direction: column;
         gap: var(--spacing-md);
@@ -678,7 +828,8 @@ body.admin {
         justify-content: center;
     }
     
-    .admin-stats-grid {
-        grid-template-columns: 1fr;
+    .cart-item {
+        grid-template-columns: 80px 1fr;
+        gap: 10px;
     }
 }
