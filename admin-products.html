@@ -1,369 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Management - Style Of Life</title>
-    <link rel="stylesheet" href="css/style.css">
-    <style>
-        .excel-container {
-            background: #1e1e1e;
-            border: 1px solid #444;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-top: 20px;
-        }
+<!-- Add this before closing </body> tag -->
+<script>
+// Cloud sync functions
+async function loadFromCloud() {
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=getProducts&t=${Date.now()}`);
+        const cloudProducts = await response.json();
         
-        .excel-toolbar {
-            background: #2d2d2d;
-            padding: 10px 20px;
-            border-bottom: 1px solid #444;
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
+        if (Array.isArray(cloudProducts)) {
+            localStorage.setItem('products', JSON.stringify(cloudProducts));
+            loadProducts(); // Reload display
+            showNotification(`✅ Loaded ${cloudProducts.length} products from cloud`);
         }
-        
-        .excel-toolbar button {
-            width: auto;
-            padding: 8px 15px;
-            background: #d4af37;
-            color: black;
-            border: none;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        
-        .excel-table-wrapper {
-            overflow-x: auto;
-            max-height: 600px;
-            overflow-y: auto;
-        }
-        
-        .excel-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            min-width: 1600px;
-        }
-        
-        .excel-table th {
-            background: #2d2d2d;
-            color: #d4af37;
-            padding: 12px 10px;
-            border-right: 1px solid #444;
-            border-bottom: 2px solid #d4af37;
-            position: sticky;
-            top: 0;
-        }
-        
-        .excel-table td {
-            padding: 10px;
-            border-right: 1px solid #333;
-            border-bottom: 1px solid #333;
-            background: #1e1e1e;
-        }
-        
-        .excel-table tr:hover td {
-            background: #2a2a2a;
-        }
-        
-        .excel-row-number {
-            background: #2d2d2d !important;
-            color: #888;
-            text-align: center;
-            font-weight: bold;
-            width: 40px;
-        }
-        
-        .url-input {
-            width: 100%;
-            padding: 8px;
-            background: #333;
-            border: 1px solid #555;
-            color: white;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        
-        .url-input:focus {
-            outline: none;
-            border-color: #d4af37;
-        }
-        
-        .image-preview {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid #d4af37;
-            margin: 5px 0;
-            cursor: pointer;
-        }
-        
-        .image-preview:hover {
-            transform: scale(2);
-            transition: transform 0.2s;
-            z-index: 100;
-            position: relative;
-        }
-        
-        .image-slot {
-            text-align: center;
-        }
-        
-        .image-label {
-            font-size: 11px;
-            color: #888;
-            margin-bottom: 3px;
-        }
-        
-        .excel-actions button {
-            width: 100%;
-            padding: 6px 10px;
-            font-size: 12px;
-            margin: 2px 0;
-        }
-        
-        .excel-status-bar {
-            background: #2d2d2d;
-            padding: 8px 20px;
-            border-top: 1px solid #444;
-            font-size: 12px;
-            color: #888;
-            display: flex;
-            justify-content: space-between;
-        }
-        
-        .image-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 2000;
-            text-align: center;
-            padding: 50px;
-        }
-        
-        .image-modal img {
-            max-width: 90%;
-            max-height: 90%;
-            border: 3px solid #d4af37;
-            border-radius: 10px;
-        }
-        
-        .close-modal {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            color: white;
-            font-size: 40px;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div id="imageModal" class="image-modal" onclick="this.style.display='none'">
-        <span class="close-modal">&times;</span>
-        <img id="modalImage" src="">
-    </div>
+    } catch (error) {
+        console.error('Cloud load failed:', error);
+        showNotification('⚠️ Using local data');
+    }
+}
 
-    <header>
-        <div class="logo">✨ STYLE OF LIFE - PRODUCTS</div>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="admin.html">Dashboard</a>
-            <a href="admin-products.html" class="active">Products</a>
-            <a href="admin-orders.html">Orders</a>
-            <a href="admin-design.html">Design</a>
-            <a href="#" onclick="logout()">Logout</a>
-        </nav>
-    </header>
-
-    <div class="admin-container">
-        <h1 class="page-title">📝 Product Management - Enter Image URLs</h1>
-        
-        <div class="excel-container">
-            <div class="excel-toolbar">
-                <button onclick="addNewProduct()">➕ Add New Product</button>
-                <button onclick="refreshData()">🔄 Refresh</button>
-                <span style="color: #888; margin-left: auto;" id="rowCount">0 products</span>
-            </div>
-            
-            <div class="excel-table-wrapper">
-                <table class="excel-table" id="productTable">
-                    <thead>
-                        <tr>
-                            <th rowspan="2">#</th>
-                            <th rowspan="2">SKU</th>
-                            <th rowspan="2">Name</th>
-                            <th rowspan="2">Category</th>
-                            <th rowspan="2">Price</th>
-                            <th rowspan="2">Stock</th>
-                            <th colspan="5">Image URLs (Paste your links)</th>
-                            <th rowspan="2">Description</th>
-                            <th rowspan="2">Actions</th>
-                        </tr>
-                        <tr>
-                            <th>Image 1 URL</th>
-                            <th>Image 2 URL</th>
-                            <th>Image 3 URL</th>
-                            <th>Image 4 URL</th>
-                            <th>Image 5 URL</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productTableBody"></tbody>
-                </table>
-            </div>
-            
-            <div class="excel-status-bar">
-                <span id="recordCount">0 records</span>
-                <span>✏️ Paste your image URLs in the boxes above</span>
-            </div>
-        </div>
-    </div>
-
-    <footer>
-        <p>© 2026 Style Of Life Jewelry</p>
-    </footer>
-
-    <script src="js/config.js"></script>
-    <script src="js/data.js"></script>
+async function saveToCloud() {
+    const products = JSON.parse(localStorage.getItem('products') || '[]');
     
-    <script>
-        if (!sessionStorage.getItem('adminLoggedIn')) {
-            window.location.href = 'login.html';
-        }
+    try {
+        const response = await fetch(`${CONFIG.API_URL}?action=saveProducts`, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                products: JSON.stringify(products)
+            })
+        });
         
-        document.addEventListener('DOMContentLoaded', loadProducts);
-        
-        function loadProducts() {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            displayProducts(products);
-            document.getElementById('rowCount').textContent = `${products.length} products`;
-            document.getElementById('recordCount').textContent = `${products.length} records`;
-        }
-        
-        function showImage(src) {
-            document.getElementById('modalImage').src = src;
-            document.getElementById('imageModal').style.display = 'block';
-        }
-        
-        function displayProducts(products) {
-            const tbody = document.getElementById('productTableBody');
-            let html = '';
-            
-            products.forEach((product, index) => {
-                const rowId = product.id;
-                const images = product.images || ['', '', '', '', ''];
-                
-                html += `
-                    <tr id="row-${rowId}" data-id="${rowId}">
-                        <td class="excel-row-number">${index + 1}</td>
-                        <td><input type="text" value="${product.sku || ''}" class="url-input" onchange="updateField('${rowId}', 'sku', this.value)"></td>
-                        <td><input type="text" value="${product.name || ''}" class="url-input" onchange="updateField('${rowId}', 'name', this.value)"></td>
-                        <td><input type="text" value="${product.category || ''}" class="url-input" onchange="updateField('${rowId}', 'category', this.value)"></td>
-                        <td><input type="number" value="${product.price || 0}" class="url-input" onchange="updateField('${rowId}', 'price', this.value)"></td>
-                        <td><input type="number" value="${product.stock || 0}" class="url-input" onchange="updateField('${rowId}', 'stock', this.value)"></td>
-                `;
-                
-                for (let i = 0; i < 5; i++) {
-                    html += `
-                        <td>
-                            <div class="image-slot">
-                                <div class="image-label">Image ${i + 1} ${i === 0 ? '(Main)' : ''}</div>
-                                ${images[i] ? `<img src="${images[i]}" class="image-preview" onclick="showImage('${images[i]}')">` : ''}
-                                <input type="url" 
-                                       class="url-input" 
-                                       value="${images[i] || ''}" 
-                                       placeholder="https://..."
-                                       onchange="updateImageUrl('${rowId}', ${i}, this.value)">
-                            </div>
-                        </td>
-                    `;
-                }
-                
-                html += `
-                        <td><input type="text" value="${product.description || ''}" class="url-input" onchange="updateField('${rowId}', 'description', this.value)"></td>
-                        <td>
-                            <div class="excel-actions">
-                                <button onclick="deleteProduct('${rowId}')" style="background: #f44336;">🗑️ Delete</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            tbody.innerHTML = html;
-        }
-        
-        function updateField(rowId, field, value) {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const index = products.findIndex(p => p.id == rowId);
-            
-            if (index !== -1) {
-                if (field === 'price' || field === 'stock') {
-                    value = Number(value) || 0;
-                }
-                products[index][field] = value;
-                localStorage.setItem('products', JSON.stringify(products));
-            }
-        }
-        
-        function updateImageUrl(rowId, slot, url) {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const index = products.findIndex(p => p.id == rowId);
-            
-            if (index !== -1) {
-                if (!products[index].images) {
-                    products[index].images = ['', '', '', '', ''];
-                }
-                products[index].images[slot] = url.trim();
-                localStorage.setItem('products', JSON.stringify(products));
-                
-                // Refresh display to show preview
-                loadProducts();
-            }
-        }
-        
-        function addNewProduct() {
-            const products = JSON.parse(localStorage.getItem('products') || '[]');
-            const newProduct = {
-                id: Date.now(),
-                sku: 'NEW' + Date.now().toString().slice(-4),
-                name: 'New Product',
-                category: '',
-                price: 0,
-                stock: 0,
-                description: '',
-                images: ['', '', '', '', '']
-            };
-            products.push(newProduct);
-            localStorage.setItem('products', JSON.stringify(products));
-            loadProducts();
-        }
-        
-        function deleteProduct(rowId) {
-            if (confirm('Delete this product?')) {
-                const products = JSON.parse(localStorage.getItem('products') || '[]');
-                const updatedProducts = products.filter(p => p.id != rowId);
-                localStorage.setItem('products', JSON.stringify(updatedProducts));
-                loadProducts();
-            }
-        }
-        
-        function refreshData() {
-            loadProducts();
-        }
-        
-        function logout() {
-            sessionStorage.removeItem('adminLoggedIn');
-            window.location.href = 'login.html';
-        }
-    </script>
-</body>
-</html>
+        showNotification('✅ Products saved to cloud');
+    } catch (error) {
+        console.error('Cloud save failed:', error);
+        showNotification('⚠️ Failed to save to cloud');
+    }
+}
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #d4af37;
+        color: black;
+        padding: 15px 25px;
+        border-radius: 8px;
+        z-index: 9999;
+        animation: slideIn 0.3s;
+    `;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => notification.remove(), 3000);
+}
+
+// Add cloud buttons to toolbar
+document.addEventListener('DOMContentLoaded', function() {
+    const toolbar = document.querySelector('.excel-toolbar');
+    if (toolbar) {
+        const cloudDiv = document.createElement('div');
+        cloudDiv.style.marginLeft = 'auto';
+        cloudDiv.innerHTML = `
+            <button onclick="loadFromCloud()" style="background: #2196f3; margin-right: 5px;">📥 Load from Cloud</button>
+            <button onclick="saveToCloud()" style="background: #4CAF50;">☁️ Save to Cloud</button>
+        `;
+        toolbar.appendChild(cloudDiv);
+    }
+    
+    // Auto-load from cloud on page load
+    loadFromCloud();
+});
+
+// Auto-save after any change
+const originalUpdateField = window.updateField;
+window.updateField = function(rowId, field, value) {
+    if (originalUpdateField) originalUpdateField(rowId, field, value);
+    saveToCloud();
+};
+
+const originalUpdateImageUrl = window.updateImageUrl;
+window.updateImageUrl = function(rowId, slot, url) {
+    if (originalUpdateImageUrl) originalUpdateImageUrl(rowId, slot, url);
+    saveToCloud();
+};
+
+const originalDeleteProduct = window.deleteProduct;
+window.deleteProduct = function(rowId) {
+    if (originalDeleteProduct) originalDeleteProduct(rowId);
+    saveToCloud();
+};
+
+const originalAddNewProduct = window.addNewProduct;
+window.addNewProduct = function() {
+    if (originalAddNewProduct) originalAddNewProduct();
+    saveToCloud();
+};
+</script>
