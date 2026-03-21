@@ -4,330 +4,145 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Style Of Life - Luxury Jewelry</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="js/config.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        :root {
-            --primary: #d4af37;
-            --primary-dark: #b8962e;
-            --dark: #1a1a1a;
-            --darker: #0a0a0a;
-            --light: #ffffff;
-            --gray-200: #e9ecef;
-            --gray-600: #6c757d;
-            --gray-800: #343a40;
-            --success: #28a745;
-            --danger: #dc3545;
-        }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--light);
-            color: var(--gray-800);
-        }
-        
-        header {
-            background: white;
-            padding: 20px 50px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 28px;
-            font-weight: 600;
-            color: var(--primary);
-        }
-        
-        nav a {
-            color: var(--gray-800);
-            text-decoration: none;
-            margin-left: 30px;
-            font-weight: 500;
-        }
-        
-        nav a:hover, nav a.active {
-            color: var(--primary);
-        }
-        
-        .cart-count {
-            background: var(--primary);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-left: 5px;
-        }
-        
-        .hero {
-            height: 500px;
-            background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=2000');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
-        }
-        
-        .hero h1 {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        
-        .hero p {
-            font-size: 20px;
-        }
-        
-        .products {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 30px;
-            padding: 50px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .product-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            transition: all 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid var(--gray-200);
-        }
-        
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .product-image {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-        }
-        
-        .product-info {
-            padding: 20px;
-        }
-        
-        .product-sku {
-            font-size: 12px;
-            color: var(--gray-600);
-        }
-        
-        .product-name {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 10px 0 5px;
-        }
-        
-        .product-category {
-            color: var(--primary);
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        
-        .product-price {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 10px 0;
-        }
-        
-        .product-stock {
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #d4af37; --primary-dark: #b8962e; --light: #ffffff; --gray-200: #e9ecef; --gray-600: #6c757d; --success: #28a745; --danger: #dc3545; }
+        body { font-family: 'Inter', sans-serif; background: var(--light); }
+        header { background: white; padding: 20px 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 28px; font-weight: 600; color: var(--primary); }
+        nav a { color: var(--gray-600); text-decoration: none; margin-left: 30px; }
+        nav a:hover { color: var(--primary); }
+        .cart-count { background: var(--primary); color: white; padding: 2px 6px; border-radius: 20px; font-size: 12px; margin-left: 5px; }
+        .hero { height: 500px; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=2000'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; text-align: center; color: white; }
+        .hero h1 { font-size: 64px; margin-bottom: 20px; }
+        .hero p { font-size: 20px; }
+        .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; padding: 50px; max-width: 1400px; margin: 0 auto; }
+        .product-card { background: white; border-radius: 16px; overflow: hidden; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid var(--gray-200); }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .product-image { width: 100%; height: 300px; object-fit: cover; }
+        .product-info { padding: 20px; }
+        .product-sku { font-size: 12px; color: var(--gray-600); }
+        .product-name { font-size: 20px; font-weight: 600; margin: 10px 0 5px; }
+        .product-category { color: var(--primary); font-size: 14px; margin-bottom: 10px; }
+        .product-price { font-size: 24px; font-weight: 700; color: var(--primary); margin: 10px 0; }
+        .product-stock { font-size: 14px; margin-bottom: 15px; }
         .in-stock { color: var(--success); }
         .out-of-stock { color: var(--danger); }
-        
-        button {
-            width: 100%;
-            padding: 12px;
-            background: var(--primary);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        button:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-        
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        footer {
-            background: var(--darker);
-            color: white;
-            text-align: center;
-            padding: 40px;
-            margin-top: 60px;
-        }
-        
-        @media (max-width: 768px) {
-            header { flex-direction: column; gap: 15px; padding: 15px; }
-            .hero h1 { font-size: 40px; }
-            .products { padding: 20px; }
-        }
+        .add-btn { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .add-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        footer { background: #0a0a0a; color: white; text-align: center; padding: 40px; margin-top: 60px; }
+        @media (max-width: 768px) { header { flex-direction: column; gap: 15px; padding: 15px; } .hero h1 { font-size: 40px; } .products { padding: 20px; } }
     </style>
 </head>
 <body>
     <header>
         <div class="logo">STYLE OF LIFE</div>
         <nav>
-            <a href="index.html" class="active">Home</a>
+            <a href="index.html">Home</a>
             <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
             <a href="track.html">Track Order</a>
         </nav>
     </header>
 
     <div class="hero">
-        <div>
-            <h1>Luxury Jewelry</h1>
-            <p>Discover exquisite handcrafted pieces</p>
-        </div>
+        <div><h1>Luxury Jewelry</h1><p>Discover exquisite handcrafted pieces</p></div>
     </div>
 
-    <div class="products" id="products"></div>
+    <div class="products" id="products">
+        <div style="text-align:center; padding:100px;">Loading products...</div>
+    </div>
 
-    <footer>
-        <p>© 2026 STYLE OF LIFE. All rights reserved.</p>
-    </footer>
+    <footer><p>© 2026 STYLE OF LIFE. All rights reserved.</p></footer>
 
-    <script>
-        let products = [];
+    <script type="importmap">
+        {
+            "imports": {
+                "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+            }
+        }
+    </script>
+    <script type="module">
+        import { createClient } from '@supabase/supabase-js';
+        
+        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
         let cart = [];
-
-        // Sample Products
-        const sampleProducts = [
-            {
-                id: 1,
-                sku: "GOLD001",
-                name: "Gold Necklace",
-                category: "Necklaces",
-                price: 25000,
-                stock: 10,
-                description: "22k Gold Necklace",
-                image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338"
-            },
-            {
-                id: 2,
-                sku: "DIA001",
-                name: "Diamond Ring",
-                category: "Rings",
-                price: 45000,
-                stock: 5,
-                description: "Diamond Ring",
-                image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e"
-            },
-            {
-                id: 3,
-                sku: "PEARL001",
-                name: "Pearl Earrings",
-                category: "Earrings",
-                price: 15000,
-                stock: 8,
-                description: "Pearl Earrings",
-                image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908"
+        let sessionId = localStorage.getItem('sessionId');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('sessionId', sessionId);
+        }
+        
+        async function loadProducts() {
+            const { data, error } = await supabase.from('products').select('*').order('id');
+            if (error) {
+                document.getElementById('products').innerHTML = '<div style="text-align:center; padding:100px;">Error loading products</div>';
+                return;
             }
-        ];
-
-        // Load data
-        document.addEventListener('DOMContentLoaded', function() {
-            // Load products
-            let storedProducts = localStorage.getItem('products');
-            if (storedProducts) {
-                products = JSON.parse(storedProducts);
-            } else {
-                products = sampleProducts;
-                localStorage.setItem('products', JSON.stringify(products));
-            }
-            
-            // Load cart
-            let storedCart = localStorage.getItem('cart');
-            if (storedCart) {
-                cart = JSON.parse(storedCart);
-            }
-            
-            displayProducts();
-            updateCartCount();
-        });
-
-        function displayProducts() {
+            displayProducts(data || []);
+        }
+        
+        function displayProducts(products) {
             const container = document.getElementById('products');
-            let html = '';
+            if (products.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:100px;">No products available</div>';
+                return;
+            }
             
-            products.forEach(product => {
+            let html = '';
+            products.forEach(p => {
+                const img = p.images?.[0] || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=400';
                 html += `
                     <div class="product-card">
-                        <img src="${product.image}" class="product-image" alt="${product.name}" onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
+                        <img src="${img}" class="product-image" onerror="this.src='https://via.placeholder.com/400x500?text=No+Image'">
                         <div class="product-info">
-                            <div class="product-sku">${product.sku}</div>
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-category">${product.category}</div>
-                            <div class="product-price">₹${product.price.toLocaleString('en-IN')}</div>
-                            <div class="product-stock ${product.stock > 0 ? 'in-stock' : 'out-of-stock'}">
-                                ${product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
+                            <div class="product-sku">${p.sku}</div>
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-category">${p.category || ''}</div>
+                            <div class="product-price">₹${(p.price || 0).toLocaleString('en-IN')}</div>
+                            <div class="product-stock ${p.stock > 0 ? 'in-stock' : 'out-of-stock'}">
+                                ${p.stock > 0 ? `In Stock (${p.stock})` : 'Out of Stock'}
                             </div>
-                            <button onclick="addToCart(${product.id})" ${product.stock <= 0 ? 'disabled' : ''}>
-                                Add to Cart
-                            </button>
+                            <button class="add-btn" onclick="addToCart(${p.id})" ${p.stock <= 0 ? 'disabled' : ''}>Add to Cart</button>
                         </div>
                     </div>
                 `;
             });
-            
             container.innerHTML = html;
         }
-
-        function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
+        
+        async function loadCart() {
+            const { data } = await supabase.from('carts').select('items').eq('session_id', sessionId).maybeSingle();
+            cart = data?.items || [];
+            updateCartCount();
+        }
+        
+        async function saveCart() {
+            const total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+            await supabase.from('carts').upsert({ session_id: sessionId, items: cart, total, updated_at: new Date() });
+        }
+        
+        window.addToCart = async function(productId) {
+            const { data: products } = await supabase.from('products').select('*').eq('id', productId);
+            const product = products?.[0];
             if (!product || product.stock <= 0) return;
             
-            const existing = cart.find(item => item.id === productId);
-            if (existing) {
-                existing.quantity = (existing.quantity || 1) + 1;
-            } else {
-                cart.push({
-                    id: product.id,
-                    sku: product.sku,
-                    name: product.name,
-                    price: product.price,
-                    image: product.image,
-                    quantity: 1
-                });
-            }
+            const existing = cart.find(i => i.id === productId);
+            if (existing) existing.quantity++;
+            else cart.push({ id: product.id, sku: product.sku, name: product.name, price: product.price, quantity: 1 });
             
-            localStorage.setItem('cart', JSON.stringify(cart));
+            await saveCart();
             updateCartCount();
             alert(`${product.name} added to cart!`);
-        }
-
+        };
+        
         function updateCartCount() {
-            const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
+            const count = cart.reduce((t, i) => t + i.quantity, 0);
             document.getElementById('cartCount').textContent = count;
         }
+        
+        loadProducts();
+        loadCart();
     </script>
 </body>
 </html>
