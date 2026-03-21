@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Style Of Life - Luxury Jewelry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="js/config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root { --primary: #d4af37; --primary-dark: #b8962e; --light: #ffffff; --gray-200: #e9ecef; --gray-600: #6c757d; --success: #28a745; --danger: #dc3545; }
         body { font-family: 'Inter', sans-serif; background: var(--light); }
-        header { background: white; padding: 20px 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        header { background: white; padding: 20px 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .logo { font-size: 28px; font-weight: 600; color: var(--primary); }
-        nav a { color: var(--gray-600); text-decoration: none; margin-left: 30px; }
-        nav a:hover { color: var(--primary); }
+        nav a { color: var(--gray-600); text-decoration: none; margin-left: 30px; font-weight: 500; transition: color 0.3s; }
+        nav a:hover, nav a.active { color: var(--primary); }
         .cart-count { background: var(--primary); color: white; padding: 2px 6px; border-radius: 20px; font-size: 12px; margin-left: 5px; }
         .hero { height: 500px; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=2000'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; text-align: center; color: white; }
         .hero h1 { font-size: 64px; margin-bottom: 20px; }
@@ -31,7 +32,11 @@
         .out-of-stock { color: var(--danger); }
         .add-btn { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s; }
         .add-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         footer { background: #0a0a0a; color: white; text-align: center; padding: 40px; margin-top: 60px; }
+        .loading { text-align: center; padding: 100px; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 768px) { header { flex-direction: column; gap: 15px; padding: 15px; } .hero h1 { font-size: 40px; } .products { padding: 20px; } }
     </style>
 </head>
@@ -39,7 +44,7 @@
     <header>
         <div class="logo">STYLE OF LIFE</div>
         <nav>
-            <a href="index.html">Home</a>
+            <a href="index.html" class="active">Home</a>
             <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
             <a href="track.html">Track Order</a>
         </nav>
@@ -50,7 +55,7 @@
     </div>
 
     <div class="products" id="products">
-        <div style="text-align:center; padding:100px;">Loading products...</div>
+        <div class="loading"><div class="spinner"></div><p>Loading products...</p></div>
     </div>
 
     <footer><p>© 2026 STYLE OF LIFE. All rights reserved.</p></footer>
@@ -68,6 +73,7 @@
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
         let cart = [];
         let sessionId = localStorage.getItem('sessionId');
+        
         if (!sessionId) {
             sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('sessionId', sessionId);
@@ -76,7 +82,7 @@
         async function loadProducts() {
             const { data, error } = await supabase.from('products').select('*').order('id');
             if (error) {
-                document.getElementById('products').innerHTML = '<div style="text-align:center; padding:100px;">Error loading products</div>';
+                document.getElementById('products').innerHTML = '<div class="loading">Error loading products</div>';
                 return;
             }
             displayProducts(data || []);
@@ -85,7 +91,7 @@
         function displayProducts(products) {
             const container = document.getElementById('products');
             if (products.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding:100px;">No products available</div>';
+                container.innerHTML = '<div class="loading">No products available</div>';
                 return;
             }
             
