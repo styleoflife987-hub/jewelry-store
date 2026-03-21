@@ -11,7 +11,7 @@
     <script src="js/config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --gold: #E8C47E; --gold-dark: #D4AF37; --gold-light: #F5E6C6; --charcoal: #2C2C2C; --dark: #1A1A1A; --light: #FFFFFF; --cream: #FAF7F2; --danger: #dc3545; --success: #28a745; }
+        :root { --gold: #E8C47E; --gold-dark: #D4AF37; --gold-light: #F5E6C6; --charcoal: #2C2C2C; --dark: #1A1A1A; --light: #FFFFFF; --cream: #FAF7F2; --danger: #dc3545; --success: #28a745; --info: #17a2b8; }
         body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--charcoal); }
         
         .logo { display: inline-flex; align-items: center; justify-content: center; position: relative; }
@@ -33,7 +33,6 @@
         .page-title { color: var(--gold-dark); margin-bottom: 30px; font-size: 32px; font-family: 'Playfair Display', serif; }
         .checkout-grid { display: grid; grid-template-columns: 1fr 380px; gap: 30px; }
         
-        /* Form Styles */
         .checkout-form { background: white; border-radius: 24px; padding: 30px; border: 1px solid rgba(212,175,55,0.15); }
         .form-section { margin-bottom: 30px; }
         .form-section h3 { font-size: 18px; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--gold); color: var(--charcoal); }
@@ -43,7 +42,6 @@
         .form-group input, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; transition: all 0.3s; font-family: 'Inter', sans-serif; }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
         
-        /* Order Summary */
         .order-summary { background: white; border-radius: 24px; padding: 30px; border: 1px solid rgba(212,175,55,0.15); position: sticky; top: 100px; }
         .summary-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--gold); }
         .order-items { max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
@@ -105,18 +103,6 @@
                         <div class="form-group"><label>Country</label><input type="text" id="country" value="India" readonly></div>
                     </div>
                 </div>
-                
-                <div class="form-section">
-                    <h3>Payment Method</h3>
-                    <div class="form-group">
-                        <select id="paymentMethod" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:12px;">
-                            <option value="cod">Cash on Delivery (COD)</option>
-                            <option value="card">Credit/Debit Card</option>
-                            <option value="upi">UPI / Google Pay / PhonePe</option>
-                            <option value="netbanking">Net Banking</option>
-                        </select>
-                    </div>
-                </div>
             </div>
             
             <div class="order-summary" id="orderSummary">
@@ -156,27 +142,54 @@
         }
         
         async function loadCart() {
-            const { data } = await supabase.from('carts').select('items').eq('session_id', sessionId).maybeSingle();
-            cart = data?.items || [];
-            updateCartCount();
-            updateOrderSummary();
+            try {
+                const { data, error } = await supabase
+                    .from('carts')
+                    .select('items')
+                    .eq('session_id', sessionId)
+                    .maybeSingle();
+                
+                if (error) {
+                    console.error('Error loading cart:', error);
+                    cart = [];
+                } else {
+                    cart = data?.items || [];
+                }
+                updateCartCount();
+                updateOrderSummary();
+            } catch (err) {
+                console.error('Failed to load cart:', err);
+                cart = [];
+                updateOrderSummary();
+            }
         }
         
         function updateCartCount() {
-            const count = cart.reduce((t, i) => t + i.quantity, 0);
-            document.getElementById('cartCount').textContent = count;
+            const count = cart.reduce((t, i) => t + (i.quantity || 1), 0);
+            const cartCountEl = document.getElementById('cartCount');
+            if (cartCountEl) cartCountEl.textContent = count;
         }
         
         function updateOrderSummary() {
             let subtotal = 0;
             let itemsHtml = '';
             
+            if (!cart || cart.length === 0) {
+                document.getElementById('orderItems').innerHTML = '<p style="text-align:center; padding:20px; color:#888;">Your cart is empty</p>';
+                document.getElementById('subtotal').textContent = '0';
+                document.getElementById('tax').textContent = '0';
+                document.getElementById('total').textContent = '0';
+                document.getElementById('shippingText').textContent = '₹100';
+                return;
+            }
+            
             cart.forEach(item => {
-                const itemTotal = item.price * item.quantity;
+                const quantity = item.quantity || 1;
+                const itemTotal = (item.price || 0) * quantity;
                 subtotal += itemTotal;
                 itemsHtml += `
                     <div class="order-item">
-                        <div class="order-item-name">${item.name} <span style="color:#888;">x${item.quantity}</span></div>
+                        <div class="order-item-name">${item.name || 'Product'} <span style="color:#888;">x${quantity}</span></div>
                         <div class="order-item-price">₹${itemTotal.toLocaleString('en-IN')}</div>
                     </div>
                 `;
@@ -186,7 +199,7 @@
             const shipping = subtotal >= 50000 ? 0 : 100;
             const total = subtotal + tax + shipping;
             
-            document.getElementById('orderItems').innerHTML = itemsHtml || '<p style="text-align:center; padding:20px; color:#888;">Your cart is empty</p>';
+            document.getElementById('orderItems').innerHTML = itemsHtml;
             document.getElementById('subtotal').textContent = subtotal.toLocaleString('en-IN');
             document.getElementById('tax').textContent = tax.toLocaleString('en-IN');
             document.getElementById('total').textContent = total.toLocaleString('en-IN');
@@ -194,6 +207,7 @@
         }
         
         window.placeOrder = async function() {
+            // Get form values
             const fullName = document.getElementById('fullName').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -202,6 +216,7 @@
             const state = document.getElementById('state').value.trim();
             const pincode = document.getElementById('pincode').value.trim();
             
+            // Validate
             if (!fullName || !phone || !address || !city || !state || !pincode) {
                 alert('Please fill all required fields');
                 return;
@@ -217,68 +232,111 @@
                 return;
             }
             
-            if (cart.length === 0) {
+            if (!cart || cart.length === 0) {
                 alert('Your cart is empty');
                 return;
             }
             
+            // Disable button
             const btn = document.getElementById('placeOrderBtn');
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            const subtotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+            // Calculate totals
+            const subtotal = cart.reduce((s, i) => s + ((i.price || 0) * (i.quantity || 1)), 0);
             const tax = Math.round(subtotal * 0.18);
             const shipping = subtotal >= 50000 ? 0 : 100;
             const total = subtotal + tax + shipping;
             const fullAddress = `${address}, ${city}, ${state} - ${pincode}`;
             
+            // Create order object
+            const orderId = 'ORD' + Date.now();
             const order = {
-                orderId: 'ORD' + Date.now(),
-                name: fullName,
+                order_id: orderId,
+                customer_name: fullName,
                 phone: phone,
                 email: email || '',
                 address: fullAddress,
-                items: cart.map(i => ({ id: i.id, sku: i.sku, name: i.name, price: i.price, quantity: i.quantity })),
+                items: cart.map(i => ({
+                    id: i.id,
+                    sku: i.sku,
+                    name: i.name,
+                    price: i.price,
+                    quantity: i.quantity || 1
+                })),
                 subtotal: subtotal,
                 tax: tax,
                 shipping: shipping,
                 total: total,
                 status: 'Pending',
-                date: new Date().toISOString()
+                created_at: new Date().toISOString()
             };
             
+            console.log('Placing order:', order);
+            
             try {
-                const { data, error } = await supabase.from('orders').insert([{
-                    order_id: order.orderId,
-                    customer_name: order.name,
-                    phone: order.phone,
-                    email: order.email,
-                    address: order.address,
-                    items: order.items,
-                    subtotal: order.subtotal,
-                    tax: order.tax,
-                    shipping: order.shipping,
-                    total: order.total,
-                    status: order.status,
-                    date: order.date
-                }]).select();
+                // Save order to Supabase
+                const { data, error } = await supabase
+                    .from('orders')
+                    .insert([order])
+                    .select();
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw new Error(error.message);
+                }
+                
+                console.log('Order saved successfully:', data);
                 
                 // Clear cart
-                await supabase.from('carts').upsert({ session_id: sessionId, items: [], total: 0 });
+                const { error: cartError } = await supabase
+                    .from('carts')
+                    .upsert({ 
+                        session_id: sessionId, 
+                        items: [], 
+                        total: 0, 
+                        updated_at: new Date().toISOString() 
+                    });
                 
-                alert(`✅ Order placed successfully!\nOrder ID: ${order.orderId}`);
-                window.location.href = `track.html?order=${order.orderId}`;
+                if (cartError) {
+                    console.error('Cart clear error:', cartError);
+                }
+                
+                // Show success message
+                alert(`✅ Order placed successfully!\n\nOrder ID: ${orderId}\nTotal: ₹${total.toLocaleString('en-IN')}\n\nYou will receive a confirmation email shortly.`);
+                
+                // Redirect to tracking page
+                window.location.href = `track.html?order=${orderId}`;
+                
             } catch (error) {
-                console.error('Order failed:', error);
-                alert('❌ Failed to place order. Please try again.');
+                console.error('Order placement error:', error);
+                alert(`❌ Failed to place order: ${error.message}\n\nPlease try again or contact support.`);
                 btn.disabled = false;
                 btn.textContent = 'Place Order';
             }
         };
         
+        // Load cart on page load
         loadCart();
+        
+        // Also try to load from localStorage if Supabase fails
+        async function fallbackLoadCart() {
+            try {
+                const localCart = localStorage.getItem('cart');
+                if (localCart) {
+                    cart = JSON.parse(localCart);
+                    updateOrderSummary();
+                    updateCartCount();
+                }
+            } catch (e) {}
+        }
+        
+        // Set timeout to check if cart loaded
+        setTimeout(() => {
+            if ((!cart || cart.length === 0) && localStorage.getItem('cart')) {
+                fallbackLoadCart();
+            }
+        }, 1000);
     </script>
     
     <!-- Analytics Tracking -->
