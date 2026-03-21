@@ -1,31 +1,34 @@
-// js/analytics.js - Visitor Tracking & Analytics
+// js/analytics.js - Server-Side Visitor Tracking (Works Across All Browsers)
 
-// Generate or get visitor ID
+// Generate or get persistent visitor ID (stored in localStorage, but synced to server)
 function getVisitorId() {
     let visitorId = localStorage.getItem('visitorId');
     if (!visitorId) {
+        // Generate unique ID
         visitorId = 'vis_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('visitorId', visitorId);
     }
     return visitorId;
 }
 
-// Track page view
+// Track page view to server (Google Sheets)
 async function trackPageView(pageName) {
     const visitorId = getVisitorId();
     const today = new Date().toISOString().split('T')[0];
     
     try {
-        const response = await fetch(`${CONFIG.API_URL}?action=trackVisit&visitorId=${visitorId}&page=${pageName}&date=${today}&t=${Date.now()}`);
-        return await response.json();
+        const response = await fetch(`${CONFIG.API_URL}?action=trackVisit&visitorId=${visitorId}&page=${pageName}&date=${today}&userAgent=${encodeURIComponent(navigator.userAgent)}&referrer=${encodeURIComponent(document.referrer)}&t=${Date.now()}`);
+        const result = await response.json();
+        console.log('✅ Page view tracked:', pageName);
+        return result;
     } catch (error) {
         console.error('Failed to track visit:', error);
-        // Store offline
+        // Store offline for later sync
         storeOfflineVisit(visitorId, pageName, today);
     }
 }
 
-// Store offline visits for later sync
+// Store offline visits
 function storeOfflineVisit(visitorId, page, date) {
     let offlineVisits = JSON.parse(localStorage.getItem('offlineVisits') || '[]');
     offlineVisits.push({ visitorId, page, date, timestamp: Date.now() });
@@ -43,9 +46,10 @@ async function syncOfflineVisits() {
         } catch (e) {}
     }
     localStorage.setItem('offlineVisits', '[]');
+    console.log('✅ Synced', offlineVisits.length, 'offline visits');
 }
 
-// Get analytics data
+// Get analytics data from server
 async function getAnalytics(days = 30) {
     try {
         const response = await fetch(`${CONFIG.API_URL}?action=getAnalytics&days=${days}&t=${Date.now()}`);
@@ -66,18 +70,45 @@ async function getActiveUsers() {
     }
 }
 
-// Track on page load
+// Track time spent on page
+let pageStartTime = Date.now();
+
+async function trackTimeSpent() {
+    const timeSpent = Math.floor((Date.now() - pageStartTime) / 1000);
+    if (timeSpent > 5) {
+        const visitorId = getVisitorId();
+        const pageName = window.location.pathname.split('/').pop() || 'index.html';
+        try {
+            await fetch(`${CONFIG.API_URL}?action=trackTime&visitorId=${visitorId}&page=${pageName}&time=${timeSpent}`);
+        } catch (e) {}
+    }
+}
+
+// Initialize tracking
 document.addEventListener('DOMContentLoaded', () => {
     const pageName = window.location.pathname.split('/').pop() || 'index.html';
+    
+    // Track page view
     trackPageView(pageName);
+    
+    // Sync offline visits
     syncOfflineVisits();
     
-    // Track time on page
-    let startTime = Date.now();
+    // Track time on page when leaving
     window.addEventListener('beforeunload', () => {
-        const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-        if (timeSpent > 5) {
-            fetch(`${CONFIG.API_URL}?action=trackTime&page=${pageName}&time=${timeSpent}&visitorId=${getVisitorId()}`);
-        }
+        trackTimeSpent();
     });
+});
+
+// Also track when page becomes visible again (for tab switches)
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        // Page became visible again - track new view
+        const pageName = window.location.pathname.split('/').pop() || 'index.html';
+        trackPageView(pageName);
+        pageStartTime = Date.now();
+    } else {
+        // Page hidden - track time spent
+        trackTimeSpent();
+    }
 });
