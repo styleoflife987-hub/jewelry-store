@@ -173,7 +173,6 @@
                                     ${validImages.map((_, idx) => `<div class="gallery-dot ${idx === 0 ? 'active' : ''}" onclick="goToImage('${p.id}', ${idx})"></div>`).join('')}
                                 </div>
                                 <div class="autoplay-indicator">
-                                    <span>▶ Auto-scroll</span>
                                     <button class="pause-btn" onclick="toggleAutoPlay('${p.id}')">⏸</button>
                                 </div>
                                 <div class="gallery-thumbnails" id="thumbnails-${p.id}">
