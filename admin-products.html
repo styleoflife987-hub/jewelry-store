@@ -18,8 +18,8 @@
         .container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
         h1 { color: var(--primary); margin-bottom: 20px; }
         .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
-        .btn { background: var(--primary); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
-        .btn:hover { background: var(--primary-dark); }
+        .btn { background: var(--primary); color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.3s; }
+        .btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
         .btn-danger { background: var(--danger); }
         .search-box input { padding: 10px 15px; border: 1px solid var(--gray-200); border-radius: 6px; width: 250px; }
         
@@ -60,7 +60,9 @@
         .empty-state { text-align: center; padding: 60px; background: white; border-radius: 12px; border: 1px solid var(--gray-200); }
         .spinner { width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .success-msg { background: #d4edda; color: #155724; padding: 10px; border-radius: 6px; margin-bottom: 15px; display: none; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #28a745; color: white; padding: 12px 24px; border-radius: 8px; z-index: 3000; animation: slideIn 0.3s; }
+        .toast.error { background: #dc3545; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } .image-grid { grid-template-columns: repeat(2, 1fr); } header { flex-direction: column; gap: 15px; } .toolbar { flex-direction: column; } .search-box input { width: 100%; } }
     </style>
 </head>
@@ -77,8 +79,6 @@
 
     <div class="container">
         <h1>📦 Product Management</h1>
-        
-        <div id="successMsg" class="success-msg"></div>
         
         <div class="toolbar">
             <button class="btn" onclick="showAddForm()">+ Add New Product</button>
@@ -100,7 +100,7 @@
                 <div><label>Stock Quantity *</label><input type="number" id="stock" placeholder="e.g., 10" value="10"></div>
             </div>
             <div><label>Description</label><textarea id="description" rows="2" placeholder="Product description..."></textarea></div>
-            <h3 style="margin: 15px 0 10px;">📸 Image URLs</h3>
+            <h3 style="margin: 15px 0 10px;">📸 Image URLs (Optional)</h3>
             <div class="image-grid">
                 <div class="image-slot">Image 1<br><input type="url" id="img1" placeholder="https://..."></div>
                 <div class="image-slot">Image 2<br><input type="url" id="img2" placeholder="https://..."></div>
@@ -149,25 +149,28 @@
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
         let allProducts = [];
         
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
         async function loadProducts() {
             const { data, error } = await supabase.from('products').select('*').order('id');
-            if (error) { console.error('Load error:', error); document.getElementById('productsGrid').innerHTML = '<div class="empty-state"><h3>❌ Error</h3><p>' + error.message + '</p><button class="btn" onclick="location.reload()" style="margin-top:15px;">Retry</button></div>'; return; }
+            if (error) { 
+                console.error('Load error:', error);
+                document.getElementById('productsGrid').innerHTML = '<div class="empty-state"><h3>❌ Error Loading Products</h3><p>' + error.message + '</p><button class="btn" onclick="location.reload()" style="margin-top:15px;">Retry</button></div>';
+                return;
+            }
             allProducts = data || [];
             displayProducts(allProducts);
-            console.log('Loaded', allProducts.length, 'products from database');
+            console.log('✅ Loaded', allProducts.length, 'products from Supabase');
         }
         
         function getStockClass(stock) { if (stock > 20) return 'stock-high'; if (stock > 0) return 'stock-low'; return 'stock-out'; }
         function getStockText(stock) { if (stock > 20) return `In Stock (${stock})`; if (stock > 0) return `Low Stock (${stock})`; return 'Out of Stock'; }
-        
-        function showMessage(msg, isError = false) {
-            const el = document.getElementById('successMsg');
-            el.textContent = msg;
-            el.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
-            el.style.color = isError ? '#721c24' : '#155724';
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 3000);
-        }
         
         function displayProducts(products) {
             const grid = document.getElementById('productsGrid');
@@ -204,7 +207,11 @@
             displayProducts(filtered);
         };
         
-        window.showAddForm = function() { document.getElementById('addForm').style.display = 'block'; window.scrollTo({ top: 0 }); };
+        window.showAddForm = function() { 
+            document.getElementById('addForm').style.display = 'block'; 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        
         window.hideAddForm = function() {
             document.getElementById('addForm').style.display = 'none';
             document.getElementById('sku').value = ''; document.getElementById('name').value = ''; document.getElementById('price').value = '';
@@ -220,7 +227,7 @@
             const price = document.getElementById('price').value.trim();
             const stock = document.getElementById('stock').value.trim();
             
-            if (!sku || !name || !price || !stock) { showMessage('Please fill all required fields', true); return; }
+            if (!sku || !name || !price || !stock) { showToast('Please fill all required fields', true); return; }
             
             const images = [1,2,3,4,5].map(i => document.getElementById('img' + i).value.trim());
             
@@ -237,16 +244,16 @@
             btn.disabled = false;
             btn.textContent = '💾 Save Product';
             
-            if (error) { showMessage('Error: ' + error.message, true); return; }
+            if (error) { showToast('Error: ' + error.message, true); return; }
             
-            showMessage('✅ Product added successfully!');
+            showToast('✅ Product added successfully!');
             hideAddForm();
             await loadProducts();
         };
         
         window.openEditModal = async function(id) {
             const { data, error } = await supabase.from('products').select('*').eq('id', id);
-            if (error) { showMessage('Error loading product', true); return; }
+            if (error) { showToast('Error loading product', true); return; }
             const p = data?.[0];
             if (!p) return;
             
@@ -270,7 +277,7 @@
             const stock = document.getElementById('editStock').value.trim();
             const description = document.getElementById('editDescription').value.trim();
             
-            if (!sku || !name || !price || !stock) { showMessage('Please fill all required fields', true); return; }
+            if (!sku || !name || !price || !stock) { showToast('Please fill all required fields', true); return; }
             
             const btn = document.getElementById('updateBtn');
             btn.disabled = true;
@@ -283,9 +290,9 @@
             btn.disabled = false;
             btn.textContent = '💾 Save Changes';
             
-            if (error) { showMessage('Error: ' + error.message, true); return; }
+            if (error) { showToast('Error: ' + error.message, true); return; }
             
-            showMessage('✅ Product updated successfully!');
+            showToast('✅ Product updated successfully!');
             closeEditModal();
             await loadProducts();
         };
@@ -302,9 +309,9 @@
             btn.disabled = false;
             btn.textContent = '🗑️ Delete';
             
-            if (error) { showMessage('Error: ' + error.message, true); return; }
+            if (error) { showToast('Error: ' + error.message, true); return; }
             
-            showMessage('✅ Product deleted successfully!');
+            showToast('✅ Product deleted permanently!');
             await loadProducts();
         };
         
