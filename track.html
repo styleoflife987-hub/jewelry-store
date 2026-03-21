@@ -5,32 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Track Order - Style Of Life</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="js/config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #d4af37; --dark: #1a1a1a; --darker: #0a0a0a; --light: #ffffff; --gray-200: #e9ecef; --success: #28a745; --danger: #dc3545; }
+        :root { --primary: #d4af37; --light: #ffffff; --gray-200: #e9ecef; --danger: #dc3545; --success: #28a745; --warning: #ffc107; }
         body { font-family: 'Inter', sans-serif; background: var(--light); }
         header { background: white; padding: 20px 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 28px; font-weight: 600; color: var(--primary); }
         nav a { color: #6c757d; text-decoration: none; margin-left: 30px; }
-        nav a.active { color: var(--primary); }
+        nav a:hover, nav a.active { color: var(--primary); }
         .container { max-width: 600px; margin: 100px auto; padding: 0 20px; text-align: center; }
         .track-box { background: white; padding: 40px; border-radius: 12px; border: 1px solid var(--gray-200); }
         .track-form { display: flex; gap: 10px; margin: 30px 0; }
         .track-input { flex: 1; padding: 15px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 16px; }
         .track-btn { padding: 15px 30px; background: var(--primary); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; }
         .order-details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px; text-align: left; }
-        .status-pending { background: #ffc107; color: #856404; display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
-        footer { background: var(--darker); color: white; text-align: center; padding: 40px; margin-top: 60px; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-Pending { background: var(--warning); color: #856404; }
+        .status-Processing { background: #17a2b8; color: white; }
+        .status-Shipped { background: var(--success); color: white; }
+        .status-Delivered { background: #20c997; color: white; }
+        .status-Cancelled { background: var(--danger); color: white; }
+        footer { background: #0a0a0a; color: white; text-align: center; padding: 40px; margin-top: 60px; }
+        @media (max-width: 768px) { header { flex-direction: column; gap: 15px; padding: 15px; } .track-form { flex-direction: column; } }
     </style>
 </head>
 <body>
     <header>
         <div class="logo">STYLE OF LIFE</div>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="cart.html">Cart</a>
-            <a href="track.html" class="active">Track Order</a>
-        </nav>
+        <nav><a href="index.html">Home</a><a href="cart.html">Cart</a><a href="track.html" class="active">Track Order</a></nav>
     </header>
 
     <div class="container">
@@ -46,45 +49,52 @@
 
     <footer><p>© 2026 STYLE OF LIFE. All rights reserved.</p></footer>
 
-    <script>
-        function trackOrder() {
+    <script type="importmap">
+        { "imports": { "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2" } }
+    </script>
+    <script type="module">
+        import { createClient } from '@supabase/supabase-js';
+        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+        
+        window.trackOrder = async function() {
             const orderId = document.getElementById('orderId').value.trim();
-            if (!orderId) {
-                alert('Enter order ID');
-                return;
-            }
+            if (!orderId) { alert('Enter order ID'); return; }
             
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const order = orders.find(o => o.orderId === orderId);
             const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div style="text-align:center; padding:20px;">Searching...</div>';
             
-            if (!order) {
+            const { data, error } = await supabase.from('orders').select('*').eq('order_id', orderId);
+            if (error || !data || data.length === 0) {
                 resultDiv.innerHTML = '<p style="color: var(--danger);">Order not found</p>';
                 return;
             }
             
+            const order = data[0];
             let itemsHtml = '';
             order.items.forEach(item => {
-                itemsHtml += `<div style="display:flex; justify-content:space-between; padding:5px 0;"><span>${item.name} x${item.quantity}</span><span>₹${(item.price * item.quantity).toLocaleString()}</span></div>`;
+                itemsHtml += `<div style="display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #e9ecef;"><span>${item.name} x${item.quantity}</span><span>₹${(item.price * item.quantity).toLocaleString()}</span></div>`;
             });
             
             resultDiv.innerHTML = `
                 <div class="order-details">
                     <h3 style="color: var(--primary);">Order Found</h3>
-                    <p><strong>Order ID:</strong> ${order.orderId}</p>
-                    <p><strong>Customer:</strong> ${order.name}</p>
+                    <p><strong>Order ID:</strong> ${order.order_id}</p>
+                    <p><strong>Customer:</strong> ${order.customer_name}</p>
                     <p><strong>Phone:</strong> ${order.phone}</p>
                     <p><strong>Address:</strong> ${order.address}</p>
-                    <p><strong>Status:</strong> <span class="status-pending">${order.status}</span></p>
-                    <p><strong>Date:</strong> ${new Date(order.date).toLocaleString()}</p>
-                    <h4 style="margin: 15px 0 10px;">Items:</h4>
+                    <p><strong>Status:</strong> <span class="status-badge status-${order.status}">${order.status}</span></p>
+                    <p><strong>Date:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                    <h4 style="margin:15px 0 10px;">Items:</h4>
                     ${itemsHtml}
-                    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;">
-                        <p><strong>Total:</strong> ₹${order.total.toLocaleString()}</p>
+                    <div style="margin-top:15px; padding-top:10px; border-top:2px solid #e9ecef;">
+                        <p><strong>Subtotal:</strong> ₹${order.subtotal.toLocaleString()}</p>
+                        <p><strong>Tax (18%):</strong> ₹${order.tax.toLocaleString()}</p>
+                        <p><strong>Shipping:</strong> ₹${order.shipping}</p>
+                        <p style="font-size:20px; color:var(--primary);"><strong>Total:</strong> ₹${order.total.toLocaleString()}</p>
                     </div>
                 </div>
             `;
-        }
+        };
         
         const urlParams = new URLSearchParams(window.location.search);
         const orderId = urlParams.get('order');
