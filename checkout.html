@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Style Of Life</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="js/config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --primary: #d4af37; --primary-dark: #b8962e; --dark: #1a1a1a; --darker: #0a0a0a; --light: #ffffff; --gray-200: #e9ecef; --gray-600: #6c757d; }
+        :root { --primary: #d4af37; --primary-dark: #b8962e; --light: #ffffff; --gray-200: #e9ecef; --gray-600: #6c757d; }
         body { font-family: 'Inter', sans-serif; background: var(--light); }
         header { background: white; padding: 20px 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 28px; font-weight: 600; color: var(--primary); }
@@ -21,17 +22,14 @@
         .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--gray-200); }
         .summary-row.total { border-bottom: none; font-size: 20px; font-weight: bold; color: var(--primary); padding-top: 15px; }
         button { width: 100%; padding: 15px; background: var(--primary); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; margin-top: 20px; }
-        footer { background: var(--darker); color: white; text-align: center; padding: 40px; margin-top: 60px; }
-        @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } }
+        footer { background: #0a0a0a; color: white; text-align: center; padding: 40px; margin-top: 60px; }
+        @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } header { flex-direction: column; gap: 15px; padding: 15px; } }
     </style>
 </head>
 <body>
     <header>
         <div class="logo">STYLE OF LIFE</div>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="cart.html">Cart</a>
-        </nav>
+        <nav><a href="index.html">Home</a><a href="cart.html">Cart</a></nav>
     </header>
 
     <div class="container">
@@ -62,40 +60,43 @@
 
     <footer><p>© 2026 STYLE OF LIFE. All rights reserved.</p></footer>
 
-    <script>
+    <script type="importmap">
+        { "imports": { "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2" } }
+    </script>
+    <script type="module">
+        import { createClient } from '@supabase/supabase-js';
+        
+        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
         let cart = [];
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadCart();
-            displayOrderSummary();
-        });
-
-        function loadCart() {
-            const stored = localStorage.getItem('cart');
-            cart = stored ? JSON.parse(stored) : [];
+        let sessionId = localStorage.getItem('sessionId');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('sessionId', sessionId);
         }
-
-        function displayOrderSummary() {
-            let subtotal = 0;
-            let itemsHtml = '';
-            
+        
+        async function loadCart() {
+            const { data } = await supabase.from('carts').select('items').eq('session_id', sessionId).maybeSingle();
+            cart = data?.items || [];
+            updateSummary();
+        }
+        
+        function updateSummary() {
+            let subtotal = 0, itemsHtml = '';
             cart.forEach(item => {
                 const itemTotal = item.price * item.quantity;
                 subtotal += itemTotal;
                 itemsHtml += `<div style="display:flex; justify-content:space-between; margin:5px 0;"><span>${item.name} x${item.quantity}</span><span>₹${itemTotal.toLocaleString()}</span></div>`;
             });
-            
             document.getElementById('orderItems').innerHTML = itemsHtml || '<p>Your cart is empty</p>';
             
             const tax = Math.round(subtotal * 0.18);
             const total = subtotal + tax + 100;
-            
             document.getElementById('orderSubtotal').textContent = subtotal.toLocaleString();
             document.getElementById('orderTax').textContent = tax.toLocaleString();
             document.getElementById('orderTotal').textContent = total.toLocaleString();
         }
-
-        function placeOrder() {
+        
+        window.placeOrder = async function() {
             const name = document.getElementById('name').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const address = document.getElementById('address').value.trim();
@@ -106,7 +107,6 @@
                 alert('Please fill all required fields');
                 return;
             }
-            
             if (cart.length === 0) {
                 alert('Your cart is empty');
                 return;
@@ -117,29 +117,37 @@
             const total = subtotal + tax + 100;
             
             const order = {
-                orderId: 'ORD' + Date.now(),
-                name: name,
-                phone: phone,
+                name, phone, email: document.getElementById('email').value.trim(),
                 address: `${address}, ${city} - ${pincode}`,
-                items: cart,
-                subtotal: subtotal,
-                tax: tax,
-                total: total,
-                status: 'Pending',
-                date: new Date().toISOString()
+                items: cart.map(i => ({ id: i.id, sku: i.sku, name: i.name, price: i.price, quantity: i.quantity })),
+                subtotal, tax, shipping: 100, total
             };
             
-            // Save order
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            orders.push(order);
-            localStorage.setItem('orders', JSON.stringify(orders));
+            const { data, error } = await supabase.from('orders').insert([{
+                order_id: 'ORD' + Date.now(),
+                customer_name: order.name,
+                phone: order.phone,
+                email: order.email,
+                address: order.address,
+                items: order.items,
+                subtotal: order.subtotal,
+                tax: order.tax,
+                shipping: order.shipping,
+                total: order.total,
+                status: 'Pending'
+            }]).select();
             
-            // Clear cart
-            localStorage.removeItem('cart');
+            if (error) {
+                alert('Error placing order: ' + error.message);
+                return;
+            }
             
-            alert(`✅ Order placed! ID: ${order.orderId}`);
-            window.location.href = `track.html?order=${order.orderId}`;
-        }
+            await supabase.from('carts').upsert({ session_id: sessionId, items: [], total: 0 });
+            alert(`✅ Order placed! ID: ${data[0].order_id}`);
+            window.location.href = `track.html?order=${data[0].order_id}`;
+        };
+        
+        loadCart();
     </script>
 </body>
 </html>
