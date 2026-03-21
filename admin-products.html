@@ -304,37 +304,36 @@
         window.deleteProduct = async function(id) {
             if (!confirm('⚠️ Delete this product permanently? This cannot be undone.')) return;
             
-            // Get the button that was clicked
             const btn = event.target;
-            const productCard = btn.closest('.product-card');
+            const originalText = btn.textContent;
             
-            // Show loading on the specific product card
-            if (productCard) {
-                const originalContent = productCard.innerHTML;
-                productCard.style.opacity = '0.5';
-                productCard.innerHTML = '<div style="text-align:center; padding:40px;">Deleting...</div>';
-                
+            // Show loading on button
+            btn.disabled = true;
+            btn.textContent = 'Deleting...';
+            
+            try {
+                // Delete from Supabase database
                 const { error } = await supabase.from('products').delete().eq('id', id);
                 
                 if (error) {
-                    productCard.style.opacity = '1';
-                    productCard.innerHTML = originalContent;
                     showToast('Error: ' + error.message, true);
+                    btn.disabled = false;
+                    btn.textContent = originalText;
                     return;
                 }
                 
-                showToast('✅ Product deleted permanently!');
-                
-                // Remove from allProducts array
+                // Remove from local array
                 allProducts = allProducts.filter(p => p.id !== id);
                 
-                // Refresh the display
+                // Update the display
                 displayProducts(allProducts);
-            } else {
-                const { error } = await supabase.from('products').delete().eq('id', id);
-                if (error) { showToast('Error: ' + error.message, true); return; }
+                
                 showToast('✅ Product deleted permanently!');
-                await loadProducts();
+                
+            } catch (err) {
+                showToast('Error: ' + err.message, true);
+                btn.disabled = false;
+                btn.textContent = originalText;
             }
         };
         
