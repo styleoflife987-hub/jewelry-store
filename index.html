@@ -23,6 +23,7 @@
             font-family: 'Inter', sans-serif; 
             background: var(--cream);
             color: var(--charcoal);
+            overflow-x: hidden;
         }
         
         /* Logo Styles */
@@ -201,214 +202,258 @@
         /* Products Grid */
         .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 40px; padding: 20px 60px 60px; max-width: 1400px; margin: 0 auto; }
         
-        /* Product Card */
-        .product-card { background: white; border-radius: 24px; overflow: hidden; transition: all 0.4s; box-shadow: 0 12px 30px rgba(0,0,0,0.05); border: 1px solid rgba(212,175,55,0.12); position: relative; }
-        .product-card:hover { transform: translateY(-8px); box-shadow: 0 25px 45px rgba(212,175,55,0.15); }
+        /* Product Card - Cinematic */
+        .product-card { 
+            background: white; 
+            border-radius: 24px; 
+            overflow: hidden; 
+            transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1); 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(212,175,55,0.12); 
+            position: relative;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
         
-        .product-badge { position: absolute; top: 18px; left: 18px; background: linear-gradient(135deg, #D4AF37, #E8C47E); color: #1A1A1A; padding: 5px 14px; border-radius: 30px; font-size: 11px; font-weight: 700; z-index: 15; }
+        .product-card:hover { 
+            transform: translateY(-12px) rotateX(2deg); 
+            box-shadow: 0 35px 55px rgba(212,175,55,0.2); 
+            border-color: var(--gold);
+        }
         
-        /* ========== PRODUCT-WISE INDEPENDENT GALLERY ========== */
+        .product-badge { 
+            position: absolute; 
+            top: 18px; 
+            left: 18px; 
+            background: linear-gradient(135deg, #D4AF37, #E8C47E);
+            color: #1A1A1A; 
+            padding: 5px 14px; 
+            border-radius: 30px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            z-index: 15; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* ========== UNIQUE CINEMATIC GALLERY ========== */
         
         .gallery-container {
             position: relative;
             width: 100%;
             height: 380px;
             overflow: hidden;
-            background: #faf7f2;
-            cursor: grab;
-            user-select: none;
-            touch-action: pan-y pinch-zoom;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            cursor: pointer;
         }
         
-        .gallery-container:active {
-            cursor: grabbing;
+        /* Cinematic Film Strip Effect */
+        .film-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 20px,
+                rgba(212,175,55,0.1) 20px,
+                rgba(212,175,55,0.1) 40px
+            );
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .gallery-container:hover .film-strip {
+            opacity: 1;
         }
         
         .gallery-slider {
             display: flex;
             width: 100%;
             height: 100%;
-            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            will-change: transform;
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
         }
         
         .gallery-slide {
             min-width: 100%;
             height: 100%;
-            flex-shrink: 0;
-            pointer-events: none;
+            position: relative;
+            overflow: hidden;
         }
         
         .gallery-slide img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        .gallery-container:hover .gallery-slide img {
+            transform: scale(1.08);
+        }
+        
+        /* Cinematic Overlay */
+        .cinematic-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+            z-index: 3;
+            opacity: 0;
+            transition: opacity 0.4s;
             pointer-events: none;
         }
         
-        /* Navigation Arrows - Only for this product */
-        .product-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 38px;
-            height: 38px;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(4px);
-            color: var(--charcoal);
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            opacity: 0;
-            transition: all 0.3s;
-            cursor: pointer;
-            z-index: 10;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .gallery-container:hover .product-arrow {
+        .gallery-container:hover .cinematic-overlay {
             opacity: 1;
         }
         
-        .product-arrow:hover {
-            background: var(--gold);
-            color: white;
-            transform: translateY(-50%) scale(1.05);
+        /* 3D Tilt Effect on Hover */
+        .product-card:hover .gallery-slide img {
+            transform: scale(1.08) translateZ(20px);
         }
         
-        .product-arrow.prev { left: 15px; }
-        .product-arrow.next { right: 15px; }
-        
-        /* Drag Indicator */
-        .drag-indicator {
+        /* Navigation - Minimal & Elegant */
+        .nav-dot-container {
             position: absolute;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(8px);
-            color: white;
-            padding: 5px 14px;
-            border-radius: 30px;
-            font-size: 10px;
-            font-weight: 500;
-            z-index: 15;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            white-space: nowrap;
-        }
-        
-        .gallery-container:hover .drag-indicator {
-            opacity: 0.6;
-        }
-        
-        .drag-indicator span {
-            font-size: 12px;
-            animation: slideLeft 1s infinite;
-        }
-        
-        @keyframes slideLeft {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(3px); }
-        }
-        
-        /* Dots Indicator */
-        .gallery-dots {
-            position: absolute;
-            bottom: 18px;
+            bottom: 20px;
             left: 0;
             right: 0;
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 12px;
             z-index: 10;
         }
         
-        .gallery-dot {
-            width: 7px;
-            height: 7px;
+        .nav-dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.5);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
         }
         
-        .gallery-dot.active {
-            background: var(--gold);
-            width: 22px;
-            border-radius: 4px;
+        .nav-dot::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            border: 1px solid transparent;
+            transition: all 0.3s;
         }
         
-        .gallery-dot:hover {
+        .nav-dot.active {
             background: var(--gold);
             transform: scale(1.2);
+            box-shadow: 0 0 10px var(--gold);
         }
         
-        /* Image Counter */
-        .image-counter {
+        .nav-dot:hover {
+            background: var(--gold);
+            transform: scale(1.1);
+        }
+        
+        /* Image Counter - Vintage Style */
+        .image-counter-vintage {
             position: absolute;
-            bottom: 18px;
-            right: 18px;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            color: white;
-            padding: 4px 12px;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            padding: 5px 14px;
             border-radius: 30px;
             font-size: 11px;
+            font-weight: 500;
+            color: white;
+            font-family: monospace;
+            letter-spacing: 1px;
             z-index: 10;
+            border: 1px solid rgba(212,175,55,0.3);
         }
         
-        /* Thumbnails */
-        .gallery-thumbnails {
+        /* Film Grain Effect */
+        .film-grain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#noise)" opacity="0.05"/></svg>');
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .gallery-container:hover .film-grain {
+            opacity: 1;
+        }
+        
+        /* Thumbnails - Floating Effect */
+        .floating-thumbnails {
             display: flex;
-            gap: 8px;
-            padding: 12px 18px;
+            gap: 10px;
+            padding: 15px 20px;
             background: white;
             border-top: 1px solid rgba(212,175,55,0.15);
             overflow-x: auto;
             scrollbar-width: thin;
+            position: relative;
         }
         
-        .gallery-thumbnails::-webkit-scrollbar {
+        .floating-thumbnails::-webkit-scrollbar {
             height: 3px;
         }
         
-        .gallery-thumbnails::-webkit-scrollbar-track {
+        .floating-thumbnails::-webkit-scrollbar-track {
             background: #efefef;
             border-radius: 10px;
         }
         
-        .gallery-thumbnails::-webkit-scrollbar-thumb {
+        .floating-thumbnails::-webkit-scrollbar-thumb {
             background: var(--gold);
             border-radius: 10px;
         }
         
-        .gallery-thumbnail {
-            width: 55px;
-            height: 55px;
+        .floating-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
             object-fit: cover;
-            border-radius: 10px;
             cursor: pointer;
             border: 2px solid transparent;
-            transition: all 0.2s;
-            opacity: 0.65;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            filter: grayscale(0.4);
+            transform: translateY(0);
         }
         
-        .gallery-thumbnail:hover {
-            opacity: 1;
-            transform: scale(1.03);
-        }
-        
-        .gallery-thumbnail.active {
+        .floating-thumb:hover {
+            transform: translateY(-5px);
+            filter: grayscale(0);
             border-color: var(--gold);
-            opacity: 1;
+        }
+        
+        .floating-thumb.active {
+            border-color: var(--gold);
+            filter: grayscale(0);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(212,175,55,0.3);
         }
         
         /* Product Info */
@@ -466,7 +511,6 @@
             .gallery-container { height: 320px; }
             .features-grid, .testimonials-grid { grid-template-columns: 1fr; }
             .logo-text { font-size: 22px; letter-spacing: 2px; }
-            .product-arrow { width: 32px; height: 32px; font-size: 16px; }
         }
     </style>
 </head>
@@ -505,7 +549,7 @@
 
     <div class="section-title" id="products-section">
         <h2>Our <span>Collection</span></h2>
-        <div class="subtitle">Swipe or drag on any product to explore images</div>
+        <div class="subtitle">Experience the art of fine jewelry</div>
         <div class="ornament">✦ ✦ ✦</div>
     </div>
 
@@ -561,14 +605,12 @@
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
         let cart = [];
         let sessionId = localStorage.getItem('sessionId');
-        let autoPlayIntervals = {};
         
         if (!sessionId) {
             sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('sessionId', sessionId);
         }
         
-        // Store gallery state for each product
         let galleryState = {};
         
         async function loadProducts() {
@@ -580,125 +622,46 @@
             displayProducts(data || []);
         }
         
-        function initProductGallery(productId, totalImages) {
-            const container = document.getElementById(`gallery-${productId}`);
-            const slider = document.getElementById(`slider-${productId}`);
-            if (!container || !slider) return;
+        function initCinematicGallery(productId, totalImages) {
+            if (galleryState[productId]) return;
             
-            // Initialize state
-            if (!galleryState[productId]) {
-                galleryState[productId] = {
-                    currentIndex: 0,
-                    totalImages: totalImages,
-                    startX: 0,
-                    currentTranslate: 0,
-                    isDragging: false
-                };
-            }
+            galleryState[productId] = {
+                currentIndex: 0,
+                totalImages: totalImages,
+                autoPlayInterval: null
+            };
             
-            const state = galleryState[productId];
-            let startX = 0;
-            let currentTranslate = 0;
-            
-            // Touch events for mobile
-            container.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                startX = e.touches[0].clientX;
-                currentTranslate = state.currentIndex * -100;
-                slider.style.transition = 'none';
-                state.isDragging = true;
-            });
-            
-            container.addEventListener('touchmove', (e) => {
-                if (!state.isDragging) return;
-                e.preventDefault();
-                const moveX = e.touches[0].clientX;
-                const diff = (moveX - startX) / container.offsetWidth * 100;
-                let newTranslate = currentTranslate + diff;
-                newTranslate = Math.min(0, Math.max(newTranslate, -(totalImages - 1) * 100));
-                slider.style.transform = `translateX(${newTranslate}%)`;
-            });
-            
-            container.addEventListener('touchend', (e) => {
-                if (!state.isDragging) return;
-                state.isDragging = false;
-                const moveX = e.changedTouches[0].clientX;
-                const diff = moveX - startX;
-                const threshold = container.offsetWidth * 0.2;
-                
-                if (Math.abs(diff) > threshold) {
-                    if (diff > 0 && state.currentIndex > 0) {
-                        state.currentIndex--;
-                    } else if (diff < 0 && state.currentIndex < totalImages - 1) {
-                        state.currentIndex++;
-                    }
+            // Auto-rotate every 5 seconds
+            galleryState[productId].autoPlayInterval = setInterval(() => {
+                if (galleryState[productId] && !document.hidden) {
+                    let newIndex = (galleryState[productId].currentIndex + 1) % totalImages;
+                    goToImage(productId, newIndex, totalImages);
                 }
-                
-                slider.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
-                slider.style.transform = `translateX(-${state.currentIndex * 100}%)`;
-                updateGalleryUI(productId, state.currentIndex, totalImages);
-            });
-            
-            // Mouse events for desktop drag
-            let mouseStartX = 0;
-            let isMouseDown = false;
-            
-            container.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                mouseStartX = e.clientX;
-                currentTranslate = state.currentIndex * -100;
-                slider.style.transition = 'none';
-                isMouseDown = true;
-                container.style.cursor = 'grabbing';
-            });
-            
-            window.addEventListener('mousemove', (e) => {
-                if (!isMouseDown) return;
-                const moveX = e.clientX;
-                const diff = (moveX - mouseStartX) / container.offsetWidth * 100;
-                let newTranslate = currentTranslate + diff;
-                newTranslate = Math.min(0, Math.max(newTranslate, -(totalImages - 1) * 100));
-                slider.style.transform = `translateX(${newTranslate}%)`;
-            });
-            
-            window.addEventListener('mouseup', (e) => {
-                if (!isMouseDown) return;
-                isMouseDown = false;
-                container.style.cursor = 'grab';
-                const moveX = e.clientX;
-                const diff = moveX - mouseStartX;
-                const threshold = container.offsetWidth * 0.2;
-                
-                if (Math.abs(diff) > threshold) {
-                    if (diff > 0 && state.currentIndex > 0) {
-                        state.currentIndex--;
-                    } else if (diff < 0 && state.currentIndex < totalImages - 1) {
-                        state.currentIndex++;
-                    }
-                }
-                
-                slider.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
-                slider.style.transform = `translateX(-${state.currentIndex * 100}%)`;
-                updateGalleryUI(productId, state.currentIndex, totalImages);
-            });
+            }, 5000);
         }
         
-        function updateGalleryUI(productId, index, totalImages) {
-            const dots = document.querySelectorAll(`#dots-${productId} .gallery-dot`);
+        function goToImage(productId, index, totalImages) {
+            const slider = document.getElementById(`slider-${productId}`);
+            if (!slider) return;
+            
+            slider.style.transform = `translateX(-${index * 100}%)`;
+            
+            // Update UI elements
+            const dots = document.querySelectorAll(`#dots-${productId} .nav-dot`);
             const counter = document.getElementById(`counter-${productId}`);
-            const thumbnails = document.querySelectorAll(`#thumbnails-${productId} .gallery-thumbnail`);
+            const thumbs = document.querySelectorAll(`#thumbs-${productId} .floating-thumb`);
             
             dots.forEach((dot, idx) => {
                 if (idx === index) dot.classList.add('active');
                 else dot.classList.remove('active');
             });
             
-            thumbnails.forEach((thumb, idx) => {
+            thumbs.forEach((thumb, idx) => {
                 if (idx === index) thumb.classList.add('active');
                 else thumb.classList.remove('active');
             });
             
-            if (counter) counter.textContent = `${index + 1} / ${totalImages}`;
+            if (counter) counter.textContent = `${String(index + 1).padStart(2, '0')} / ${String(totalImages).padStart(2, '0')}`;
             
             if (galleryState[productId]) {
                 galleryState[productId].currentIndex = index;
@@ -729,13 +692,11 @@
                 html += `
                     <div class="product-card" data-product-id="${p.id}">
                         ${badge}
-                        <div class="gallery-container" id="gallery-${p.id}" style="cursor: grab;">
+                        <div class="gallery-container" id="gallery-${p.id}">
+                            <div class="film-strip"></div>
+                            <div class="film-grain"></div>
+                            <div class="cinematic-overlay"></div>
                             ${hasImages ? `
-                                <button class="product-arrow prev" onclick="prevImage('${p.id}', ${validImages.length})">‹</button>
-                                <button class="product-arrow next" onclick="nextImage('${p.id}', ${validImages.length})">›</button>
-                                <div class="drag-indicator">
-                                    <span>↔️</span> Drag to scroll
-                                </div>
                                 <div class="gallery-slider" id="slider-${p.id}">
                                     ${validImages.map((img, idx) => `
                                         <div class="gallery-slide">
@@ -743,19 +704,21 @@
                                         </div>
                                     `).join('')}
                                 </div>
-                                <div class="image-counter" id="counter-${p.id}">1 / ${validImages.length}</div>
-                                <div class="gallery-dots" id="dots-${p.id}">
-                                    ${validImages.map((_, idx) => `<div class="gallery-dot ${idx === 0 ? 'active' : ''}" onclick="goToImage('${p.id}', ${idx}, ${validImages.length})"></div>`).join('')}
-                                </div>
-                                <div class="gallery-thumbnails" id="thumbnails-${p.id}">
-                                    ${validImages.map((img, idx) => `
-                                        <img src="${img}" class="gallery-thumbnail ${idx === 0 ? 'active' : ''}" onclick="goToImage('${p.id}', ${idx}, ${validImages.length})" loading="lazy" onerror="this.style.display='none'">
-                                    `).join('')}
+                                <div class="image-counter-vintage" id="counter-${p.id}">01 / ${String(validImages.length).padStart(2, '0')}</div>
+                                <div class="nav-dot-container" id="dots-${p.id}">
+                                    ${validImages.map((_, idx) => `<div class="nav-dot ${idx === 0 ? 'active' : ''}" onclick="goToImage('${p.id}', ${idx}, ${validImages.length})"></div>`).join('')}
                                 </div>
                             ` : `
                                 <img src="${mainImage}" style="width:100%; height:100%; object-fit:cover;">
                             `}
                         </div>
+                        ${hasImages ? `
+                            <div class="floating-thumbnails" id="thumbs-${p.id}">
+                                ${validImages.map((img, idx) => `
+                                    <img src="${img}" class="floating-thumb ${idx === 0 ? 'active' : ''}" onclick="goToImage('${p.id}', ${idx}, ${validImages.length})" loading="lazy" onerror="this.style.display='none'">
+                                `).join('')}
+                            </div>
+                        ` : ''}
                         <div class="product-info">
                             <div class="product-sku">${p.sku}</div>
                             <div class="product-name">${p.name}</div>
@@ -769,62 +732,18 @@
             }
             container.innerHTML = html;
             
-            // Initialize independent gallery for each product
+            // Initialize cinematic galleries
             for (let p of products) {
                 const images = p.images || [];
                 const validImages = images.filter(img => img && img.trim() !== '');
                 if (validImages.length > 1) {
-                    initProductGallery(p.id, validImages.length);
-                    startAutoPlay(p.id, validImages.length);
+                    initCinematicGallery(p.id, validImages.length);
                 }
             }
         }
-        
-        function startAutoPlay(productId, totalImages) {
-            let currentIndex = 0;
-            const interval = setInterval(() => {
-                if (!document.hidden && galleryState[productId]) {
-                    currentIndex = (galleryState[productId].currentIndex + 1) % totalImages;
-                    const slider = document.getElementById(`slider-${productId}`);
-                    if (slider) {
-                        slider.style.transition = 'transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
-                        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
-                        updateGalleryUI(productId, currentIndex, totalImages);
-                        if (galleryState[productId]) {
-                            galleryState[productId].currentIndex = currentIndex;
-                        }
-                    }
-                }
-            }, 5000);
-            autoPlayIntervals[productId] = interval;
-        }
-        
-        window.prevImage = function(productId, totalImages) {
-            if (galleryState[productId]) {
-                let newIndex = galleryState[productId].currentIndex - 1;
-                if (newIndex < 0) newIndex = totalImages - 1;
-                goToImage(productId, newIndex, totalImages);
-            }
-        };
-        
-        window.nextImage = function(productId, totalImages) {
-            if (galleryState[productId]) {
-                let newIndex = galleryState[productId].currentIndex + 1;
-                if (newIndex >= totalImages) newIndex = 0;
-                goToImage(productId, newIndex, totalImages);
-            }
-        };
         
         window.goToImage = function(productId, index, totalImages) {
-            const slider = document.getElementById(`slider-${productId}`);
-            if (!slider) return;
-            
-            slider.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
-            slider.style.transform = `translateX(-${index * 100}%)`;
-            updateGalleryUI(productId, index, totalImages);
-            if (galleryState[productId]) {
-                galleryState[productId].currentIndex = index;
-            }
+            goToImage(productId, index, totalImages);
         };
         
         async function loadCart() {
