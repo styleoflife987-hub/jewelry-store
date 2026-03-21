@@ -8,6 +8,7 @@
     <meta name="robots" content="noindex, follow">
     
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="js/config.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -42,6 +43,13 @@
         .form-group input, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; transition: all 0.3s; font-family: 'Inter', sans-serif; }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
         
+        .payment-methods { display: flex; gap: 15px; margin-top: 10px; flex-wrap: wrap; }
+        .payment-option { flex: 1; padding: 15px; border: 2px solid #efefef; border-radius: 16px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .payment-option.selected { border-color: var(--gold); background: rgba(212,175,55,0.05); }
+        .payment-option:hover { border-color: var(--gold); }
+        .payment-option .icon { font-size: 28px; margin-bottom: 8px; display: block; }
+        .payment-option .name { font-size: 14px; font-weight: 500; }
+        
         .order-summary { background: white; border-radius: 24px; padding: 30px; border: 1px solid rgba(212,175,55,0.15); position: sticky; top: 100px; }
         .summary-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--gold); }
         .order-items { max-height: 300px; overflow-y: auto; margin-bottom: 20px; }
@@ -64,6 +72,7 @@
             .checkout-grid { grid-template-columns: 1fr; }
             .order-summary { position: static; margin-top: 20px; }
             .form-row { grid-template-columns: 1fr; }
+            .payment-methods { flex-direction: column; }
         }
     </style>
 </head>
@@ -92,7 +101,7 @@
                         <div class="form-group"><label>Full Name *</label><input type="text" id="fullName" placeholder="Enter your full name" required></div>
                         <div class="form-group"><label>Phone Number *</label><input type="tel" id="phone" placeholder="10 digit mobile number" maxlength="10" required></div>
                     </div>
-                    <div class="form-group"><label>Email Address</label><input type="email" id="email" placeholder="your@email.com"></div>
+                    <div class="form-group"><label>Email Address *</label><input type="email" id="email" placeholder="your@email.com" required></div>
                     <div class="form-group"><label>Street Address *</label><input type="text" id="address" placeholder="House number and street name" required></div>
                     <div class="form-row">
                         <div class="form-group"><label>City *</label><input type="text" id="city" placeholder="City" required></div>
@@ -101,6 +110,20 @@
                     <div class="form-row">
                         <div class="form-group"><label>Pincode *</label><input type="text" id="pincode" placeholder="6 digit pincode" maxlength="6" required></div>
                         <div class="form-group"><label>Country</label><input type="text" id="country" value="India" readonly></div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>Payment Method</h3>
+                    <div class="payment-methods">
+                        <div class="payment-option selected" data-method="razorpay" onclick="selectPayment('razorpay')">
+                            <span class="icon">💳</span>
+                            <span class="name">Card / UPI / NetBanking</span>
+                        </div>
+                        <div class="payment-option" data-method="cod" onclick="selectPayment('cod')">
+                            <span class="icon">💰</span>
+                            <span class="name">Cash on Delivery</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -112,7 +135,7 @@
                 <div class="summary-row"><span>Shipping</span><span id="shippingText">₹100</span></div>
                 <div class="summary-row"><span>GST (18%)</span><span>₹<span id="tax">0</span></span></div>
                 <div class="summary-row total"><span>Total</span><span>₹<span id="total">0</span></span></div>
-                <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()">Place Order</button>
+                <button class="place-order-btn" id="placeOrderBtn" onclick="processOrder()">Place Order</button>
                 <div class="secure-badge">
                     <span>🔒 Secure SSL Encryption</span>
                     <span>💳 100% Secure Payment</span>
@@ -135,11 +158,20 @@
         const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
         let cart = [];
         let sessionId = localStorage.getItem('sessionId');
+        let selectedPayment = 'razorpay';
         
         if (!sessionId) {
             sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('sessionId', sessionId);
         }
+        
+        window.selectPayment = function(method) {
+            selectedPayment = method;
+            document.querySelectorAll('.payment-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`[data-method="${method}"]`).classList.add('selected');
+        };
         
         async function loadCart() {
             try {
@@ -149,18 +181,17 @@
                     .eq('session_id', sessionId)
                     .maybeSingle();
                 
-                if (error) {
-                    console.error('Error loading cart:', error);
-                    cart = [];
-                } else {
-                    cart = data?.items || [];
-                }
+                if (error) throw error;
+                cart = data?.items || [];
                 updateCartCount();
                 updateOrderSummary();
-            } catch (err) {
-                console.error('Failed to load cart:', err);
-                cart = [];
-                updateOrderSummary();
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                const localCart = localStorage.getItem('cart');
+                if (localCart) {
+                    cart = JSON.parse(localCart);
+                    updateOrderSummary();
+                }
             }
         }
         
@@ -179,7 +210,6 @@
                 document.getElementById('subtotal').textContent = '0';
                 document.getElementById('tax').textContent = '0';
                 document.getElementById('total').textContent = '0';
-                document.getElementById('shippingText').textContent = '₹100';
                 return;
             }
             
@@ -206,8 +236,57 @@
             document.getElementById('shippingText').textContent = shipping === 0 ? 'Free' : '₹' + shipping;
         }
         
-        window.placeOrder = async function() {
-            // Get form values
+        async function saveOrderToDatabase(orderData) {
+            const { data, error } = await supabase
+                .from('orders')
+                .insert([orderData])
+                .select();
+            
+            if (error) throw error;
+            return data;
+        }
+        
+        async function clearCartAfterOrder() {
+            cart = [];
+            await supabase
+                .from('carts')
+                .upsert({ session_id: sessionId, items: [], total: 0, updated_at: new Date().toISOString() });
+            localStorage.removeItem('cart');
+            updateCartCount();
+        }
+        
+        function initRazorpayPayment(orderDetails, onSuccess) {
+            const options = {
+                key: CONFIG.RAZORPAY_KEY,
+                amount: orderDetails.total * 100,
+                currency: "INR",
+                name: CONFIG.SITE_NAME,
+                description: `Order #${orderDetails.orderId}`,
+                image: "https://style-of-life.vercel.app/logo.png",
+                handler: function(response) {
+                    console.log('Payment successful:', response);
+                    onSuccess(response.razorpay_payment_id);
+                },
+                prefill: {
+                    name: orderDetails.customerName,
+                    contact: orderDetails.phone,
+                    email: orderDetails.email
+                },
+                theme: {
+                    color: "#D4AF37"
+                },
+                modal: {
+                    ondismiss: function() {
+                        console.log('Payment modal closed');
+                    }
+                }
+            };
+            
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+        
+        window.processOrder = async function() {
             const fullName = document.getElementById('fullName').value.trim();
             const phone = document.getElementById('phone').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -216,8 +295,7 @@
             const state = document.getElementById('state').value.trim();
             const pincode = document.getElementById('pincode').value.trim();
             
-            // Validate
-            if (!fullName || !phone || !address || !city || !state || !pincode) {
+            if (!fullName || !phone || !email || !address || !city || !state || !pincode) {
                 alert('Please fill all required fields');
                 return;
             }
@@ -237,25 +315,22 @@
                 return;
             }
             
-            // Disable button
             const btn = document.getElementById('placeOrderBtn');
             btn.disabled = true;
             btn.textContent = 'Processing...';
             
-            // Calculate totals
             const subtotal = cart.reduce((s, i) => s + ((i.price || 0) * (i.quantity || 1)), 0);
             const tax = Math.round(subtotal * 0.18);
             const shipping = subtotal >= 50000 ? 0 : 100;
             const total = subtotal + tax + shipping;
             const fullAddress = `${address}, ${city}, ${state} - ${pincode}`;
-            
-            // Create order object
             const orderId = 'ORD' + Date.now();
-            const order = {
+            
+            const orderData = {
                 order_id: orderId,
                 customer_name: fullName,
                 phone: phone,
-                email: email || '',
+                email: email,
                 address: fullAddress,
                 items: cart.map(i => ({
                     id: i.id,
@@ -268,78 +343,55 @@
                 tax: tax,
                 shipping: shipping,
                 total: total,
-                status: 'Pending',
+                status: selectedPayment === 'cod' ? 'Pending' : 'Paid',
                 created_at: new Date().toISOString()
             };
             
-            console.log('Placing order:', order);
-            
             try {
-                // Save order to Supabase
-                const { data, error } = await supabase
-                    .from('orders')
-                    .insert([order])
-                    .select();
-                
-                if (error) {
-                    console.error('Supabase error:', error);
-                    throw new Error(error.message);
-                }
-                
-                console.log('Order saved successfully:', data);
-                
-                // Clear cart
-                const { error: cartError } = await supabase
-                    .from('carts')
-                    .upsert({ 
-                        session_id: sessionId, 
-                        items: [], 
-                        total: 0, 
-                        updated_at: new Date().toISOString() 
+                if (selectedPayment === 'razorpay') {
+                    // Process Razorpay payment
+                    initRazorpayPayment({
+                        orderId: orderId,
+                        customerName: fullName,
+                        phone: phone,
+                        email: email,
+                        total: total
+                    }, async (paymentId) => {
+                        orderData.payment_id = paymentId;
+                        orderData.status = 'Paid';
+                        
+                        await saveOrderToDatabase(orderData);
+                        await clearCartAfterOrder();
+                        
+                        alert(`✅ Payment Successful!\nOrder ID: ${orderId}\nPayment ID: ${paymentId}`);
+                        window.location.href = `track.html?order=${orderId}`;
                     });
-                
-                if (cartError) {
-                    console.error('Cart clear error:', cartError);
+                    
+                    btn.disabled = false;
+                    btn.textContent = 'Place Order';
+                } else {
+                    // COD Order
+                    await saveOrderToDatabase(orderData);
+                    await clearCartAfterOrder();
+                    
+                    alert(`✅ Order placed successfully!\nOrder ID: ${orderId}\nTotal: ₹${total.toLocaleString('en-IN')}\n\nYou will pay ₹${total.toLocaleString('en-IN')} on delivery.`);
+                    window.location.href = `track.html?order=${orderId}`;
                 }
-                
-                // Show success message
-                alert(`✅ Order placed successfully!\n\nOrder ID: ${orderId}\nTotal: ₹${total.toLocaleString('en-IN')}\n\nYou will receive a confirmation email shortly.`);
-                
-                // Redirect to tracking page
-                window.location.href = `track.html?order=${orderId}`;
-                
             } catch (error) {
-                console.error('Order placement error:', error);
-                alert(`❌ Failed to place order: ${error.message}\n\nPlease try again or contact support.`);
+                console.error('Order error:', error);
+                alert(`❌ Failed to place order: ${error.message}\n\nPlease try again.`);
                 btn.disabled = false;
                 btn.textContent = 'Place Order';
             }
         };
         
-        // Load cart on page load
         loadCart();
         
-        // Also try to load from localStorage if Supabase fails
-        async function fallbackLoadCart() {
-            try {
-                const localCart = localStorage.getItem('cart');
-                if (localCart) {
-                    cart = JSON.parse(localCart);
-                    updateOrderSummary();
-                    updateCartCount();
-                }
-            } catch (e) {}
-        }
-        
-        // Set timeout to check if cart loaded
-        setTimeout(() => {
-            if ((!cart || cart.length === 0) && localStorage.getItem('cart')) {
-                fallbackLoadCart();
-            }
-        }, 1000);
+        window.updateCheckoutSummary = updateOrderSummary;
     </script>
     
     <!-- Analytics Tracking -->
     <script src="js/analytics.js"></script>
+    <script src="js/cart.js"></script>
 </body>
 </html>
