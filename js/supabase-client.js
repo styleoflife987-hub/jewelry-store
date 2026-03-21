@@ -1,119 +1,158 @@
-// js/supabase-client.js
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Style Of Life - Luxury Jewelry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="js/config.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #d4af37; --primary-dark: #b8962e; --light: #ffffff; --gray-200: #e9ecef; --gray-600: #6c757d; --success: #28a745; --danger: #dc3545; }
+        body { font-family: 'Inter', sans-serif; background: var(--light); }
+        header { background: white; padding: 20px 50px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .logo { font-size: 28px; font-weight: 600; color: var(--primary); }
+        nav a { color: var(--gray-600); text-decoration: none; margin-left: 30px; font-weight: 500; transition: color 0.3s; }
+        nav a:hover, nav a.active { color: var(--primary); }
+        .cart-count { background: var(--primary); color: white; padding: 2px 6px; border-radius: 20px; font-size: 12px; margin-left: 5px; }
+        .hero { height: 500px; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=2000'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; text-align: center; color: white; }
+        .hero h1 { font-size: 64px; margin-bottom: 20px; }
+        .hero p { font-size: 20px; }
+        .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; padding: 50px; max-width: 1400px; margin: 0 auto; }
+        .product-card { background: white; border-radius: 16px; overflow: hidden; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid var(--gray-200); }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .product-image { width: 100%; height: 300px; object-fit: cover; }
+        .product-info { padding: 20px; }
+        .product-sku { font-size: 12px; color: var(--gray-600); }
+        .product-name { font-size: 20px; font-weight: 600; margin: 10px 0 5px; }
+        .product-category { color: var(--primary); font-size: 14px; margin-bottom: 10px; }
+        .product-price { font-size: 24px; font-weight: 700; color: var(--primary); margin: 10px 0; }
+        .product-stock { font-size: 14px; margin-bottom: 15px; }
+        .in-stock { color: var(--success); }
+        .out-of-stock { color: var(--danger); }
+        .add-btn { width: 100%; padding: 12px; background: var(--primary); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .add-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        footer { background: #0a0a0a; color: white; text-align: center; padding: 40px; margin-top: 60px; }
+        .loading { text-align: center; padding: 100px; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        .empty-state { text-align: center; padding: 100px; color: var(--gray-600); }
+        .empty-state h3 { font-size: 24px; margin-bottom: 10px; color: var(--primary); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) { header { flex-direction: column; gap: 15px; padding: 15px; } .hero h1 { font-size: 40px; } .products { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">STYLE OF LIFE</div>
+        <nav>
+            <a href="index.html" class="active">Home</a>
+            <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+            <a href="track.html">Track Order</a>
+        </nav>
+    </header>
 
-const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    <div class="hero">
+        <div><h1>Luxury Jewelry</h1><p>Discover exquisite handcrafted pieces</p></div>
+    </div>
 
-// ==================== PRODUCTS ====================
-export async function getProducts() {
-    const { data, error } = await supabase.from('products').select('*').order('id');
-    if (error) {
-        console.error('Error fetching products:', error);
-        return [];
-    }
-    return data || [];
-}
+    <div class="products" id="products">
+        <div class="loading"><div class="spinner"></div><p>Loading products...</p></div>
+    </div>
 
-export async function addProduct(product) {
-    const { data, error } = await supabase.from('products').insert([{
-        sku: product.sku,
-        name: product.name,
-        category: product.category,
-        price: product.price,
-        stock: product.stock,
-        description: product.description,
-        images: product.images || []
-    }]).select();
-    
-    if (error) return { success: false, error: error.message };
-    return { success: true, data: data[0] };
-}
+    <footer><p>© 2026 STYLE OF LIFE. All rights reserved.</p></footer>
 
-export async function updateProduct(id, updates) {
-    const { error } = await supabase.from('products').update(updates).eq('id', id);
-    if (error) return { success: false, error: error.message };
-    return { success: true };
-}
-
-export async function deleteProduct(id) {
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (error) return { success: false, error: error.message };
-    return { success: true };
-}
-
-// ==================== ORDERS ====================
-export async function getOrders() {
-    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-    if (error) return [];
-    return data || [];
-}
-
-export async function placeOrder(order) {
-    const { data, error } = await supabase.from('orders').insert([{
-        order_id: 'ORD' + Date.now(),
-        customer_name: order.name,
-        phone: order.phone,
-        email: order.email || '',
-        address: order.address,
-        items: order.items,
-        subtotal: order.subtotal,
-        tax: order.tax,
-        shipping: order.shipping,
-        total: order.total,
-        status: 'Pending'
-    }]).select();
-    
-    if (error) return { success: false, error: error.message };
-    return { success: true, orderId: data[0].order_id };
-}
-
-export async function updateOrderStatus(orderId, status) {
-    const { error } = await supabase.from('orders').update({ status }).eq('order_id', orderId);
-    if (error) return { success: false, error: error.message };
-    return { success: true };
-}
-
-export async function deleteOrder(orderId) {
-    const { error } = await supabase.from('orders').delete().eq('order_id', orderId);
-    if (error) return { success: false, error: error.message };
-    return { success: true };
-}
-
-// ==================== CART ====================
-let sessionId = localStorage.getItem('sessionId');
-if (!sessionId) {
-    sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem('sessionId', sessionId);
-}
-
-export async function getCart() {
-    const { data, error } = await supabase.from('carts').select('items, total').eq('session_id', sessionId).maybeSingle();
-    if (error) return { items: [], total: 0 };
-    return { items: data?.items || [], total: data?.total || 0 };
-}
-
-export async function saveCart(items, total) {
-    const { error } = await supabase.from('carts').upsert({
-        session_id: sessionId,
-        items: items,
-        total: total,
-        updated_at: new Date().toISOString()
-    });
-    if (error) return false;
-    return true;
-}
-
-// ==================== DASHBOARD ====================
-export async function getDashboardStats() {
-    const [products, orders] = await Promise.all([
-        supabase.from('products').select('count', { count: 'exact', head: true }),
-        supabase.from('orders').select('total, status')
-    ]);
-    
-    const totalProducts = products.count || 0;
-    const orderData = orders.data || [];
-    const totalOrders = orderData.length;
-    const totalRevenue = orderData.reduce((sum, o) => sum + (o.total || 0), 0);
-    const pendingOrders = orderData.filter(o => o.status === 'Pending').length;
-    
-    return { totalProducts, totalOrders, totalRevenue, pendingOrders };
-}
+    <script type="importmap">
+        { "imports": { "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2" } }
+    </script>
+    <script type="module">
+        import { createClient } from '@supabase/supabase-js';
+        
+        const supabase = createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+        let cart = [];
+        let sessionId = localStorage.getItem('sessionId');
+        
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('sessionId', sessionId);
+        }
+        
+        async function loadProducts() {
+            const { data, error } = await supabase.from('products').select('*').order('id');
+            if (error) {
+                document.getElementById('products').innerHTML = '<div class="empty-state"><h3>Error Loading Products</h3><p>Please try again later.</p></div>';
+                return;
+            }
+            displayProducts(data || []);
+        }
+        
+        function displayProducts(products) {
+            const container = document.getElementById('products');
+            if (!products || products.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>✨ Coming Soon ✨</h3>
+                        <p>New collection arriving shortly. Check back soon!</p>
+                        <p style="margin-top: 10px; font-size: 14px;">No products available at the moment.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            products.forEach(p => {
+                const img = p.images?.[0] || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=400';
+                html += `
+                    <div class="product-card">
+                        <img src="${img}" class="product-image" onerror="this.src='https://via.placeholder.com/400x500?text=No+Image'">
+                        <div class="product-info">
+                            <div class="product-sku">${p.sku}</div>
+                            <div class="product-name">${p.name}</div>
+                            <div class="product-category">${p.category || ''}</div>
+                            <div class="product-price">₹${(p.price || 0).toLocaleString('en-IN')}</div>
+                            <div class="product-stock ${p.stock > 0 ? 'in-stock' : 'out-of-stock'}">
+                                ${p.stock > 0 ? `In Stock (${p.stock})` : 'Out of Stock'}
+                            </div>
+                            <button class="add-btn" onclick="addToCart(${p.id})" ${p.stock <= 0 ? 'disabled' : ''}>Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+        
+        async function loadCart() {
+            const { data } = await supabase.from('carts').select('items').eq('session_id', sessionId).maybeSingle();
+            cart = data?.items || [];
+            updateCartCount();
+        }
+        
+        async function saveCart() {
+            const total = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+            await supabase.from('carts').upsert({ session_id: sessionId, items: cart, total, updated_at: new Date() });
+        }
+        
+        window.addToCart = async function(productId) {
+            const { data: products } = await supabase.from('products').select('*').eq('id', productId);
+            const product = products?.[0];
+            if (!product || product.stock <= 0) return;
+            
+            const existing = cart.find(i => i.id === productId);
+            if (existing) existing.quantity++;
+            else cart.push({ id: product.id, sku: product.sku, name: product.name, price: product.price, quantity: 1 });
+            
+            await saveCart();
+            updateCartCount();
+            alert(`${product.name} added to cart!`);
+        };
+        
+        function updateCartCount() {
+            const count = cart.reduce((t, i) => t + i.quantity, 0);
+            document.getElementById('cartCount').textContent = count;
+        }
+        
+        loadProducts();
+        loadCart();
+    </script>
+</body>
+</html>
